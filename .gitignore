@@ -4,3 +4,7 @@
 *.jar
 *.war
 *.ear
+
+node_modules
+bower_components
+

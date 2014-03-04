@@ -1,0 +1,9 @@
+Package: facete2-tomcat-common
+Version: [[version]]
+Section: web
+Priority: optional
+Architecture: all
+Depends: dbconfig-common, postgresql
+Maintainer: Claus Stadler <cstadler@informatik.uni-leipzig.de>
+Description: Facete2 Tomcat Common
+Distribution: development
