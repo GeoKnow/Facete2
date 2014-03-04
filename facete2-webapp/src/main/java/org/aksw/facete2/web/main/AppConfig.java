@@ -24,7 +24,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 @Configuration
-@ComponentScan("org.aksw.jassa.web")
+@ComponentScan("org.aksw.facete2.web")
 // @EnableTransactionManagement
 public class AppConfig {
     private static final Logger logger = LoggerFactory
