@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 @Configuration
 @EnableWebMvc
-@ComponentScan(basePackages = "org.aksw.jassa.web.api")
+@ComponentScan(basePackages = "org.aksw.facete2.web.api")
 public class WebMvcConfig
 	extends WebMvcConfigurerAdapter
 {

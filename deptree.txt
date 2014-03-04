@@ -1,0 +1,127 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] Facete2 - Parent
+[INFO] Facete2 - Client
+[INFO] Facete2 - Debian Packaging - Tomcat Common
+[INFO] Facete2 - Debian Packaging - Tomcat7
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Facete2 - Parent 0.0.1-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.1:tree (default-cli) @ facete2-parent ---
+[INFO] org.aksw.facete2:facete2-parent:pom:0.0.1-SNAPSHOT
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Facete2 - Client 0.0.1-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.1:tree (default-cli) @ facete2-webapp ---
+[INFO] org.aksw.facete2:facete2-webapp:war:0.0.1-SNAPSHOT
+[INFO] +- org.aksw.jassa:jassa-servlets:jar:0.0.1-SNAPSHOT:compile
+[INFO] |  +- org.aksw.jena-sparql-api:jena-sparql-api-servlets:jar:2.10.0-31:compile (version managed from 2.10.0-31-SNAPSHOT)
+[INFO] |  |  \- org.springframework:spring-context:jar:3.2.4.RELEASE:compile
+[INFO] |  |     \- org.springframework:spring-aop:jar:3.2.4.RELEASE:compile
+[INFO] |  +- org.aksw.jassa:jassa-core:jar:0.0.1-SNAPSHOT:compile
+[INFO] |  |  \- org.jgrapht:jgrapht-core:jar:0.9.0:compile
+[INFO] |  \- com.google.code.gson:gson:jar:2.2.2:compile
+[INFO] +- org.aksw.jena-sparql-api:jena-sparql-api-server:jar:2.10.0-31:compile
+[INFO] |  +- org.aksw.jena-sparql-api:jena-sparql-api-core:jar:2.10.0-31:compile
+[INFO] |  |  +- org.apache.jena:jena-core:jar:2.10.0:compile
+[INFO] |  |  |  \- xerces:xercesImpl:jar:2.10.0:compile
+[INFO] |  |  |     \- xml-apis:xml-apis:jar:1.4.01:compile
+[INFO] |  |  +- org.apache.jena:jena-arq:jar:2.10.0:compile
+[INFO] |  |  |  +- org.apache.httpcomponents:httpclient:jar:4.2.3:compile
+[INFO] |  |  |  |  +- org.apache.httpcomponents:httpcore:jar:4.2.2:compile
+[INFO] |  |  |  |  \- commons-codec:commons-codec:jar:1.6:compile
+[INFO] |  |  |  \- org.slf4j:jcl-over-slf4j:jar:1.6.4:compile
+[INFO] |  |  +- org.apache.jena:jena-iri:jar:0.9.5:compile
+[INFO] |  |  +- org.aksw.commons:collections:jar:0.5:compile
+[INFO] |  |  |  \- net.sourceforge.collections:collections-generic:jar:4.01:compile
+[INFO] |  |  +- org.aksw.commons:util:jar:0.5:compile
+[INFO] |  |  |  +- commons-validator:commons-validator:jar:1.3.1:compile
+[INFO] |  |  |  |  +- commons-beanutils:commons-beanutils:jar:1.7.0:compile
+[INFO] |  |  |  |  \- commons-digester:commons-digester:jar:1.6:compile
+[INFO] |  |  |  |     \- commons-collections:commons-collections:jar:2.1:compile
+[INFO] |  |  |  \- com.thoughtworks.xstream:xstream:jar:1.3.1:compile
+[INFO] |  |  |     \- xpp3:xpp3_min:jar:1.1.4c:compile
+[INFO] |  |  \- org.apache.commons:commons-compress:jar:1.2:compile
+[INFO] |  +- org.aksw.jena-sparql-api:jena-sparql-api-utils:jar:2.10.0-31:compile
+[INFO] |  |  \- com.hp.hpl.jena:sdb:jar:1.3.4:compile
+[INFO] |  +- com.sun.jersey.contribs:jersey-spring:jar:1.17.1:compile
+[INFO] |  +- org.atmosphere:atmosphere-jersey:jar:2.0.0.RC3:compile
+[INFO] |  |  +- org.atmosphere:atmosphere-annotations:jar:2.0.0.RC3:compile
+[INFO] |  |  |  \- org.atmosphere:atmosphere-runtime:jar:2.0.0.RC3:compile
+[INFO] |  |  +- com.sun.jersey:jersey-server:jar:1.17:compile
+[INFO] |  |  |  \- com.sun.jersey:jersey-core:jar:1.17:compile
+[INFO] |  |  \- com.sun.jersey:jersey-servlet:jar:1.17:compile
+[INFO] |  +- org.springframework:spring-webmvc:jar:3.2.4.RELEASE:compile
+[INFO] |  |  +- org.springframework:spring-expression:jar:3.2.4.RELEASE:compile
+[INFO] |  |  \- org.springframework:spring-web:jar:3.2.4.RELEASE:compile
+[INFO] |  +- org.atmosphere:atmosphere-spring:jar:1.1.0.RC5:compile
+[INFO] |  +- eu.infomas:annotation-detector:jar:3.0.1:runtime
+[INFO] |  +- cglib:cglib:jar:2.2.2:compile
+[INFO] |  |  \- asm:asm:jar:3.3.1:compile
+[INFO] |  +- org.eclipse.jetty:jetty-server:jar:8.1.12.v20130726:compile
+[INFO] |  |  +- org.eclipse.jetty.orbit:javax.servlet:jar:3.0.0.v201112011016:compile
+[INFO] |  |  \- org.eclipse.jetty:jetty-continuation:jar:8.1.12.v20130726:compile
+[INFO] |  +- org.eclipse.jetty:jetty-webapp:jar:8.1.12.v20130726:compile
+[INFO] |  |  \- org.eclipse.jetty:jetty-xml:jar:8.1.12.v20130726:compile
+[INFO] |  |     \- org.eclipse.jetty:jetty-util:jar:8.1.12.v20130726:compile
+[INFO] |  +- org.eclipse.jetty:jetty-servlet:jar:8.1.12.v20130726:compile
+[INFO] |  |  \- org.eclipse.jetty:jetty-security:jar:8.1.12.v20130726:compile
+[INFO] |  +- org.eclipse.jetty:jetty-http:jar:8.1.12.v20130726:compile
+[INFO] |  |  \- org.eclipse.jetty:jetty-io:jar:8.1.12.v20130726:compile
+[INFO] |  +- org.eclipse.jetty:jetty-jsp:jar:8.1.12.v20130726:compile
+[INFO] |  |  +- org.eclipse.jetty.orbit:javax.servlet.jsp:jar:2.2.0.v201112011158:compile
+[INFO] |  |  +- org.eclipse.jetty.orbit:org.apache.jasper.glassfish:jar:2.2.2.v201112011158:compile
+[INFO] |  |  +- org.eclipse.jetty.orbit:javax.servlet.jsp.jstl:jar:1.2.0.v201105211821:compile
+[INFO] |  |  +- org.eclipse.jetty.orbit:org.apache.taglibs.standard.glassfish:jar:1.2.0.v201112081803:compile
+[INFO] |  |  +- org.eclipse.jetty.orbit:javax.el:jar:2.2.0.v201108011116:compile
+[INFO] |  |  +- org.eclipse.jetty.orbit:com.sun.el:jar:2.2.0.v201108011116:compile
+[INFO] |  |  \- org.eclipse.jetty.orbit:org.eclipse.jdt.core:jar:3.7.1:compile
+[INFO] |  +- log4j:log4j:jar:1.2.14:compile
+[INFO] |  +- org.slf4j:slf4j-api:jar:1.6.0:compile
+[INFO] |  +- org.slf4j:slf4j-ext:jar:1.6.0:compile
+[INFO] |  |  \- ch.qos.cal10n:cal10n-api:jar:0.7.2:compile
+[INFO] |  +- org.slf4j:slf4j-log4j12:jar:1.6.0:runtime
+[INFO] |  \- com.google.guava:guava:jar:11.0:compile
+[INFO] |     \- com.google.code.findbugs:jsr305:jar:1.3.9:compile
+[INFO] +- commons-cli:commons-cli:jar:1.2:compile
+[INFO] +- org.springframework:spring-jdbc:jar:3.2.4.RELEASE:compile
+[INFO] |  +- org.springframework:spring-beans:jar:3.2.4.RELEASE:compile
+[INFO] |  +- org.springframework:spring-core:jar:3.2.4.RELEASE:compile
+[INFO] |  \- org.springframework:spring-tx:jar:3.2.4.RELEASE:compile
+[INFO] |     \- aopalliance:aopalliance:jar:1.0:compile
+[INFO] \- postgresql:postgresql:jar:8.4-701.jdbc4:compile
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Facete2 - Debian Packaging - Tomcat Common 0.0.1-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.1:tree (default-cli) @ facete2-debian-tomcat-common ---
+[INFO] org.aksw.facete2:facete2-debian-tomcat-common:war:0.0.1-SNAPSHOT
+[INFO] \- org.aksw.facete2:facete2-webapp:war:0.0.1-SNAPSHOT:compile
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Facete2 - Debian Packaging - Tomcat7 0.0.1-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.1:tree (default-cli) @ facete2-debian-tomcat7 ---
+[INFO] org.aksw.facete2:facete2-debian-tomcat7:jar:0.0.1-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary:
+[INFO] 
+[INFO] Facete2 - Parent .................................. SUCCESS [0.628s]
+[INFO] Facete2 - Client .................................. SUCCESS [1.132s]
+[INFO] Facete2 - Debian Packaging - Tomcat Common ........ SUCCESS [0.018s]
+[INFO] Facete2 - Debian Packaging - Tomcat7 .............. SUCCESS [0.009s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 2.463s
+[INFO] Finished at: Tue Mar 04 16:12:27 CET 2014
+[INFO] Final Memory: 14M/218M
+[INFO] ------------------------------------------------------------------------

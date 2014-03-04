@@ -11,15 +11,19 @@ import org.aksw.jassa.sparql_path.core.SparqlServiceFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.utils.UriUtils;
 import org.aksw.jena_sparql_api.web.SparqlEndpointBase;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Multimap;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 
-@Service
+//@Service
+@Component
 @javax.ws.rs.Path("/sparql")
-public class SparqlEndpointCache extends SparqlEndpointBase {
+public class SparqlEndpointCache
+    extends SparqlEndpointBase
+{
 
     //@Autowired
     @Resource(name="sparqlServiceFactory")
@@ -28,15 +32,28 @@ public class SparqlEndpointCache extends SparqlEndpointBase {
     private String defaultServiceUri;
     private boolean allowOverrideServiceUri = false;
 
-    @Context
+    @Autowired
     private HttpServletRequest req;
     
-    public SparqlEndpointCache(@Context ServletContext context) {
+    @Context
+    private ServletContext servletContext;
 
-        this.defaultServiceUri = (String) context
+//    @Context
+//    private UriInfo uriInfo;
+
+    public SparqlEndpointCache() {
+        
+    }
+    
+    //@PostConstruct
+    public void init() {
+
+        //ServletContext context = req.getServletContext();
+        
+        this.defaultServiceUri = (String) servletContext
                 .getAttribute("defaultServiceUri");
 
-        Boolean tmp = (Boolean) context.getAttribute("allowOverrideServiceUri");
+        Boolean tmp = (Boolean) servletContext.getAttribute("allowOverrideServiceUri");
         this.allowOverrideServiceUri = tmp == null ? true : tmp;
 
         if (!allowOverrideServiceUri
@@ -47,8 +64,10 @@ public class SparqlEndpointCache extends SparqlEndpointBase {
     }
 
     @Override
-    public QueryExecution createQueryExecution(final Query query) {
+    public QueryExecution createQueryExecution(Query query) {
 
+        init();
+        
         if(sparqlServiceFactory == null) {
             throw new RuntimeException("Cannot serve request because sparqlServiceFactory is null");
         }

@@ -10,6 +10,7 @@ import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
 
@@ -29,37 +30,40 @@ public class WebAppInitializer
 		servletContext.addListener(new ContextLoaderListener(rootContext));
 		servletContext.addListener(new RequestContextListener());
 
-	    FilterRegistration.Dynamic fr = servletContext.addFilter("CorsFilter", new CorsFilter());
-	    //fr.setInitParameter("dispatcher", "REQUEST");
-	    fr.addMappingForUrlPatterns(null, true, "/*");
+		{
+		    FilterRegistration.Dynamic fr = servletContext.addFilter("CorsFilter", new CorsFilter());
+		    fr.addMappingForUrlPatterns(null, true, "/*");
+        //  fr.setInitParameter("dispatcher", "REQUEST");
+		}
+		
+//	    {
+//            FilterRegistration.Dynamic fr = servletContext.addFilter("UrlRewriteFilter", new UrlRewriteFilter());
+//            fr.setInitParameter("dispatcher", "REQUEST");
+//            fr.setInitParameter("dispatcher", "FORWARD");
+//            fr.addMappingForUrlPatterns(null, true, "/*");
+//	    }
 
 		
 		// Create the dispatcher servlet's Spring application context
 		AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
 		dispatcherContext.register(WebMvcConfig.class);
 		
-		ServletRegistration.Dynamic jassaServlet = servletContext.addServlet("jassa-api", new SpringServlet());
+		ServletRegistration.Dynamic jassaServlet = servletContext.addServlet("jassa-servlet", new SpringServlet());
 		jassaServlet.setInitParameter("com.sun.jersey.config.property.packages", "org.aksw.jassa.web.api");
+		//ServletRegistration.Dynamic jassaServlet = servletContext.addServlet("jassa-servlet", new DispatcherServlet(dispatcherContext));
 		jassaServlet.addMapping("/api/*");
 		jassaServlet.setLoadOnStartup(1);
 
-		ServletRegistration.Dynamic facete2Servlet = servletContext.addServlet("facete2-api", new SpringServlet());
+		ServletRegistration.Dynamic facete2Servlet = servletContext.addServlet("facete2-servlet", new SpringServlet());
+        //ServletRegistration.Dynamic facete2Servlet = servletContext.addServlet("facete2-servlet", new DispatcherServlet(dispatcherContext));
         facete2Servlet.setInitParameter("com.sun.jersey.config.property.packages", "org.aksw.facete2.web.api");
         facete2Servlet.addMapping("/cache/*");
         facete2Servlet.setLoadOnStartup(1);
 		
-		
-//		ServletRegistration.Dynamic endpointServlet = servletContext.addServlet("sparqlify-endpoints", new SpringServlet());
-//		endpointServlet.setInitParameter("com.sun.jersey.config.property.packages", "org.aksw.sparqlify.admin.web.endpoint");
-//		endpointServlet.setLoadOnStartup(1);
-//		endpointServlet.addMapping("/services/*");
-//		
-//		// Register and map the dispatcher servlet
-//		ServletRegistration.Dynamic dispatcherServlet = servletContext.addServlet("sparqlify-dispatcher", new DispatcherServlet(dispatcherContext));
-//		//dispatcherServlet.set
-////		dispatcherServlet.addMapping("");
-//		dispatcherServlet.addMapping("*.do");
-//		//dispatcherServlet.addMapping("/**");
-//		dispatcherServlet.setLoadOnStartup(1);
+//        ServletRegistration.Dynamic dispatcherServlet = servletContext.addServlet("sparqlify-dispatcher", new DispatcherServlet(dispatcherContext));
+//        dispatcherServlet.addMapping("*.do");
+//        dispatcherServlet.setLoadOnStartup(1);
+        //dispatcherServlet.addMapping("/**");
+        //dispatcherServlet.addMapping("");
 	}	
 }
