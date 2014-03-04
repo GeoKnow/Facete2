@@ -2,16 +2,15 @@ package org.aksw.facete2.web.api;
 
 import java.util.Collection;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 
 import org.aksw.jassa.sparql_path.core.SparqlServiceFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
-import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.utils.UriUtils;
 import org.aksw.jena_sparql_api.web.SparqlEndpointBase;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Multimap;
@@ -22,13 +21,15 @@ import com.hp.hpl.jena.query.QueryExecution;
 @javax.ws.rs.Path("/sparql")
 public class SparqlEndpointCache extends SparqlEndpointBase {
 
-    @Autowired
+    //@Autowired
+    @Resource(name="sparqlServiceFactory")
     private SparqlServiceFactory sparqlServiceFactory;
     
     private String defaultServiceUri;
     private boolean allowOverrideServiceUri = false;
 
-    private @Context HttpServletRequest req;
+    @Context
+    private HttpServletRequest req;
     
     public SparqlEndpointCache(@Context ServletContext context) {
 
@@ -48,6 +49,10 @@ public class SparqlEndpointCache extends SparqlEndpointBase {
     @Override
     public QueryExecution createQueryExecution(final Query query) {
 
+        if(sparqlServiceFactory == null) {
+            throw new RuntimeException("Cannot serve request because sparqlServiceFactory is null");
+        }
+        
         Multimap<String, String> qs = UriUtils.parseQueryString(req.getQueryString());
 
         Collection<String> serviceUris = qs.get("service-uri");
