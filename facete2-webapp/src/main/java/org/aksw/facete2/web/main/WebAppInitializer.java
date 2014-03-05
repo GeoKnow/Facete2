@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
 import org.aksw.jena_sparql_api.web.filters.CorsFilter;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
@@ -59,7 +60,12 @@ public class WebAppInitializer
         facete2Servlet.setInitParameter("com.sun.jersey.config.property.packages", "org.aksw.facete2.web.api");
         facete2Servlet.addMapping("/cache/*");
         facete2Servlet.setLoadOnStartup(1);
-		
+
+        
+        ServletRegistration.Dynamic defaultServlet = servletContext.addServlet("default-servlet", new DefaultServlet());
+        defaultServlet.addMapping("/resources/*");
+        defaultServlet.setLoadOnStartup(1);
+        
 //        ServletRegistration.Dynamic dispatcherServlet = servletContext.addServlet("sparqlify-dispatcher", new DispatcherServlet(dispatcherContext));
 //        dispatcherServlet.addMapping("*.do");
 //        dispatcherServlet.setLoadOnStartup(1);

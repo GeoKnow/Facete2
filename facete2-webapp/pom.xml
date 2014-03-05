@@ -119,6 +119,12 @@
 		<!-- <artifactId>jassa-core</artifactId> -->
 		<!-- </dependency> -->
 
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.aksw.jassa</groupId> -->
+<!-- 			<artifactId>jassa-server</artifactId> -->
+<!--			<type>war</type> -->
+<!-- 		</dependency> -->
+
 		<dependency>
 			<groupId>org.aksw.jassa</groupId>
 			<artifactId>jassa-servlets</artifactId>
@@ -143,8 +149,8 @@
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>8.4-701.jdbc4</version>
-			<type>jar</type>
-			<scope>compile</scope>
+<!--			<type>jar</type> -->
+<!--			<scope>compile</scope> -->
 		</dependency>
 
 	</dependencies>

@@ -12,14 +12,14 @@ import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.utils.UriUtils;
 import org.aksw.jena_sparql_api.web.SparqlEndpointBase;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Multimap;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 
-//@Service
-@Component
+@Service
+//@Component
 @javax.ws.rs.Path("/sparql")
 public class SparqlEndpointCache
     extends SparqlEndpointBase
