@@ -25,5 +25,16 @@
       validationQuery="SELECT VERSION();"
    />
 
+  <!--
+      factory="com.jolbox.bonecp.BoneCPDataSource"
+      idleConnectionTestPeriod="60"
+      partitionCount="3"
+      acquireIncrement="5"
+      maxConnectionsPerPartition="5"
+      minConnectionsPerPartition="1"
+      statementsCacheSize="50"
+      releaseHelperThreads="5"
+  -->
+
 </Context>
 

@@ -148,9 +148,14 @@
 		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>8.4-701.jdbc4</version>
+<!-- 			<version>8.4-701.jdbc4</version> -->
 <!--			<type>jar</type> -->
 <!--			<scope>compile</scope> -->
+		</dependency>
+
+		<dependency>
+			<groupId>com.jolbox</groupId>
+			<artifactId>bonecp</artifactId>
 		</dependency>
 
 	</dependencies>

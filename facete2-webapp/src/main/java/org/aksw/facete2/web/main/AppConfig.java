@@ -23,6 +23,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import com.jolbox.bonecp.BoneCPConfig;
+import com.jolbox.bonecp.BoneCPDataSource;
+
 @Configuration
 @ComponentScan({"org.aksw.jassa.web", "org.aksw.facete2.web"})
 // @EnableTransactionManagement
@@ -51,28 +54,59 @@ public class AppConfig {
         // TODO Somehow allow loading drivers dynamically
         Class.forName("org.postgresql.Driver");
 
-        DataSource result = null;
+        DataSource dsBean = null;
 
         try {
             String jndiName = "java:comp/env/jdbc/facete2Ds";
             Context ctx = new InitialContext();
-            result = (DataSource) ctx.lookup(jndiName);
+            dsBean = (DataSource) ctx.lookup(jndiName);
+            
+            /*
+            if(jdbcUrl.isEmpty()) {
+                cpConfig.setDatasourceBean(dataSourceBean);         
+            } else {
+                cpConfig.setJdbcUrl(jdbcUrl);
+                cpConfig.setUsername(userName);
+                cpConfig.setPassword(passWord);
+            }
+            
+            /*
+            cpConfig.setJdbcUrl(dbconf.getDbConnString()); // jdbc url specific to your database, eg jdbc:mysql://127.0.0.1/yourdb
+            cpConfig.setUsername(dbconf.getUsername()); 
+            cpConfig.setPassword(dbconf.getPassword());
+            */
+            
         } catch (NamingException e) {
             logger.info("Exception on retrieving initial JNDI context - trying a different method");
         }
 
-        if (result != null) {
-            return result;
+        if(dsBean == null) {
+            DriverManagerDataSource dataSource = new DriverManagerDataSource();
+
+            dataSource.setDriverClassName(env.getRequiredProperty(JDBC_DRIVER));
+            dataSource.setUrl(env.getRequiredProperty(JDBC_URL));
+            dataSource.setUsername(env.getRequiredProperty(JDBC_USERNAME));
+            dataSource.setPassword(env.getRequiredProperty(JDBC_PASSWORD));
+
+            dsBean = dataSource;
         }
 
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        BoneCPConfig cpConfig = new BoneCPConfig();
+        cpConfig.setDatasourceBean(dsBean);
+        
+        cpConfig.setMinConnectionsPerPartition(1);
+        cpConfig.setMaxConnectionsPerPartition(10);
+        cpConfig.setPartitionCount(2);
+        //cpConfig.setConnectionTimeoutInMs(30000);
+        //cpConfig.setStatisticsEnabled(true);
+        cpConfig.setCloseConnectionWatch(true);
+        
+        //BoneCP connectionPool = new BoneCP(cpConfig); // setup the connection pool    
 
-        dataSource.setDriverClassName(env.getRequiredProperty(JDBC_DRIVER));
-        dataSource.setUrl(env.getRequiredProperty(JDBC_URL));
-        dataSource.setUsername(env.getRequiredProperty(JDBC_USERNAME));
-        dataSource.setPassword(env.getRequiredProperty(JDBC_PASSWORD));
+        DataSource result = new BoneCPDataSource(cpConfig);
 
-        return dataSource;
+        
+        return result;
     }
 
     @Bean

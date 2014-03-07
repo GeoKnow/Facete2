@@ -53,6 +53,25 @@
 	
 	var client = Jassa.client;
 
+	var testDenis = function() {
+	    var sparqlService = new service.SparqlServiceHttp('http://dbpedia.org/sparql', ['http://dbpedia.org']);
+
+		var queryString = 'SELECT DISTINCT * { <http://dbpedia.org/resource/Paris> ?p ?o }';
+
+	    var qe = sparqlService.createQueryExecution(queryString);
+		qe.setTimeout(60000);
+		
+		qe.execSelect().done(function(rs) {
+		    alert(JSON.stringify(fs));
+		}).fail(function() {
+		     alert('fail'); 
+		});
+
+	}
+	
+	testDenis();
+	
+	
     var myModule = angular.module('Facete2', ['ui.bootstrap', 'ui.jassa', 'ngGrid', 'ui.jassa.openlayers']);
 
     myModule.controller('MyCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
@@ -98,25 +117,30 @@
 
 		//var sparqlServiceIri = 'http://fp7-pp.publicdata.eu/sparql';
 		//var defaultGraphIris = ['http://fp7-pp.publicdata.eu/'];
-		
-		var sparqlServiceIri = 'http://dbpedia.org/sparql';
-		var defaultGraphIris = ['http://dbpedia.org'];
 
 		
-		//var sparqlServiceIri = 'http://cstadler.aksw.org/conti/freebase/germany/sparql';
-		//var defaultGraphIris = ['http://freebase.com/2013-09-22/data/'];
+		//var sparqlServiceIri = 'http://dbpedia.org/sparql';
+		//var defaultGraphIris = ['http://dbpedia.org'];
+
+		
+		var sparqlServiceIri = 'http://cstadler.aksw.org/conti/freebase/germany/sparql';
+		var defaultGraphIris = ['http://freebase.com/2013-09-22/data/'];
 
 		var joinSummaryServiceIri = 'http://localhost:8810/sparql';
+		//var joinSummaryServiceIri = 'http://localhost:8810/sparql';
 		//var joinSummaryDefaultGraphIris = ['http://dbpedia.org/2013-12-22/join-summary/'];
 		var joinSummaryDefaultGraphIris = ['http://dbpedia.org/2013-12-22/join-summary-essential/'];
 		
 		
-		var conceptPathFinderApiUrl = 'http://localhost:8080/jassa/api/path-finding';
+		//var conceptPathFinderApiUrl = 'http://localhost:8080/jassa/api/path-finding';
+		var conceptPathFinderApiUrl = 'http://localhost:7532/api/path-finding';
 		//var conceptPathFinderApiUrl = 'http://localhost:7532/api/path-finding';
 		//var conceptPathFinderApiUrl = 'http://cstadler.aksw.org/jassa/api/path-finding';
 		
 		
-		var sparqlService = new service.SparqlServiceHttp(sparqlServiceIri, defaultGraphIris);
+		//var sparqlService = new service.SparqlServiceHttp(sparqlServiceIri, defaultGraphIris, {}, {'sparql-service-uri': ''});
+		//var sparqlService = new service.SparqlServiceHttp('http://localhost:8080/facete2/cache/sparql', defaultGraphIris, {}, {'service-uri': sparqlServiceIri});
+		var sparqlService = new service.SparqlServiceHttp('http://localhost:7532/cache/sparql', defaultGraphIris, {}, {'service-uri': sparqlServiceIri});
 
 		sparqlService = new service.SparqlServiceCache(sparqlService);
 		sparqlService = new service.SparqlServicePaginate(sparqlService, 1000);

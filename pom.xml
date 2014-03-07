@@ -40,8 +40,8 @@
 
 		<!-- Dependency Versions -->
 		<!-- facete2 only works with jena-sparql-api version 2.10.0-27 and onwards -->
-		<jena-sparql-api.version>2.10.0-36</jena-sparql-api.version>
-		<jassa.version>0.0.1</jassa.version>
+		<jena-sparql-api.version>2.10.0-38-SNAPSHOT</jena-sparql-api.version>
+		<jassa.version>0.0.2-SNAPSHOT</jassa.version>
 
 		<spring.version>3.2.4.RELEASE</spring.version>
 
@@ -119,6 +119,17 @@
 				<version>1.2</version>
 			</dependency>
 
+			<dependency>
+				<groupId>postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>8.4-701.jdbc4</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.jolbox</groupId>
+				<artifactId>bonecp</artifactId>
+				<version>0.7.1.RELEASE</version>				
+			</dependency>
 
 		    <dependency>
 		            <groupId>org.springframework</groupId>
