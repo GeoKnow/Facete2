@@ -89,23 +89,37 @@ public class AppConfig {
             dataSource.setPassword(env.getRequiredProperty(JDBC_PASSWORD));
 
             dsBean = dataSource;
+            
+//            BoneCPConfig cpConfig = new BoneCPConfig();
+//            cpConfig.setDatasourceBean(dsBean);
+//            
+//            //cpConfig.sesetDriverClassName(env.getRequiredProperty(JDBC_DRIVER));
+//            cpConfig.setJdbcUrl(env.getRequiredProperty(JDBC_URL));
+//            cpConfig.setUsername(env.getRequiredProperty(JDBC_USERNAME));
+//            cpConfig.setPassword(env.getRequiredProperty(JDBC_PASSWORD));
+//            
+//            cpConfig.setMinConnectionsPerPartition(1);
+//            cpConfig.setMaxConnectionsPerPartition(10);
+//            cpConfig.setPartitionCount(2);
+//            //cpConfig.setConnectionTimeoutInMs(30000);
+//            //cpConfig.setStatisticsEnabled(true);
+//            cpConfig.setCloseConnectionWatch(true);
+            
+            //BoneCP connectionPool = new BoneCP(cpConfig); // setup the connection pool    
         }
+        
+        //DataSource result = dsBean;
 
         BoneCPConfig cpConfig = new BoneCPConfig();
         cpConfig.setDatasourceBean(dsBean);
-        
+
         cpConfig.setMinConnectionsPerPartition(1);
         cpConfig.setMaxConnectionsPerPartition(10);
         cpConfig.setPartitionCount(2);
-        //cpConfig.setConnectionTimeoutInMs(30000);
-        //cpConfig.setStatisticsEnabled(true);
-        cpConfig.setCloseConnectionWatch(true);
+        //cpConfig.setCloseConnectionWatch(true);
         
-        //BoneCP connectionPool = new BoneCP(cpConfig); // setup the connection pool    
-
         DataSource result = new BoneCPDataSource(cpConfig);
 
-        
         return result;
     }
 
