@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE urlrewrite PUBLIC "-//tuckey.org//DTD UrlRewrite 4.0//EN"
+        "http://www.tuckey.org/res/dtds/urlrewrite4.0.dtd">
+
+<!--
+
+    Configuration file for UrlRewriteFilter
+    http://www.tuckey.org/urlrewrite/
+
+
+	Quick link to probably most relevant docs:
+	http://urlrewritefilter.googlecode.com/svn/trunk/src/doc/manual/4.0/index.html#tips
+-->
+
+<!--
+	There are seemingly two bugs with tuckey here:
+	(.) %{context-path} only works if the <to> tag also has a type, e.g. type="temporary-redirect"
+	(.) The query-string is broken as it starts with an ampersand 
+
+ -->
+<urlrewrite>
+
+	<rule>
+		<from>^/$</from>
+		<to>/index.do</to>
+	</rule>
+
+	<rule>
+		<from>^/bower_components/(.*)</from>
+		<to>/resources/app/bower_components/$1</to>
+	</rule>
+
+	<rule>
+		<from>^/css/(.*)</from>
+		<to>/resources/app/css/$1</to>
+	</rule>
+
+	<rule>
+		<from>^/js/(.*)</from>
+		<to>/resources/app/js/$1</to>
+	</rule>
+
+	<rule>
+		<from>^/lib/(.*)</from>
+		<to>/resources/app/lib/$1</to>
+	</rule>
+
+<!--
+	<rule>
+		<from>^(.*)/sparql$</from>
+		<to type="temporary-redirect">%{context-path}$1/sparql/$2?%{query-string}</to>
+	</rule>
+
+	<rule>
+		<from>^(.*)/sparql/(?!namespaces)(.*\.(css|js|png))$</from>
+		<to type="temporary-redirect">%{context-path}/resources/snorql/$2</to>
+	</rule>
+-->
+
+</urlrewrite>
+
