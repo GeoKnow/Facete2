@@ -115,6 +115,8 @@
     myModule.controller('MyCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
 
 		var facetTreeConfig = new facete.FacetTreeConfig();
+		var geoConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+
 		var vs = rdf.NodeFactory.createVar('s');
 
 		var conceptFalse = new facete.Concept(sparql.ElementString.create('?s a <http://foo.bar>'), vs);
@@ -127,6 +129,7 @@
 
 		
 		$scope.sparqlService = new service.SparqlServiceDummy();
+		$scope.geoConceptFactory = geoConceptFactory;
 
         $scope.serviceConfigs = [{
             name: 'Freebase Germany',
@@ -201,9 +204,15 @@
 			var result = sponate.angular.bridgePromise(promise, $q.defer(), $rootScope);
 	
 			result.then(function(paths) {
-			    var tmp = _(paths).map(function(path) {			        
+			    var tmp = _(paths).map(function(path) {
+
+			        var pathName = path.toString();
+			        if(pathName === '') {
+			            pathName = '(empty path)';
+			        }
+
 			        var r = {
-						name: path.toString(),
+						name: pathName,
 						path: path
 					};
 			        return r;
@@ -234,9 +243,7 @@
 
     		//var mapFactory =  geo.GeoMapFactoryUtils.ogcVirtMapFactory;
     		var mapFactory = config.mapFactory;
-    		
-    		var geoConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
-    		
+    		    		
     		$scope.sparqlService = sparqlService;		
             $scope.facetTreeConfig = facetTreeConfig;
             
@@ -359,7 +366,9 @@
 			</div>
 			<div class="panel-body">
    				<ul>
-   					<li ng-repeat="geoPath in geoPaths"><a href="" ng-click="setGeoPath(geoPath.path)">{{geoPath.name}}</a></li>
+   					<li ng-repeat="geoPath in geoPaths">
+   						<a href="" ng-click="setGeoPath(geoPath.path)">{{geoPath.name}}</a>
+   					</li>
    				</ul>
 			</div>
 		</div>
