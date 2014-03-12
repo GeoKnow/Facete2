@@ -4,6 +4,7 @@
 *.jar
 *.war
 *.ear
+*.swp
 
 node_modules
 bower_components
