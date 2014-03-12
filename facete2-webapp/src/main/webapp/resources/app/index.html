@@ -171,6 +171,26 @@
 					maxGlobalItemCount: 2000
 				}
             }
+        }, {
+            name: 'LinkedGeoData',
+            dataService: {
+                serviceIri: 'http://linkedgeodata.org/sparql',
+                defaultGraphIris: ['http://linkedgeodata.org']
+            },
+            joinSummaryService: {
+                serviceIri: 'http://linkedgeodata.org/join-summary/sparql',
+                defaultGraphIris: ['http://linkedgeodata.org/join-summary']
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+                geoConcept: geo.GeoConcepts.conceptWgs84,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
         }];
 
 
@@ -349,7 +369,7 @@
 
 <body ng-controller="MyCtrl">
 
-	<div style="position: absolute; top: 0px; left: 0px; width: 500px; max-height: 100%; overflow: auto; margin: 5px;">
+	<div style="position: absolute; top: 0px; left: 0px; width: 500px; max-height: 100%; overflow: auto; padding: 5px;">
 
 		<div class="panel panel-info"> 
 			<div class="panel-heading">
@@ -403,12 +423,33 @@
 
 	</div>
 
-	<div class="panel panel-info" style="display: none; position: absolute; bottom: 30px; left: 520px; height: 500px"> 
+	<div class="panel panel-info" style="position: absolute; bottom: 30px; left: 520px;"> 
 		<div class="panel-heading">
 			<i class="panel-title">Data</i>
 		</div>
-		<div class="panel-body">
+		<div class="panel-body" style="max-height: 500px; overflow: auto">
 			<sparql-table sparql-service="sparqlService" config="facetTableConfig"></sparql-table>
+		</div>
+	</div>
+
+	<div class="panel panel-info" style="display: none; position: absolute; bottom: 30px; left: 520px; height: 500px"> 
+		<div class="panel-heading">
+			<i class="panel-title">Register Data Source</i>
+		</div>
+		<div class="panel-body">
+			<div>
+				<label>Title: <input type="text"></input><select></select></label>
+			</div>
+
+			<div>
+				<label>Sparql Service Iri: <input type="text"></input></label>
+				<label>Named Graphs: <select></select></label>
+			</div>
+			
+			<div>
+				<label>Join Summary Service: <input type="text"></input></label>
+				<label>Join Summary Graphs: <input type="text"></input></label>
+			</div>
 		</div>
 	</div>
 
