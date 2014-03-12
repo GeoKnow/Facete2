@@ -29,7 +29,7 @@ import com.jolbox.bonecp.BoneCPDataSource;
 
 @Configuration
 @ComponentScan({"org.aksw.jassa.web", "org.aksw.facete2.web"})
-@PropertySource("classpath:config/jdbc/jdbc.properties")
+//@PropertySource("classpath:config/jdbc/jdbc.properties")
 // @EnableTransactionManagement
 public class AppConfig {
     private static final Logger logger = LoggerFactory
@@ -83,7 +83,7 @@ public class AppConfig {
             */
             
         } catch (NamingException e) {
-            logger.info("Exception on retrieving initial JNDI context - trying a different method");
+            logger.info("Exception on retrieving initial JNDI context - trying a different method", e);
         }
 
         if(dsBean == null) {
