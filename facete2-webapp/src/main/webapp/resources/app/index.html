@@ -171,6 +171,26 @@
 					maxGlobalItemCount: 2000
 				}
             }
+        }, {        
+            name: 'DBpedia',
+            dataService: {
+                serviceIri: 'http://dbpedia.org/sparql',
+                defaultGraphIris: ['http://dbpedia.org']
+            },
+            joinSummaryService: {
+                serviceIri: 'http://cstadler.aksw.org/service/join-summary/sparql',
+                defaultGraphIris: ['http://dbpedia.org/2013-12-22/join-summary-essential/']
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',        
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+                geoConcept: geo.GeoConcepts.conceptWgs84,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
         }, {
             name: 'LinkedGeoData',
             dataService: {
@@ -376,7 +396,8 @@
 				<i class="panel-title">Data Sources</i>
 			</div>
 			<div class="panel-body">
-				<select ng-model="dataSourceSelection" ng-change='activeService = dataSourceSelection' ng-options="item.name for item in serviceConfigs"></select>
+<!-- 				<select ng-model="dataSourceSelection" ng-change="activeService = dataSourceSelection" ng-options="item.name for item in serviceConfigs"></select> -->
+				<select ng-model="activeService" ng-options="item.name for item in serviceConfigs"></select>
 			</div>
 		</div>
 
