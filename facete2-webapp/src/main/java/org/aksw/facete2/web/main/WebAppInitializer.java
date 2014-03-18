@@ -67,7 +67,7 @@ public class WebAppInitializer
 //        defaultServlet.setLoadOnStartup(1);
         
         ServletRegistration.Dynamic defaultServlet = servletContext.addServlet("default-servlet", new DispatcherServlet(dispatcherContext));
-        defaultServlet.addMapping("/resources/app/**");
+        //defaultServlet.addMapping("/resources/app/**");
         defaultServlet.addMapping("*.do");
         defaultServlet.setLoadOnStartup(1);
         //dispatcherServlet.addMapping("/**");

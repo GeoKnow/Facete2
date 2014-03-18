@@ -38,7 +38,10 @@ public class WebMvcConfig
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/resources/app/**").addResourceLocations("/resources/app/");
+        //registry.addResourceHandler("/resources/app/**").addResourceLocations("/resources/app/");
+        registry.addResourceHandler("/bower_components/**").addResourceLocations("/bower_components/");
+        registry.addResourceHandler("/scripts/**").addResourceLocations("/scripts/");
+        registry.addResourceHandler("/styles/**").addResourceLocations("/styles/");
 //        registry.addResourceHandler("/jsp/**").addResourceLocations("/jsp/");
 //        registry.addResourceHandler("*.js").addResourceLocations("/resources/snorql/");
 //        registry.addResourceHandler("/**/*.css").addResourceLocations("/resources/snorql/");
@@ -142,7 +145,8 @@ public class WebMvcConfig
     //@Bean(name="viewResolverHtml")
     public InternalResourceViewResolver internalResourceViewResolverHtml() {
         InternalResourceViewResolver result = new InternalResourceViewResolver();
-        result.setPrefix("/resources/app/");
+        //result.setPrefix("/resources/app/");
+        result.setPrefix("");
         result.setSuffix(".html");
 //      result.setOrder(2);
         return result;

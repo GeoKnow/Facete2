@@ -110,7 +110,42 @@
 				</configuration>
 			</plugin>
 
-		</plugins>
+			<plugin>
+				<groupId>com.github.trecloux</groupId>
+				<artifactId>yeoman-maven-plugin</artifactId>
+				<version>0.1</version>
+				<configuration>
+					<yeomanProjectDirectory>${project.basedir}</yeomanProjectDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<id>run-grunt</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>dist</directory>
+						</fileset>
+						<fileset>
+							<directory>.tmp</directory>
+						</fileset>
+						<fileset>
+							<directory>node_modules</directory>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>			
+			
+		</plugins>		
 	</build>
 
 	<dependencies>

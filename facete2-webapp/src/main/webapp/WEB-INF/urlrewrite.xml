@@ -25,25 +25,25 @@
 		<to>/index.do</to>
 	</rule>
 
-	<rule>
-		<from>^/bower_components/(.*)</from>
-		<to>/resources/app/bower_components/$1</to>
-	</rule>
+<!-- 	<rule> -->
+<!-- 		<from>^/bower_components/(.*)</from> -->
+<!-- 		<to>/resources/app/bower_components/$1</to> -->
+<!-- 	</rule> -->
 
-	<rule>
-		<from>^/css/(.*)</from>
-		<to>/resources/app/css/$1</to>
-	</rule>
+<!-- 	<rule> -->
+<!-- 		<from>^/css/(.*)</from> -->
+<!-- 		<to>/resources/app/css/$1</to> -->
+<!-- 	</rule> -->
 
-	<rule>
-		<from>^/js/(.*)</from>
-		<to>/resources/app/js/$1</to>
-	</rule>
+<!-- 	<rule> -->
+<!-- 		<from>^/js/(.*)</from> -->
+<!-- 		<to>/resources/app/js/$1</to> -->
+<!-- 	</rule> -->
 
-	<rule>
-		<from>^/lib/(.*)</from>
-		<to>/resources/app/lib/$1</to>
-	</rule>
+<!-- 	<rule> -->
+<!-- 		<from>^/lib/(.*)</from> -->
+<!-- 		<to>/resources/app/lib/$1</to> -->
+<!-- 	</rule> -->
 
 <!--
 	<rule>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html ng-app="Facete2">
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>Facete II</title>
+	
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <link rel="stylesheet" href="styles/main.css"/>
+
+<!--    <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" /> -->
+	
+    <script src="scripts/e9fca107.scripts.js"></script>
+
+<!--    <script src="js/jassa-ui-angular-geo-openlayers-tpls.js"></script> -->
+	
+	<script type="text/javascript">
+    _.mixin(_.str.exports());
+
+	var rdf = Jassa.rdf;
+	var sparql = Jassa.sparql;
+    var service = Jassa.service;
+	var sponate = Jassa.sponate;
+    var facete = Jassa.facete;
+	var geo = Jassa.geo;
+	var util = Jassa.util;
+	
+	var client = Jassa.client;
+
+    var myModule = angular.module('Facete2', ['ui.bootstrap', 'ui.jassa', 'ngGrid', 'ui.jassa.openlayers']);
+
+
+    (function() {
+	    var ns = service;
+	    
+	    ns.QueryExecutionDummy = Class.create(ns.QueryExecution, {
+	        createPromise:function(val) {
+	            var deferred = jQuery.Deferred();
+	            deferred.resolve(val);
+	            return deferred.promise();            
+	        },
+	        
+	        execAsk: function() {
+	            var result = this.createPromise(false);
+	            return result;
+	        },
+	        
+	        execSelect: function() {
+	            var rs = new ns.ResultSetArrayIteratorBinding(new util.IteratorArray([]));
+	            var result = this.createPromise(rs);
+	            return result;
+	        }
+	    });
+	        
+	    ns.SparqlServiceDummy = Class.create(ns.SparqlService, {
+	        
+	        createQueryExecution: function(query) {
+	            return new ns.QueryExecutionDummy();
+	        },
+	        
+	        getStateId: function() {
+	            return 'dummyId';
+	        },
+	        
+	        getStateHash: function() {
+	            return 'dummyHash';
+	        },
+	        
+	        hashCode: function() {
+	            return 'dummy-sparql-service';
+	        }
+	    });
+    })();
+    
+    (function() {
+	    var ns = facete;
+	    ns.QueryFactoryConst = Class.create(ns.QueryFactory, {
+	        initialize: function(query) {
+	            this.query = query;
+	        },
+	        
+	        createQuery: function() {
+	            return this.query;
+	        }
+	    });
+    })();
+    
+    
+    myModule.controller('MyCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
+
+		var facetTreeConfig = new facete.FacetTreeConfig();
+		var geoConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+
+		var vs = rdf.NodeFactory.createVar('s');
+
+		var conceptFalse = new facete.Concept(sparql.ElementString.create('?s a <http://foo.bar>'), vs);
+
+		var filterConceptFactory = new facete.ConceptFactoryConst(conceptFalse)
+        var tableMod = new facete.TableMod();
+        //tableMod.addColumn('s');
+        tableMod.addColumn('_p_');
+        tableMod.addColumn('_o_');
+
+		
+		$scope.sparqlService = new service.SparqlServiceDummy();
+		$scope.geoConceptFactory = geoConceptFactory;
+
+        $scope.serviceConfigs = [{
+            name: 'Freebase Germany',
+            dataService: {
+                serviceIri: 'http://cstadler.aksw.org/conti/freebase/germany/sparql',
+                defaultGraphIris: ['http://freebase.com/2013-09-22/data/']
+            },
+            joinSummaryService: {
+                serviceIri: null,
+                defaultGraphIris: []
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+                geoConcept: geo.GeoConcepts.conceptWgs84,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
+        }, {        
+            name: 'FP7 ICT Project Partners',
+            dataService: {
+                serviceIri: 'http://fp7-pp.publicdata.eu/sparql',
+                defaultGraphIris: ['http://fp7-pp.publicdata.eu/']
+            },
+            joinSummaryService: {
+                serviceIri: null,
+                defaultGraphIris: []
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',        
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+                geoConcept: geo.GeoConcepts.conceptWgs84,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
+        }, {        
+            name: 'DBpedia',
+            dataService: {
+                serviceIri: 'http://dbpedia.org/sparql',
+                defaultGraphIris: ['http://dbpedia.org']
+            },
+            joinSummaryService: {
+                serviceIri: 'http://cstadler.aksw.org/service/join-summary/sparql',
+                defaultGraphIris: ['http://dbpedia.org/2013-12-22/join-summary-essential/']
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',        
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+                geoConcept: geo.GeoConcepts.conceptWgs84,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
+        }, {
+            name: 'LinkedGeoData',
+            dataService: {
+                serviceIri: 'http://linkedgeodata.org/sparql',
+                defaultGraphIris: ['http://linkedgeodata.org']
+            },
+            joinSummaryService: {
+                serviceIri: 'http://linkedgeodata.org/join-summary/sparql',
+                defaultGraphIris: ['http://linkedgeodata.org/join-summary']
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+                geoConcept: geo.GeoConcepts.conceptWgs84,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
+        }, {
+            name: 'GeoStats',
+            dataService: {
+                serviceIri: 'http://cstadler.aksw.org/service/geostats/sparql',
+                defaultGraphIris: ['http://geostats.aksw.org/']
+            },
+            joinSummaryService: {
+                serviceIri: null,
+                defaultGraphIris: []
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.ogcVirtMapFactory,
+                geoConcept: geo.GeoConcepts.conceptOgcV,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
+        }, {
+            name: 'LGD Sparqlify Localhost',
+            dataService: {
+                serviceIri: 'http://localhost:7531/sparql',
+                defaultGraphIris: []
+            },
+            joinSummaryService: {
+                serviceIri: 'http://linkedgeodata.org/join-summary/sparql',
+                defaultGraphIris: ['http://linkedgeodata.org/join-summary']
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+                geoConcept: geo.GeoConcepts.conceptWgs84,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
+        }];
+
+
+        $scope.path = null;
+
+		
+		/*
+		 * Concept Path Finding
+		 */
+		var refresh = function(config) {
+			
+		    var conceptPathFinderApiUrl = config.conceptPathFinderApiUrl;
+		    var sparqlServiceIri = config.dataService.serviceIri;
+		    var defaultGraphIris = config.dataService.defaultGraphIris;
+		    var joinSummaryServiceIri = config.joinSummaryService.serviceIri;
+		    var joinSummaryDefaultGraphIris = config.joinSummaryService.defaultGraphIris;
+		    
+		    
+		    var geoConcept = config.mapConfig.geoConcept;
+		    
+		    var conceptPathFinder = new client.ConceptPathFinderApi(conceptPathFinderApiUrl, sparqlServiceIri, defaultGraphIris, joinSummaryServiceIri, joinSummaryDefaultGraphIris);
+
+            var facetTreeConfig = config.facetTreeConfig;
+    		var conceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+
+		    
+		    var sourceConcept = conceptFactory.createConcept(); 	
+			var targetConcept = geoConcept;
+
+		    var promise = conceptPathFinder.findPaths(sourceConcept, targetConcept);
+			var result = sponate.angular.bridgePromise(promise, $q.defer(), $rootScope);
+	
+			result.then(function(paths) {
+			    var tmp = _(paths).map(function(path) {
+
+			        var pathName = path.toString();
+			        if(pathName === '') {
+			            pathName = '(empty path)';
+			        }
+
+			        var r = {
+						name: pathName,
+						path: path
+					};
+			        return r;
+			    });
+			   
+			    $scope.geoPaths = tmp;
+			}, function(err) {
+			    alert(err.responseText);
+			});
+		};
+		        
+       	var refreshServices = function(config) {
+       	    if(!config) {
+				return;
+       	    }
+
+            var dataCnf = config.dataService;
+
+            var facetTreeConfig = config.facetTreeConfig;
+            
+    		var sparqlService = new service.SparqlServiceHttp('cache/sparql', dataCnf.defaultGraphIris, {}, {'service-uri': dataCnf.serviceIri});
+
+    		sparqlService = new service.SparqlServiceCache(sparqlService);
+    		sparqlService = new service.SparqlServicePaginate(sparqlService, 1000);
+
+    		var conceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+
+
+    		//var mapFactory =  geo.GeoMapFactoryUtils.ogcVirtMapFactory;
+    		var mapFactory = config.mapFactory;
+    		    		
+    		$scope.sparqlService = sparqlService;		
+            $scope.facetTreeConfig = facetTreeConfig;
+            
+            //$scope.path = null;
+
+            var facetConfig = facetTreeConfig.getFacetConfig();
+    		var facetConceptFactory = new facete.ConceptFactoryFacetConfig(facetConfig);
+
+            var dataConcept = facete.ConceptUtils.createSubjectConcept(vs);
+            var elementFactory = new sparql.ElementFactoryJoinConcept(new facete.ConceptFactoryConst(dataConcept), filterConceptFactory);
+                
+            var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
+
+    		$scope.facetTableConfig = {
+    			queryFactory: queryFactory,
+    			tableMod: tableMod
+    		};
+
+    		var mapConfig = config.mapConfig;
+    		
+            $scope.dataSources = [{
+    			sparqlService: sparqlService,
+    			mapFactory: mapConfig.mapFactory,
+    			conceptFactory: geoConceptFactory,
+    		    quadTreeConfig: mapConfig.quadTreeConfig
+    		}];
+
+        };
+
+        $scope.dataSources = [];
+        
+        
+        $scope.setDataSource = function(item) {
+            alert(JSON.stringify(item));
+        };
+        
+//         $scope.$watch('dataSourceSelection.active', function(val) {
+// 			alert(JSON.stringify(val));
+//         });
+        
+        var dummyQuery = new sparql.Query();
+        dummyQuery.getProjectVars().add(vs);
+        dummyQuery.getElements().push(new sparql.ElementTriplesBlock([new rdf.Triple(vs, vs, vs)]));
+        
+        $scope.facetTableConfig = {
+            queryFactory: new facete.QueryFactoryConst(dummyQuery),
+            tableMod: tableMod
+        };
+		
+		$scope.ObjectUtils = util.ObjectUtils;
+		//$scope.$watch('ObjectUtils.hashCode(facetTreeConfig)', function() {
+		$scope.$watch('ObjectUtils.hashCode(activeService)', function() {
+
+		    var config = $scope.activeService;
+		    if(config) {
+		    	refreshServices(config);
+		    	refresh(config);
+		    }
+		});
+		
+        $scope.activeService = $scope.serviceConfigs[0];
+
+
+		
+		$scope.setGeoPath = function(path) {
+		    $scope.geoConceptFactory.setPath(path);
+		};
+
+        $scope.selectFacet = function(path) {
+            $scope.path = path;
+        };
+
+        $scope.selectGeom = function(data) {
+            //alert('Select: ' + JSON.stringify(data));
+			var node = data.id;
+            var ev = new sparql.ExprVar(vs);
+            var nodeValue = sparql.NodeValue.makeNode(node);
+            var expr = new sparql.E_Equals(ev, nodeValue);
+            var element = new sparql.ElementFilter(expr);
+			var concept = new facete.Concept(element, vs);
+
+			filterConceptFactory.setConcept(concept);
+
+			if(!$scope.$$phase) {
+                $scope.$apply();
+            }
+        }
+
+        $scope.unselectGeom = function(data) {
+            //alert('Unselect: ' + JSON.stringify(data));
+			filterConceptFactory.setConcept(conceptFalse);
+			if(!$scope.$$phase) {
+                $scope.$apply();
+            }
+        }
+
+
+
+    }]);
+	</script>
+
+</head>
+
+<body ng-controller="MyCtrl">
+
+	<div style="position: absolute; top: 0px; left: 0px; width: 500px; max-height: 100%; overflow: auto; padding: 5px">
+
+		<div class="panel panel-info"> 
+			<div class="panel-heading">
+				<i class="panel-title">Data Sources</i>
+			</div>
+			<div class="panel-body">
+<!-- 				<select ng-model="dataSourceSelection" ng-change="activeService = dataSourceSelection" ng-options="item.name for item in serviceConfigs"></select> -->
+				<select ng-model="activeService" ng-options="item.name for item in serviceConfigs"></select>
+			</div>
+		</div>
+
+		<div class="panel panel-info"> 
+			<div class="panel-heading">
+				<i class="panel-title">GeoPaths</i>
+			</div>
+			<div class="panel-body">
+   				<ul>
+   					<li ng-repeat="geoPath in geoPaths">
+   						<a href="" ng-click="setGeoPath(geoPath.path)">{{geoPath.name}}</a>
+   					</li>
+   				</ul>
+			</div>
+		</div>
+
+
+		<div class="panel panel-info"> 
+			<div class="panel-heading">
+				<i class="panel-title">Facet Tree</i>
+			</div>
+			<div class="panel-body">
+			   <facet-tree sparql-service="sparqlService" facet-tree-config="facetTreeConfig" select="selectFacet(path)"></facet-tree>
+			</div>
+		</div>
+
+		<div class="panel panel-info"> 
+			<div class="panel-heading">
+				<i class="panel-title">Facet Values</i>
+			</div>
+			<div class="panel-body">
+   				<facet-value-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig" path="path"></facet-value-list>
+			</div>
+		</div>
+
+		<div class="panel panel-info"> 
+			<div class="panel-heading">
+				<i class="panel-title">Constraints</i>
+			</div>
+			<div class="panel-body">
+   				<constraint-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig"></constraint-list>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="panel panel-info" style="position: absolute; bottom: 30px; left: 520px"> 
+		<div class="panel-heading">
+			<i class="panel-title">Data</i>
+		</div>
+		<div class="panel-body" style="max-height: 500px; overflow: auto">
+			<sparql-table sparql-service="sparqlService" config="facetTableConfig"></sparql-table>
+		</div>
+	</div>
+
+	<div class="panel panel-info" style="display: none; position: absolute; bottom: 30px; left: 520px; height: 500px"> 
+		<div class="panel-heading">
+			<i class="panel-title">Register Data Source</i>
+		</div>
+		<div class="panel-body">
+			<div>
+				<label>Title: <input type="text"><select></select></label>
+			</div>
+
+			<div>
+				<label>Sparql Service Iri: <input type="text"></label>
+				<label>Named Graphs: <select></select></label>
+			</div>
+			
+			<div>
+				<label>Join Summary Service: <input type="text"></label>
+				<label>Join Summary Graphs: <input type="text"></label>
+			</div>
+		</div>
+	</div>
+
+
+    <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>
+
+</body>
+
+</html>
