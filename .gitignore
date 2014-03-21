@@ -6,7 +6,10 @@
 *.ear
 *.swp
 
+
+.tmp
 node_modules
 bower_components
 deptree.txt
+dist
 

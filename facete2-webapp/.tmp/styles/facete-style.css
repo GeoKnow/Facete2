@@ -47,18 +47,20 @@ input[type=text] .btn-xs, input[type=password] .btn-xs {
 }
 
 .portlet {
+	font-family: Verdana,Helvetica,Arial,"DejaVu Sans",sans-serif;
+	
 /* 		border: 1px; */
 /* 		border-collapse: true; */
 /* 		border-style: solid; */
 /* 		border-color: #cccccc; */
 /* 		padding-right: 0px; */
-	padding: 5px;
+/* 	padding: 5px; */
 /* 		padding-bottom: 16px; */
 /*  		margin-top: 3px; */
-		margin: 5px;
+/* 		margin: 5px; */
 /*  		margin-bottom: 3px; */
 /*  		background-color: #EFEFEF; */
-		background-color: rgba(239, 239, 239, 0.7);
+/* 		background-color: rgba(239, 239, 239, 0.7); */
 		
 /*  		background : url("resources/images/facete-ui/background.png") repeat scroll 0 0 rgba(0, 0, 0, 0); */
 /*  		background-color: #eeeeee; */
@@ -85,14 +87,34 @@ a {
 	background-color: #EEEEEE;
 }
 
-.navbar-inner {
-    background-color: #CCCCFA;
-       background-image: -webkit-gradient(linear, left top, left bottom, from(#CCCCFF), to(#EEEEFF));
-       background-image: -webkit-linear-gradient(top, #CCCCFF, #EEEEFF);
-       background-image: linear-gradient(to bottom, #CCCCFF, #EEEEFF);
-   }
-   
-   .nav-tabs {
+.portlet-heading {
+	background-color: #CCCCFA;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#CCCCFF), to(#EEEEFF));
+	background-image: -webkit-linear-gradient(top, #CCCCFF, #EEEEFF);
+	background-image: linear-gradient(to bottom, #CCCCFF, #EEEEFF);
+	min-height: 20px;
+	height: 20px;
+	position: relative;
+	padding: 0px 20px;
+/* 	font-size: 14px; */
+}
+
+.portlet-body {
+	font-size: 11px;
+	line-height: 15px;
+	padding: 5px;
+}
+
+.portlet-body ul {
+	padding-left: 15px;
+}
+
+.portlet-body .badge {
+	font-size: 8px;
+}
+
+
+.nav-tabs {
 	background-color: #eeeeff;
    }
    

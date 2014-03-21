@@ -8,11 +8,10 @@
     <title>Facete II</title>
 	
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-    <link rel="stylesheet" href="styles/main.css"/>
+    <link rel="stylesheet" href="styles/e065d650.main.css"/>
 
-<!--    <link rel="stylesheet" href="../../../target/release/repo/jassa-ui-angular.css" /> -->
 	
-    <script src="scripts/e9fca107.scripts.js"></script>
+    <script src="scripts/ae1d1bf5.scripts.js"></script>
 
 <!--    <script src="js/jassa-ui-angular-geo-openlayers-tpls.js"></script> -->
 	
@@ -29,14 +28,29 @@
 	
 	var client = Jassa.client;
 
-    var myModule = angular.module('Facete2', ['ui.bootstrap', 'ui.jassa', 'ngGrid', 'ui.jassa.openlayers']);
+    var myModule = angular.module('Facete2', ['ui.bootstrap', 'ui.jassa', 'ngGrid', 'ui.jassa.openlayers', 'ngSanitize']);
 
+    
+
+    /*
+    var test = new service.SparqlServiceHttp('http://localhost:7532/api/path-finding?service-uri=http%3A%2F%2Fcstadler.aksw.org%2Fconti%2Ffreebase%2Fgermany%2Fsparql&default-graph-uri=http%3A%2F%2Ffreebase.com%2F2013-09-22%2Fdata%2F&source-element=%3Fs+%3F_p_+%3F_o_&source-var=s&target-element=%3Fs+<http%3A%2F%2Fwww.w3.org%2F2003%2F01%2Fgeo%2Fwgs84_pos%23long>+%3Fx+%3B++<http%3A%2F%2Fwww.w3.org%2F2003%2F01%2Fgeo%2Fwgs84_pos%23lat>+%3Fy&target-var=s&js-service-uri=');
+    var qe = test.createQueryExecution('Select * { ?s ?p ?o } Limit 10');
+    var promise = qe.execSelect();
+    promise.done(function(rs) {
+       while(rs.hasNext()) {
+           var binding = rs.next();
+           console.log('Binding ' + binding);
+       } 
+    }).fail(function() {
+        alert(JSON.stringify(arguments));
+    });
+    */
 
     (function() {
 	    var ns = service;
 	    
 	    ns.QueryExecutionDummy = Class.create(ns.QueryExecution, {
-	        createPromise:function(val) {
+	        createPromise: function(val) {
 	            var deferred = jQuery.Deferred();
 	            deferred.resolve(val);
 	            return deferred.promise();            
@@ -51,6 +65,10 @@
 	            var rs = new ns.ResultSetArrayIteratorBinding(new util.IteratorArray([]));
 	            var result = this.createPromise(rs);
 	            return result;
+	        },
+	        
+	        setTimeout: function(timeoutInMillis) {
+	            
 	        }
 	    });
 	        
@@ -90,6 +108,9 @@
     
     myModule.controller('MyCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
 
+		$scope.active = {};
+
+        
 		var facetTreeConfig = new facete.FacetTreeConfig();
 		var geoConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
 
@@ -104,10 +125,10 @@
         tableMod.addColumn('_o_');
 
 		
-		$scope.sparqlService = new service.SparqlServiceDummy();
-		$scope.geoConceptFactory = geoConceptFactory;
+		$scope.active.sparqlService = new service.SparqlServiceDummy();
+		$scope.active.geoConceptFactory = geoConceptFactory;
 
-        $scope.serviceConfigs = [{
+        $scope.active.serviceConfigs = [{
             name: 'Freebase Germany',
             dataService: {
                 serviceIri: 'http://cstadler.aksw.org/conti/freebase/germany/sparql',
@@ -138,6 +159,26 @@
                 defaultGraphIris: []
             },
             conceptPathFinderApiUrl: 'api/path-finding',        
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+                geoConcept: geo.GeoConcepts.conceptWgs84,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
+        }, {
+            name: 'GeoKnow Demo Dataset',
+            dataService: {
+                serviceIri: 'http://cstadler.aksw.org/geoknow/sparql',
+                defaultGraphIris: []
+            },
+            joinSummaryService: {
+                serviceIri: null,
+                defaultGraphIris: []
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',
             facetTreeConfig: facetTreeConfig,
             mapConfig: {
                 mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
@@ -230,7 +271,7 @@
         }];
 
 
-        $scope.path = null;
+        $scope.active.path = null;
 
 		
 		/*
@@ -256,6 +297,15 @@
 		    var sourceConcept = conceptFactory.createConcept(); 	
 			var targetConcept = geoConcept;
 
+// 			var cpfSparqlService = conceptPathFinder.createSparqlService(sourceConcept, targetConcept);
+// 			var qe = cpfSparqlService.createQueryExecution('Select * { ?s ?p ?o } Limit 10');
+// 			qe.execSelect().done(function(rs) {
+// 				alert(JSON.stringify(rs.getBindings()));
+// 			}).fail(function() {
+// 			    alert('fail');
+// 			});
+			
+			
 		    var promise = conceptPathFinder.findPaths(sourceConcept, targetConcept);
 			var result = sponate.angular.bridgePromise(promise, $q.defer(), $rootScope);
 	
@@ -274,7 +324,7 @@
 			        return r;
 			    });
 			   
-			    $scope.geoPaths = tmp;
+			    $scope.active.geoPaths = tmp;
 			}, function(err) {
 			    alert(err.responseText);
 			});
@@ -294,14 +344,25 @@
     		sparqlService = new service.SparqlServiceCache(sparqlService);
     		sparqlService = new service.SparqlServicePaginate(sparqlService, 1000);
 
+//     		debugger;    		
+//     		var query = new sparql.Query();
+//     		query.getElements().push(new sparql.ElementTriplesBlock([new rdf.Triple(rdf.NodeFactory.createVar('s'), rdf.NodeFactory.createVar('p'), rdf.NodeFactory.createVar('o'))]));
+//     		query.setResultStar(true);
+//     		query.setLimit(10);    		
+//     		sparqlService.createQueryExecution(query).execSelect().done(function(rs) {
+//     		    var hash = Jassa.util.ObjectUtils.hashCode(sparqlService);
+//     			alert(hash);
+//     		});
+
+    		
     		var conceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
 
 
     		//var mapFactory =  geo.GeoMapFactoryUtils.ogcVirtMapFactory;
     		var mapFactory = config.mapFactory;
     		    		
-    		$scope.sparqlService = sparqlService;		
-            $scope.facetTreeConfig = facetTreeConfig;
+    		$scope.active.sparqlService = sparqlService;		
+            $scope.active.facetTreeConfig = facetTreeConfig;
             
             //$scope.path = null;
 
@@ -313,14 +374,14 @@
                 
             var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
 
-    		$scope.facetTableConfig = {
+    		$scope.active.facetTableConfig = {
     			queryFactory: queryFactory,
     			tableMod: tableMod
     		};
 
     		var mapConfig = config.mapConfig;
     		
-            $scope.dataSources = [{
+            $scope.active.dataSources = [{
     			sparqlService: sparqlService,
     			mapFactory: mapConfig.mapFactory,
     			conceptFactory: geoConceptFactory,
@@ -329,7 +390,7 @@
 
         };
 
-        $scope.dataSources = [];
+        $scope.active.dataSources = [];
         
         
         $scope.setDataSource = function(item) {
@@ -344,32 +405,34 @@
         dummyQuery.getProjectVars().add(vs);
         dummyQuery.getElements().push(new sparql.ElementTriplesBlock([new rdf.Triple(vs, vs, vs)]));
         
-        $scope.facetTableConfig = {
+        $scope.active.facetTableConfig = {
             queryFactory: new facete.QueryFactoryConst(dummyQuery),
             tableMod: tableMod
         };
 		
 		$scope.ObjectUtils = util.ObjectUtils;
+		
+		
 		//$scope.$watch('ObjectUtils.hashCode(facetTreeConfig)', function() {
-		$scope.$watch('ObjectUtils.hashCode(activeService)', function() {
+		$scope.$watch('ObjectUtils.hashCode(active.service)', function() {
 
-		    var config = $scope.activeService;
+		    var config = $scope.active.service;
 		    if(config) {
 		    	refreshServices(config);
 		    	refresh(config);
 		    }
 		});
 		
-        $scope.activeService = $scope.serviceConfigs[0];
+        $scope.active.service = $scope.active.serviceConfigs[0];
 
 
 		
 		$scope.setGeoPath = function(path) {
-		    $scope.geoConceptFactory.setPath(path);
+		    $scope.active.geoConceptFactory.setPath(path);
 		};
 
         $scope.selectFacet = function(path) {
-            $scope.path = path;
+            $scope.active.path = path;
         };
 
         $scope.selectGeom = function(data) {
@@ -397,6 +460,34 @@
         }
 
 
+        
+        $scope.nextConceptSpaceId = 1;
+        $scope.conceptSpaces = [];
+        
+        
+        $scope.addConceptSpace = function() {
+            var conceptSpaceId = '' + (++$scope.nextConceptSpaceId);
+            
+			var config = {
+			    id: conceptSpaceId,
+			    name: 'concept-' + conceptSpaceId
+			};
+			
+			$scope.conceptSpaces.push(config);
+        };
+        
+        $scope.selectConceptSpace = function(index) {
+			_($scope.conceptSpaces).each(function(conceptSpace) {
+				conceptSpace.active = false;
+			});
+			
+			$scope.conceptSpaces[index].active = true;
+        };
+        
+        $scope.removeConceptSpace = function(index) {
+			$scope.conceptSpaces.splice(index, 1);
+        };
+
 
     }]);
 	</script>
@@ -405,58 +496,99 @@
 
 <body ng-controller="MyCtrl">
 
-	<div style="position: absolute; top: 0px; left: 0px; width: 500px; max-height: 100%; overflow: auto; padding: 5px">
-
-		<div class="panel panel-info"> 
-			<div class="panel-heading">
-				<i class="panel-title">Data Sources</i>
+	<nav class="navbar navbar-default" role="navigation">
+		<div class="container-fluid">
+			<!-- Brand and toggle get grouped for better mobile display -->
+   			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#">Facete II</a>
 			</div>
-			<div class="panel-body">
-<!-- 				<select ng-model="dataSourceSelection" ng-change="activeService = dataSourceSelection" ng-options="item.name for item in serviceConfigs"></select> -->
-				<select ng-model="activeService" ng-options="item.name for item in serviceConfigs"></select>
-			</div>
+			
+<!-- 			<div class="collapse navbar-collapse"> -->
+<!--       			<ul class="nav navbar-nav"> -->
+<!--         			<li class="active"><a href="#">Source Code</a></li> -->
+<!--         			<li><a href="#">Link</a></li> -->
+<!--         		</ul> -->
+<!--         	</div> -->
 		</div>
+	</nav>
 
-		<div class="panel panel-info"> 
-			<div class="panel-heading">
-				<i class="panel-title">GeoPaths</i>
-			</div>
-			<div class="panel-body">
-   				<ul>
-   					<li ng-repeat="geoPath in geoPaths">
-   						<a href="" ng-click="setGeoPath(geoPath.path)">{{geoPath.name}}</a>
-   					</li>
-   				</ul>
-			</div>
-		</div>
+	<div style="position: absolute; top: 50px; left: 0px; width: 500px; bottom: 0px; overflow: auto; padding: 5px; pointer-events:none">
+<!-- 		<div style="width:100%;"> -->
+<!-- 			<div style="min-height: 50px;"/></div> -->
+<!-- 		</div> -->
 
 
-		<div class="panel panel-info"> 
-			<div class="panel-heading">
-				<i class="panel-title">Facet Tree</i>
-			</div>
-			<div class="panel-body">
-			   <facet-tree sparql-service="sparqlService" facet-tree-config="facetTreeConfig" select="selectFacet(path)"></facet-tree>
-			</div>
-		</div>
+		<accordion close-others="false">
+<!-- 			<accordion-group heading="Search" style="pointer-events: auto;"> -->
+<!-- 				<input type="text" ng-model="active.searchString"></input>				 -->
+<!-- 			</accordion-group> -->
+		
+			<accordion-group heading="Data Sources" style="pointer-events: auto">
+				<select ng-model="active.service" ng-options="item.name for item in active.serviceConfigs"></select>
+			</accordion-group>
 
-		<div class="panel panel-info"> 
-			<div class="panel-heading">
-				<i class="panel-title">Facet Values</i>
-			</div>
-			<div class="panel-body">
-   				<facet-value-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig" path="path"></facet-value-list>
-			</div>
-		</div>
+			<accordion-group heading="Concepts" style="pointer-events: auto">
+				<ul>
+			    	<li ng-show="conceptSpaces.length == 0" class="inactive">(there are no concepts yet)</li>
+				    <li ng-repeat="conceptSpace in conceptSpaces" ng-class="{'highlite': conceptSpace.active}">
+				    	<a href="" ng-click="removeConceptSpace($index)"><span class="glyphicon glyphicon-remove-circle"></span></a>
+				    	<a href="" ng-click="selectConceptSpace($index)">{{conceptSpace.name}}</a>
+				   	</li>
+				</ul>
+				
+				<button class="btn btn-primary" ng-click="addConceptSpace()">Create a new Concept</button>
+			</accordion-group>
 
-		<div class="panel panel-info"> 
-			<div class="panel-heading">
-				<i class="panel-title">Constraints</i>
-			</div>
-			<div class="panel-body">
-   				<constraint-list sparql-service="sparqlService" facet-tree-config="facetTreeConfig"></constraint-list>
-			</div>
-		</div>
+			<accordion-group heading="GeoPaths" class="portlet" style="pointer-events: auto">
+				<tabset>
+					<tab heading="Candidates">
+		   				<ul>
+		   					<li ng-repeat="geoPath in active.geoPaths">
+		   						<a href="" ng-click="setGeoPath(geoPath.path)">{{geoPath.name}}</a>
+		   					</li>
+		   				</ul>
+				  	</tab>
+					<tab heading="Active">
+						To be done
+					</tab>
+				</tabset>
+			</accordion-group>
+
+			<accordion-group heading="Facets" style="pointer-events: auto">
+				<div class="panel panel-info"> 
+					<div class="panel-heading portlet-heading">
+						Facet Tree
+					</div>
+					<div class="panel-body">
+					   <facet-tree sparql-service="active.sparqlService" facet-tree-config="active.facetTreeConfig" select="selectFacet(path)"></facet-tree>
+					</div>
+				</div>
+		
+				<div class="panel panel-info"> 
+					<div class="panel-heading portlet-heading">
+						Facet Values
+					</div>
+					<div class="panel-body">
+		   				<facet-value-list sparql-service="active.sparqlService" facet-tree-config="active.facetTreeConfig" path="active.path"></facet-value-list>
+					</div>
+				</div>
+		
+				<div class="panel panel-info"> 
+					<div class="panel-heading portlet-heading">
+						Constraints
+					</div>
+					<div class="panel-body">
+		   				<constraint-list sparql-service="active.sparqlService" facet-tree-config="active.facetTreeConfig"></constraint-list>
+					</div>
+				</div>
+			</accordion-group>
+		</accordion>
 
 	</div>
 
@@ -465,7 +597,7 @@
 			<i class="panel-title">Data</i>
 		</div>
 		<div class="panel-body" style="max-height: 500px; overflow: auto">
-			<sparql-table sparql-service="sparqlService" config="facetTableConfig"></sparql-table>
+			<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig"></sparql-table>
 		</div>
 	</div>
 
@@ -491,7 +623,9 @@
 	</div>
 
 
-    <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>
+    <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>
+
+	<a href="https://github.com/GeoKnow/Facete2"><img style="position: absolute; top: 0; right: 0; border: 0" src="images/39c9135d.forkme_right_green_007200.png" alt="Fork me on GitHub"></a>
 
 </body>
 

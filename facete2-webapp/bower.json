@@ -4,6 +4,7 @@
   "dependencies": {
     "jquery-ui": "1.10.3",
     "openlayers": "2.13.1",
+    "jassa": "0.0.2-SNAPSHOT",
     "jassa-ui-angular": "0.0.1-SNAPSHOT",
     "jassa-ui-angular-openlayers": "0.0.1-SNAPSHOT"
   }
