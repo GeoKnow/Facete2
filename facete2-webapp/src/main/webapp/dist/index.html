@@ -466,7 +466,7 @@
         
         
         $scope.addConceptSpace = function() {
-            var conceptSpaceId = '' + (++$scope.nextConceptSpaceId);
+            var conceptSpaceId = '' + ($scope.nextConceptSpaceId++);
             
 			var config = {
 			    id: conceptSpaceId,
@@ -592,14 +592,20 @@
 
 	</div>
 
-	<div class="panel panel-info" style="position: absolute; bottom: 30px; left: 520px"> 
-		<div class="panel-heading">
-			<i class="panel-title">Data</i>
-		</div>
-		<div class="panel-body" style="max-height: 500px; overflow: auto">
+	<accordion style="position: absolute; bottom: 30px; left: 520px">
+		<accordion-group heading="Data">
 			<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig"></sparql-table>
-		</div>
-	</div>
+		</accordion-group>
+	</accordion>
+
+<!-- 	<div class="panel panel-info" style="position: absolute; bottom: 30px; left: 520px;">  -->
+<!-- 		<div class="panel-heading"> -->
+<!-- 			<i class="panel-title">Data</i> -->
+<!-- 		</div> -->
+<!-- 		<div class="panel-body" style="max-height: 500px; overflow: auto"> -->
+<!-- 			<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig"></sparql-table> -->
+<!-- 		</div> -->
+<!-- 	</div> -->
 
 	<div class="panel panel-info" style="display: none; position: absolute; bottom: 30px; left: 520px; height: 500px"> 
 		<div class="panel-heading">
@@ -625,7 +631,7 @@
 
     <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>
 
-	<a href="https://github.com/GeoKnow/Facete2"><img style="position: absolute; top: 0; right: 0; border: 0" src="images/39c9135d.forkme_right_green_007200.png" alt="Fork me on GitHub"></a>
+	<a href="https://github.com/GeoKnow/Facete2" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0" src="images/39c9135d.forkme_right_green_007200.png" alt="Fork me on GitHub"></a>
 
 </body>
 
