@@ -34,4 +34,3 @@ This project is built on these of our other projects:
 * [Jassa User Interface Components](https://github.com/GeoKnow/Jassa-UI-Angular)
 * [jena-sparql-api](https://github.com/AKSW/jena-sparql-api)
 
-
