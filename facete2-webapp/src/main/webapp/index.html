@@ -146,19 +146,64 @@
 
 		$scope.active = {};
 
+		var vs = rdf.NodeFactory.createVar('s');
+
         
+		/* Dummy init */
+        var dummyQuery = new sparql.Query();
+        dummyQuery.getProjectVars().add(vs);
+        dummyQuery.getElements().push(new sparql.ElementTriplesBlock([new rdf.Triple(vs, vs, vs)]));
+        
+        var tmpTableMod = new facete.TableMod();
+        tmpTableMod.addColumn('s');
+        $scope.active.facetTableConfig = {
+            queryFactory: new facete.QueryFactoryConst(dummyQuery),
+            tableMod: tmpTableMod
+        };
+
+		
+		
 		var facetTreeConfig = new facete.FacetTreeConfig();
+
+		var facetConfig = facetTreeConfig.getFacetConfig();
+		var pathTaggerManager = facetConfig.getPathTaggerManager()
+		var taggerMap = pathTaggerManager.getTaggerMap();
+		
+		
+        var facetTableConfig = new facete.FacetTableConfig(facetConfig);
+		var tableMod = facetTableConfig.getTableMod();
+		tableMod.addColumn('s');
+		
+		taggerMap.table = new facete.ItemTaggerMembership(facetTableConfig.getPaths());
+
+		
+		
 		var geoConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
 
-		var vs = rdf.NodeFactory.createVar('s');
 
 		var conceptFalse = new facete.Concept(sparql.ElementString.create('?s a <http://foo.bar>'), vs);
 
 		var filterConceptFactory = new facete.ConceptFactoryConst(conceptFalse)
-        var tableMod = new facete.TableMod();
-        //tableMod.addColumn('s');
-        tableMod.addColumn('_p_');
-        tableMod.addColumn('_o_');
+		
+
+		
+		$scope.facetTreePluginContext = {
+			toggleTableLink: function(path) {
+			    if($scope.facetTableConfig) {
+                	$scope.facetTableConfig.togglePath(path);
+			    }
+			}
+		};
+
+
+		$scope.facetTreePlugins = ['<a ng-show="data.isHovered || data.item.getTags().table.isContained" href="" ng-click="context.toggleTableLink(data.item.getPath())"><span class="glyphicon glyphicon-list-alt"></span></a>'];
+
+		
+		
+//         var tableMod = new facete.TableMod();
+//         //tableMod.addColumn('s');
+//         tableMod.addColumn('_p_');
+//         tableMod.addColumn('_o_');
 
 		
 		$scope.active.sparqlService = new service.SparqlServiceDummy();
@@ -185,7 +230,7 @@
 				}
             }
         }, {        
-            name: 'FP7 ICT Project Partners',
+            name: 'FP7 ICT Project Partners (remote)',
             dataService: {
                 serviceIri: 'http://fp7-pp.publicdata.eu/sparql',
                 defaultGraphIris: ['http://fp7-pp.publicdata.eu/']
@@ -204,10 +249,50 @@
 					maxGlobalItemCount: 2000
 				}
             }
+        }, {        
+            name: 'FP7 ICT Project Partners (local)',
+            dataService: {
+                serviceIri: 'http://localhost:8801/sparql',
+                defaultGraphIris: ['http://fp7-pp.publicdata.eu/']
+            },
+            joinSummaryService: {
+                serviceIri: null,
+                defaultGraphIris: []
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',        
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+                geoConcept: geo.GeoConcepts.conceptWgs84,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
         }, {
-            name: 'GeoKnow Demo Dataset',
+            name: 'GeoKnow Demo Dataset (remote)',
             dataService: {
                 serviceIri: 'http://cstadler.aksw.org/geoknow/sparql',
+                defaultGraphIris: []
+            },
+            joinSummaryService: {
+                serviceIri: null,
+                defaultGraphIris: []
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+                geoConcept: geo.GeoConcepts.conceptWgs84,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
+        }, {
+            name: 'GeoKnow Demo Dataset (local)',
+            dataService: {
+                serviceIri: 'http://localhost:8870/sparql',
                 defaultGraphIris: []
             },
             joinSummaryService: {
@@ -265,10 +350,30 @@
 				}
             }
         }, {
-            name: 'GeoStats',
+            name: 'GeoStats (remote)',
             dataService: {
                 serviceIri: 'http://cstadler.aksw.org/service/geostats/sparql',
                 defaultGraphIris: ['http://geostats.aksw.org/']
+            },
+            joinSummaryService: {
+                serviceIri: null,
+                defaultGraphIris: []
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.ogcVirtMapFactory,
+                geoConcept: geo.GeoConcepts.conceptGeoVocab,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
+        }, {
+            name: 'GeoStats (local)',
+            dataService: {
+                serviceIri: 'http://localhost:8860/sparql',
+                defaultGraphIris: ['http://localhost/geostats.nt']
             },
             joinSummaryService: {
                 serviceIri: null,
@@ -306,7 +411,31 @@
             }
         }];
 
+        
+        /**
+         * Init of derived attributes
+         *
+         */
+        _($scope.active.serviceConfigs).each(function(serviceConfig) {
+            // Create the facetTableConfig
+// 			var facetTreeConfig = serviceConfig.facetTreeConfig;
+//             var facetConfig = facetTreeConfig.getFacetConfig()
 
+
+            serviceConfig.facetTableConfig = facetTableConfig;
+
+            // Init the taggerMap
+//     		var pathTaggerManager = facetConfig.getPathTaggerManager()
+//     		var taggerMap = pathTaggerManager.getTaggerMap();
+    		
+//     		taggerMap.table = new facete.ItemTaggerMembership(facetTableConfig.getPaths());
+    		
+    		// Init the tableMod
+//     		var tableMod = facetTableConfig.getTableMod();
+//     		tableMod.addColumn('s');
+        });
+
+        
         $scope.active.path = null;
 
 		
@@ -332,7 +461,8 @@
 		    
 		    var sourceConcept = conceptFactory.createConcept(); 	
 			var targetConcept = geoConcept;
-
+								
+			
 // 			var cpfSparqlService = conceptPathFinder.createSparqlService(sourceConcept, targetConcept);
 // 			var qe = cpfSparqlService.createQueryExecution('Select * { ?s ?p ?o } Limit 10');
 // 			qe.execSelect().done(function(rs) {
@@ -402,6 +532,7 @@
             
             //$scope.path = null;
 
+            /*
             var facetConfig = facetTreeConfig.getFacetConfig();
     		var facetConceptFactory = new facete.ConceptFactoryFacetConfig(facetConfig);
 
@@ -414,7 +545,36 @@
     			queryFactory: queryFactory,
     			tableMod: tableMod
     		};
+            */
 
+            
+    		/*
+    		 * <- Facet Tree 'Link-Facet-To-Table' Plugin
+    		 */
+    		var facetConfig = facetTreeConfig.getFacetConfig()
+            var facetTableConfig = config.facetTableConfig;
+    		var tableMod = facetTableConfig.getTableMod();
+
+    		
+            var dataConcept = facetTableConfig.createDataConcept();
+            var elementFactory = new sparql.ElementFactoryJoinConcept(new facete.ConceptFactoryConst(dataConcept), filterConceptFactory);           
+            var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
+
+    		$scope.active.facetTableConfig = {
+    			queryFactory: queryFactory,
+    			tableMod: tableMod
+    		};
+    		
+    		// HACK!
+    		$scope.facetTableConfig = facetTableConfig;
+    		/*
+    		 * ->
+    		 */
+            
+
+            
+            
+            
     		var mapConfig = config.mapConfig;
     		
             $scope.active.dataSources = [{
@@ -436,16 +596,7 @@
 //         $scope.$watch('dataSourceSelection.active', function(val) {
 // 			alert(JSON.stringify(val));
 //         });
-        
-        var dummyQuery = new sparql.Query();
-        dummyQuery.getProjectVars().add(vs);
-        dummyQuery.getElements().push(new sparql.ElementTriplesBlock([new rdf.Triple(vs, vs, vs)]));
-        
-        $scope.active.facetTableConfig = {
-            queryFactory: new facete.QueryFactoryConst(dummyQuery),
-            tableMod: tableMod
-        };
-		
+
 		$scope.ObjectUtils = util.ObjectUtils;
 		
 		
@@ -602,7 +753,7 @@
 						Facet Tree
 					</div>
 					<div class="panel-body">
-					   <facet-tree sparql-service="active.sparqlService" facet-tree-config="active.facetTreeConfig" select="selectFacet(path)"></facet-tree>
+					   <facet-tree sparql-service="active.sparqlService" facet-tree-config="active.facetTreeConfig" select="selectFacet(path)" plugins="facetTreePlugins" plugin-context="facetTreePluginContext"></facet-tree>
 					</div>
 				</div>
 		
