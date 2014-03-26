@@ -161,8 +161,7 @@
             tableMod: tmpTableMod
         };
 
-		
-		
+
 		var facetTreeConfig = new facete.FacetTreeConfig();
 
 		var facetConfig = facetTreeConfig.getFacetConfig();
@@ -557,7 +556,22 @@
 
     		
             var dataConcept = facetTableConfig.createDataConcept();
-            var elementFactory = new sparql.ElementFactoryJoinConcept(new facete.ConceptFactoryConst(dataConcept), filterConceptFactory);           
+            var dataElementFactory = new sparql.ElementFactoryConst(dataConcept.getElement());
+            
+            var filterElementFactory = new facete.ElementFactoryConceptFactory(filterConceptFactory);
+            
+            
+            //var filterConcept = filterConceptFactory.createConcept();
+            
+            //debugger;
+            // NOTE We assume the data and filter concept share the same variables
+            var elementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, filterElementFactory]);
+            //var element = tmp.flatten();
+            
+            //console.log('EEEEEEEelement: ' + element);
+            
+            //var elementFactory = new sparql.ElementFactoryConst(element);
+            //var elementFactory = new sparql.ElementFactoryJoinConcept(new facete.ConceptFactoryConst(dataConcept), filterConceptFactory);           
             var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
 
     		$scope.active.facetTableConfig = {
@@ -623,14 +637,30 @@
         };
 
         $scope.selectGeom = function(data) {
-            //alert('Select: ' + JSON.stringify(data));
+            console.log('Data selected: ', data);
+        
+            var geoConceptFactory = data.config.conceptFactory;
+            
+            var geoConcept = geoConceptFactory.createConcept();
+            var vs = geoConcept.getVar();
+            var rootVar = geoConceptFactory.getFacetTreeConfig().getFacetConfig().getBaseConcept().getVar();
+            
+            
+           	//alert('Select: ' + JSON.stringify(data));
 			var node = data.id;
             var ev = new sparql.ExprVar(vs);
             var nodeValue = sparql.NodeValue.makeNode(node);
             var expr = new sparql.E_Equals(ev, nodeValue);
-            var element = new sparql.ElementFilter(expr);
-			var concept = new facete.Concept(element, vs);
+            var elementFilter = new sparql.ElementFilter(expr);
+            
+            var elements = geoConcept.getElements().slice(0);
+            elements.push(elementFilter);
+            
+            
+			var concept = facete.Concept.createFromElements(elements, rootVar);
 
+			//alert('SelectConcept: ' + concept);
+			
 			filterConceptFactory.setConcept(concept);
 
 			if(!$scope.$$phase) {
