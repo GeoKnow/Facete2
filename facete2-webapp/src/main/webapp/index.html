@@ -67,6 +67,7 @@
     var myModule = angular.module('Facete2', ['ui.bootstrap', 'ui.jassa', 'ngGrid', 'ui.jassa.openlayers', 'ngSanitize']);
 
     
+    
 
     /*
     var test = new service.SparqlServiceHttp('http://localhost:7532/api/path-finding?service-uri=http%3A%2F%2Fcstadler.aksw.org%2Fconti%2Ffreebase%2Fgermany%2Fsparql&default-graph-uri=http%3A%2F%2Ffreebase.com%2F2013-09-22%2Fdata%2F&source-element=%3Fs+%3F_p_+%3F_o_&source-var=s&target-element=%3Fs+<http%3A%2F%2Fwww.w3.org%2F2003%2F01%2Fgeo%2Fwgs84_pos%23long>+%3Fx+%3B++<http%3A%2F%2Fwww.w3.org%2F2003%2F01%2Fgeo%2Fwgs84_pos%23lat>+%3Fy&target-var=s&js-service-uri=');
@@ -143,9 +144,26 @@
     
     
     myModule.controller('MyCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
-
+        
+        
 		$scope.active = {};
 
+		
+        $scope.edit = {
+	        id: null,
+	        dataServiceIri: '',
+	        dataGraphIris: '',
+	        jsServiceIri: '',
+	        jsGraphIris: ''
+		};
+            
+
+        $scope.addDataSource = function() {
+			alert('yay' + JSON.stringify($scope.edit));
+        };
+
+		
+		
 		var vs = rdf.NodeFactory.createVar('s');
 
         
@@ -706,6 +724,55 @@
         };
 
 
+        $scope.app = {
+			search: {
+				show: false,
+				isOpen: false
+			}
+        };
+        
+        
+        $scope.searchResults = [];
+        
+        $scope.doSearch = function(searchString) {
+            $scope.app.search.show = true;
+            $scope.app.search.isOpen = true;
+            
+            var ajaxSpec = {
+				crossDomain: true,
+				url: 'http://nominatim.openstreetmap.org/search/',
+				dataType: 'json',
+				traditional: 'true',
+				data: {
+				    format: 'json',
+					q: searchString
+				}
+            };
+            
+            var promise = jQuery.ajax(ajaxSpec).pipe(function(items) {
+                _(items).each(function(item) {
+                    var nameParts = item.display_name.split(',');
+                    
+                    item.primaryName = nameParts[0];
+                    item.description = nameParts[1];
+                });
+
+                return items;
+            });
+            
+			sponate.angular.bridgePromise(promise, $q.defer(), $rootScope, function(data) {
+			    $scope.searchResults = data;
+			});
+        };
+        
+        $scope.active.mapConfig = {};
+        
+        $scope.selectSearchResult = function(item) {
+			$scope.active.mapConfig.center = {lon: item.lon, lat: item.lat},
+			$scope.active.mapConfig.zoom = 13;
+        };
+        
+
     }]);
 	</script>
 
@@ -727,6 +794,13 @@
 				<a class="navbar-brand" style="padding: 3px 15px;"href="#"><img style="height: 42px;" src="images/logo-eccenca-plain.png" alt=""></img></a>
 				<a class="navbar-brand" href="#">Facete II</a>
 			</div>
+
+			 <form class="navbar-form navbar-left" role="search">
+        		<div class="form-group">
+          			<input type="text" ng-model="app.searchString" class="form-control" placeholder="Search">
+        		</div>
+        		<button type="submit" ng-click="doSearch(app.searchString)" class="btn btn-default">Submit</button>
+			</form>			
 			
 <!-- 			<div class="collapse navbar-collapse"> -->
 <!--       			<ul class="nav navbar-nav"> -->
@@ -747,6 +821,20 @@
 <!-- 			<accordion-group heading="Search" style="pointer-events: auto;"> -->
 <!-- 				<input type="text" ng-model="active.searchString"></input>				 -->
 <!-- 			</accordion-group> -->
+			<accordion-group ng-show="app.search.show" is-open="app.search.isOpen" style="pointer-events: auto;">
+				<accordion-heading>
+					<a href="" ng-click="app.search.show = false"><span class="glyphicon glyphicon-remove-circle"></span></a> Search Results
+<!-- 					<button ng-click="app.search.hide = true"><span class="glyphicon glyphicon-remove-circle"></span></button> -->
+				</accordion-heading>
+				
+				<ul>
+				<li ng-show="!(searchResults.length > 0)">(this list is empty)</li>
+				<li ng-repeat="item in searchResults">
+					<a href="" ng-click="selectSearchResult(item)"><b>{{item.primaryName}}</b></a>
+					<span>{{item.description}}</span>
+				</li>
+				</ul>
+			</accordion-group>
 		
 			<accordion-group heading="Data Sources" style="pointer-events: auto;">
 				<select ng-model="active.service" ng-options="item.name for item in active.serviceConfigs"></select>
@@ -813,7 +901,34 @@
 
 	<accordion style="position: absolute; bottom: 30px; left: 520px;">
 		<accordion-group heading="Data">
-			<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig"></sparql-table>
+		
+		<tabset>
+			<tab heading="Table View">
+				<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig"></sparql-table>
+			</tab>
+		
+			<tab ng-show="hideCreateDataSource != true" heading="Data Source">
+				<form class="well form-horizontal">
+					<div class="form-group">
+						<label>Title: <input ng-model="edit.name" type="text" class="form-control"></input></label>
+					</div>
+					<div class="form-group">					
+						<label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label>
+					</div>
+					<div class="form-group">					
+						<label>Named Graphs: <input ng-model="edit.dataGraphIris" type="text" class="form-control"></input></label>
+					</div>
+					<div class="form-group">										
+						<label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>
+					</div>
+					<div class="form-group">										
+						<label>Join Summary Graphs: <input ng-model="edit.jsGraphIris" type="text" class="form-control"></input></label>
+					</div>
+
+					<button class="btn btn-primary" ng-click="hideCreateDataSource=true">Cancel</button>
+					<button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>			
+            	</form>
+           </tab>
 		</accordion-group>
 	</accordion>
 
@@ -826,29 +941,8 @@
 <!-- 		</div> -->
 <!-- 	</div> -->
 
-	<div class="panel panel-info" style="display: none; position: absolute; bottom: 30px; left: 520px; height: 500px"> 
-		<div class="panel-heading">
-			<i class="panel-title">Register Data Source</i>
-		</div>
-		<div class="panel-body">
-			<div>
-				<label>Title: <input type="text"></input><select></select></label>
-			</div>
 
-			<div>
-				<label>Sparql Service Iri: <input type="text"></input></label>
-				<label>Named Graphs: <select></select></label>
-			</div>
-			
-			<div>
-				<label>Join Summary Service: <input type="text"></input></label>
-				<label>Join Summary Graphs: <input type="text"></input></label>
-			</div>
-		</div>
-	</div>
-
-
-    <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>
+    <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.mapConfig" sources="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>
 
 <!-- 	<a href="https://github.com/GeoKnow/Facete2" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" src="images/forkme_right_green_007200.png" alt="Fork me on GitHub"></a> -->
 
