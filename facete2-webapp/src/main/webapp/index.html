@@ -206,9 +206,16 @@
 		
 		$scope.facetTreePluginContext = {
 			toggleTableLink: function(path) {
-			    if($scope.facetTableConfig) {
-                	$scope.facetTableConfig.togglePath(path);
-			    }
+			    //var active = $scope.active;
+			    var active = $scope;
+			    
+               	if(active.facetTableConfig) {
+               	    active.facetTableConfig.togglePath(path);
+               	}
+               	
+//                	if(active.allFacetTableConfig) {
+//                	    active.allFacetTableConfig.togglePath(path);
+//                	}
 			}
 		};
 
@@ -597,8 +604,18 @@
     			tableMod: tableMod
     		};
     		
-    		// HACK!
+
+            var allQueryFactory = new facete.QueryFactoryTableMod(dataElementFactory, tableMod);
+
+    		$scope.active.allFacetTableConfig = {
+    		    queryFactory: allQueryFactory,
+    		    tableMod: tableMod
+    		};
+    		
+    		
+    		// HACK! because of name clash in .active
     		$scope.facetTableConfig = facetTableConfig;
+    		//$scope.allFacetTableConfig = $scope.active.allFacetTableConfig;
     		/*
     		 * ->
     		 */
@@ -797,7 +814,7 @@
 
 			 <form class="navbar-form navbar-left" role="search">
         		<div class="form-group">
-          			<input type="text" ng-model="app.searchString" class="form-control" placeholder="Search">
+          			<input type="text" ng-model="app.searchString" class="form-control" placeholder="Find Place...">
         		</div>
         		<button type="submit" ng-click="doSearch(app.searchString)" class="btn btn-default">Submit</button>
 			</form>			
@@ -821,7 +838,7 @@
 <!-- 			<accordion-group heading="Search" style="pointer-events: auto;"> -->
 <!-- 				<input type="text" ng-model="active.searchString"></input>				 -->
 <!-- 			</accordion-group> -->
-			<accordion-group ng-show="app.search.show" is-open="app.search.isOpen" style="pointer-events: auto;">
+			<accordion-group ng-if="app.search.show" is-open="app.search.isOpen" style="pointer-events: auto;">
 				<accordion-heading>
 					<a href="" ng-click="app.search.show = false"><span class="glyphicon glyphicon-remove-circle"></span></a> Search Results
 <!-- 					<button ng-click="app.search.hide = true"><span class="glyphicon glyphicon-remove-circle"></span></button> -->
@@ -836,7 +853,7 @@
 				</ul>
 			</accordion-group>
 		
-			<accordion-group heading="Data Sources" style="pointer-events: auto;">
+			<accordion-group heading="Data Sources {{active.service ? '[' + active.service.name + ']': ''}}" style="pointer-events: auto;">
 				<select ng-model="active.service" ng-options="item.name for item in active.serviceConfigs"></select>
 			</accordion-group>
 
@@ -899,39 +916,45 @@
 
 	</div>
 
-	<accordion style="position: absolute; bottom: 30px; left: 520px;">
-		<accordion-group heading="Data">
-		
-		<tabset>
-			<tab heading="Table View">
-				<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig"></sparql-table>
-			</tab>
-		
-			<tab ng-show="hideCreateDataSource != true" heading="Data Source">
-				<form class="well form-horizontal">
-					<div class="form-group">
-						<label>Title: <input ng-model="edit.name" type="text" class="form-control"></input></label>
-					</div>
-					<div class="form-group">					
-						<label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label>
-					</div>
-					<div class="form-group">					
-						<label>Named Graphs: <input ng-model="edit.dataGraphIris" type="text" class="form-control"></input></label>
-					</div>
-					<div class="form-group">										
-						<label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>
-					</div>
-					<div class="form-group">										
-						<label>Join Summary Graphs: <input ng-model="edit.jsGraphIris" type="text" class="form-control"></input></label>
-					</div>
 
-					<button class="btn btn-primary" ng-click="hideCreateDataSource=true">Cancel</button>
-					<button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>			
-            	</form>
-           </tab>
-		</accordion-group>
-	</accordion>
-
+	<div style="position: absolute; margin: 0px; bottom: 20px; left: 530px; top: 50px; right: 5px; overflow: auto; pointer-events: none;">
+		<accordion style="position: absolute; bottom: 0px; left: 0px; max-height: 100%; pointer-events: auto;">
+			<accordion-group heading="Data">
+			
+			<tabset>
+				<tab heading="All">
+					<sparql-table sparql-service="active.sparqlService" config="active.allFacetTableConfig"></sparql-table>
+				</tab>
+	
+				<tab heading="Selection">
+					<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig"></sparql-table>
+				</tab>
+			
+				<tab ng-show="hideCreateDataSource != true" heading="Data Source">
+					<form class="well form-horizontal">
+						<div class="form-group">
+							<label>Title: <input ng-model="edit.name" type="text" class="form-control"></input></label>
+						</div>
+						<div class="form-group">					
+							<label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label>
+						</div>
+						<div class="form-group">					
+							<label>Named Graphs: <input ng-model="edit.dataGraphIris" type="text" class="form-control"></input></label>
+						</div>
+						<div class="form-group">										
+							<label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>
+						</div>
+						<div class="form-group">										
+							<label>Join Summary Graphs: <input ng-model="edit.jsGraphIris" type="text" class="form-control"></input></label>
+						</div>
+	
+						<button class="btn btn-primary" ng-click="hideCreateDataSource=true">Cancel</button>
+						<button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>			
+	            	</form>
+	           </tab>
+			</accordion-group>
+		</accordion>
+	</div>
 <!-- 	<div class="panel panel-info" style="position: absolute; bottom: 30px; left: 520px;">  -->
 <!-- 		<div class="panel-heading"> -->
 <!-- 			<i class="panel-title">Data</i> -->
