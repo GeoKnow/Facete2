@@ -29,7 +29,6 @@
 
     <!-- bower:js -->
     <script src="bower_components/jquery/jquery.js"></script>
-    <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/jassa/jassa.js"></script>
     <script src="bower_components/angular/angular.js"></script>
@@ -37,8 +36,10 @@
     <script src="bower_components/ng-grid-bower/ng-grid.js"></script>
     <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
+    <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
     <script src="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers-tpls.js"></script>
     <!-- endbower -->
+
 
 
 	<script src="scripts/lib/ng-grid-flexible-height/ng-grid-flexible-height.js"></script>
@@ -67,6 +68,11 @@
     var myModule = angular.module('Facete2', ['ui.bootstrap', 'ui.jassa', 'ngGrid', 'ui.jassa.openlayers', 'ngSanitize']);
 
     
+    myModule.filter('reverse', function() {
+		return function(items) {
+			return items.slice().reverse();
+		};
+	});
     
 
     /*
@@ -745,6 +751,18 @@
 			search: {
 				show: false,
 				isOpen: false
+			},
+			dataSources: {
+				isOpen: false
+			},
+			data: {
+				isOpen: false
+			},
+			geoLinks: {
+				isOpen: false
+			},
+			facets: {
+			    isOpen: false
 			}
         };
         
@@ -788,6 +806,52 @@
 			$scope.active.mapConfig.center = {lon: item.lon, lat: item.lat},
 			$scope.active.mapConfig.zoom = 13;
         };
+
+        
+        $scope.notifications = [];
+        
+        
+        
+        var applyRootScope = function(scope) {
+            var rootScope = scope.$root;
+
+            if(!rootScope.$$phase) {
+                rootScope.$apply()
+            }
+        };
+        
+        $scope.exportAll = function() {
+            var queryFactory = $scope.active.allFacetTableConfig.queryFactory;
+            var query = queryFactory.createQuery();
+            //alert('' + query);
+
+            $scope.notifications.push({msg: 'Export started.'});
+                //applyRootScope($scope);
+
+            
+            var config = $scope.active.service;
+            
+            var promise = jQuery.ajax({
+            	url: 'api/export/start',
+            	traditional: true,
+            	data: {
+            	    'service-uri': config.dataService.serviceIri,
+            		'default-graph-uri': config.dataService.defaultGraphIris,
+            	    query: '' + query
+            	}
+            });
+            
+            promise.done(function() {
+                $scope.notifications.push({msg: 'Export succeeded.'});
+                applyRootScope($scope);
+                
+            }).fail(function() {
+                $scope.notifications.push({msg: 'Export failed.'});
+                applyRootScope($scope);
+            })
+        }
+        
+        
         
 
     }]);
@@ -808,17 +872,38 @@
 					<span class="icon-bar"></span>
 				</button>
 				
-				<a class="navbar-brand" style="padding: 3px 15px;"href="#"><img style="height: 42px;" src="images/logo-eccenca-plain.png" alt=""></img></a>
+				<a class="navbar-brand" style="padding: 3px 15px;" href="#"><img style="height: 42px;" src="images/logo-eccenca-plain.png" alt=""></img></a>
 				<a class="navbar-brand" href="#">Facete II</a>
 			</div>
 
-			 <form class="navbar-form navbar-left" role="search">
-        		<div class="form-group">
-          			<input type="text" ng-model="app.searchString" class="form-control" placeholder="Find Place...">
-        		</div>
-        		<button type="submit" ng-click="doSearch(app.searchString)" class="btn btn-default">Submit</button>
-			</form>			
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+				 <form class="navbar-form navbar-left" role="search">
+	        		<div class="form-group">
+	          			<input type="text" ng-model="app.searchString" class="form-control" placeholder="Find Place...">
+	        		</div>
+	        		<button type="submit" ng-click="doSearch(app.searchString)" class="btn btn-default">Submit</button>
+				</form>			
 			
+				<ul class="nav nav-pills navbar-nav navbar-right">
+					<li class="dropdown" ng-class="{'active': (notifications.length > 0)}">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">Notifications <span class="badge">{{notifications.length}}</span> <b class="caret"></b></a>
+						<ul class="dropdown-menu">
+							<li ng-if="!(notifications.length > 0)">(empty list)</li>
+							<li ng-repeat="item in notifications | reverse">
+								<a href="">{{item}}</a>
+								<!-- For now we support only export {started, cancelled, failed and finished} -->
+							</li>
+<!-- 							<li><a href="#">Action</a></li> -->
+<!-- 							<li><a href="#">Another action</a></li> -->
+<!-- 							<li><a href="#">Something else here</a></li> -->
+<!-- 							<li class="divider"></li> -->
+<!-- 							<li><a href="#">Separated link</a></li> -->
+						</ul>
+					</li>
+				</ul>
+
+			</div>
+							
 <!-- 			<div class="collapse navbar-collapse"> -->
 <!--       			<ul class="nav navbar-nav"> -->
 <!--         			<li class="active"><a href="#">Source Code</a></li> -->
@@ -829,19 +914,15 @@
 	</nav>
 
 	<div style="position: absolute; top: 50px; left: 0px; width: 500px; bottom: 0px; overflow: auto; padding: 5px; pointer-events:none">
-<!-- 		<div style="width:100%;"> -->
-<!-- 			<div style="min-height: 50px;"/></div> -->
-<!-- 		</div> -->
 
 
 		<accordion close-others="false">
-<!-- 			<accordion-group heading="Search" style="pointer-events: auto;"> -->
-<!-- 				<input type="text" ng-model="active.searchString"></input>				 -->
-<!-- 			</accordion-group> -->
-			<accordion-group ng-if="app.search.show" is-open="app.search.isOpen" style="pointer-events: auto;">
+
+			<accordion-group style="pointer-events: auto;" ng-if="app.search.show" is-open="app.search.isOpen">
 				<accordion-heading>
-					<a href="" ng-click="app.search.show = false"><span class="glyphicon glyphicon-remove-circle"></span></a> Search Results
-<!-- 					<button ng-click="app.search.hide = true"><span class="glyphicon glyphicon-remove-circle"></span></button> -->
+					<i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.search.isOpen, 'glyphicon-chevron-right': !app.search.isOpen}"></i>
+					Search Results
+					<a href="" ng-click="app.search.show = false"><span class="glyphicon glyphicon-remove-circle"></span></a>
 				</accordion-heading>
 				
 				<ul>
@@ -853,23 +934,21 @@
 				</ul>
 			</accordion-group>
 		
-			<accordion-group heading="Data Sources {{active.service ? '[' + active.service.name + ']': ''}}" style="pointer-events: auto;">
+			<accordion-group style="pointer-events: auto;" is-open="app.dataSources.isOpen">
+				<accordion-heading>
+					<i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.dataSources.isOpen, 'glyphicon-chevron-right': !app.dataSources.isOpen}"></i>
+					Data Sources {{active.service ? '[' + active.service.name + ']': ''}}
+				</accordion-heading>
+
 				<select ng-model="active.service" ng-options="item.name for item in active.serviceConfigs"></select>
 			</accordion-group>
 
-			<accordion-group heading="Concepts" style="pointer-events: auto;">
-				<ul>
-			    	<li ng-show="conceptSpaces.length == 0" class="inactive">(there are no concepts yet)</li>
-				    <li ng-repeat="conceptSpace in conceptSpaces" ng-class="{'highlite': conceptSpace.active}">
-				    	<a href="" ng-click="removeConceptSpace($index)"><span class="glyphicon glyphicon-remove-circle"></span></a>
-				    	<a href="" ng-click="selectConceptSpace($index)">{{conceptSpace.name}}</a>
-				   	</li>
-				</ul>
-				
-				<button class="btn btn-primary" ng-click="addConceptSpace()">Create a new Concept</button>
-			</accordion-group>
+			<accordion-group class="portlet" style="pointer-events: auto;" is-open="app.geoLinks.isOpen">
+				<accordion-heading>
+					<i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.geoLinks.isOpen, 'glyphicon-chevron-right': !app.geoLinks.isOpen}"></i>
+					GeoLinks
+				</accordion-heading>
 
-			<accordion-group heading="GeoPaths" class="portlet" style="pointer-events: auto;">
 				<tabset>
 					<tab heading="Candidates">
 		   				<ul>
@@ -884,7 +963,12 @@
 				</tabset>
 			</accordion-group>
 
-			<accordion-group heading="Facets" style="pointer-events: auto;">
+			<accordion-group style="pointer-events: auto;" is-open="app.facets.isOpen">
+				<accordion-heading>
+					<i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.facets.isOpen, 'glyphicon-chevron-right': !app.facets.isOpen}"></i>
+					Facets
+				</accordion-heading>
+
 				<div class="panel panel-info"> 
 					<div class="panel-heading portlet-heading">
 						Facet Tree
@@ -919,53 +1003,69 @@
 
 	<div style="position: absolute; margin: 0px; bottom: 20px; left: 530px; top: 50px; right: 5px; overflow: auto; pointer-events: none;">
 		<accordion style="position: absolute; bottom: 0px; left: 0px; max-height: 100%; pointer-events: auto;">
-			<accordion-group heading="Data">
+			<accordion-group is-open="app.data.isOpen">
+				<accordion-heading>
+					<i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.data.isOpen, 'glyphicon-chevron-right': !app.data.isOpen}"></i>
+					Data
+				</accordion-heading>
 			
-			<tabset>
-				<tab heading="All">
-					<sparql-table sparql-service="active.sparqlService" config="active.allFacetTableConfig"></sparql-table>
-				</tab>
-	
-				<tab heading="Selection">
-					<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig"></sparql-table>
-				</tab>
-			
-				<tab ng-show="hideCreateDataSource != true" heading="Data Source">
-					<form class="well form-horizontal">
-						<div class="form-group">
-							<label>Title: <input ng-model="edit.name" type="text" class="form-control"></input></label>
-						</div>
-						<div class="form-group">					
-							<label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label>
-						</div>
-						<div class="form-group">					
-							<label>Named Graphs: <input ng-model="edit.dataGraphIris" type="text" class="form-control"></input></label>
-						</div>
-						<div class="form-group">										
-							<label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>
-						</div>
-						<div class="form-group">										
-							<label>Join Summary Graphs: <input ng-model="edit.jsGraphIris" type="text" class="form-control"></input></label>
-						</div>
-	
-						<button class="btn btn-primary" ng-click="hideCreateDataSource=true">Cancel</button>
-						<button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>			
-	            	</form>
-	           </tab>
+				<tabset>
+					<tab heading="All">
+						<button class="btn btn-primary" ng-click="exportAll()">Export</button>
+						<sparql-table sparql-service="active.sparqlService" config="active.allFacetTableConfig"></sparql-table>
+					</tab>
+		
+					<tab heading="Selection">
+						<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig"></sparql-table>
+					</tab>
+				
+					<tab ng-show="hideCreateDataSource != true" heading="Data Source">
+						<form class="well form-horizontal">
+							<div class="form-group">
+								<label>Title: <input ng-model="edit.name" type="text" class="form-control"></input></label>
+							</div>
+							<div class="form-group">					
+								<label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label>
+							</div>
+							<div class="form-group">					
+								<label>Named Graphs: <input ng-model="edit.dataGraphIris" type="text" class="form-control"></input></label>
+							</div>
+							<div class="form-group">										
+								<label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>
+							</div>
+							<div class="form-group">										
+								<label>Join Summary Graphs: <input ng-model="edit.jsGraphIris" type="text" class="form-control"></input></label>
+							</div>
+		
+							<button class="btn btn-primary" ng-click="hideCreateDataSource=true">Cancel</button>
+							<button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>			
+		            	</form>
+					</tab>
+				</tabset>
 			</accordion-group>
 		</accordion>
 	</div>
-<!-- 	<div class="panel panel-info" style="position: absolute; bottom: 30px; left: 520px;">  -->
-<!-- 		<div class="panel-heading"> -->
-<!-- 			<i class="panel-title">Data</i> -->
-<!-- 		</div> -->
-<!-- 		<div class="panel-body" style="max-height: 500px; overflow: auto"> -->
-<!-- 			<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig"></sparql-table> -->
-<!-- 		</div> -->
-<!-- 	</div> -->
 
 
     <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.mapConfig" sources="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>
+
+
+<!-- 			<accordion-group style="pointer-events: auto;" is-open="isOpenConcepts"> -->
+<!-- 				<accordion-heading> -->
+<!-- 					<i class="glyphicon" ng-class="{'glyphicon-chevron-down': isOpenConcepts, 'glyphicon-chevron-right': !isOpenConcepts}"></i> -->
+<!-- 					Concepts {{active.service ? '[' + active.service.name + ']': ''}} -->
+<!-- 				</accordion-heading> -->
+				
+<!-- 				<ul> -->
+<!-- 			    	<li ng-show="conceptSpaces.length == 0" class="inactive">(there are no concepts yet)</li> -->
+<!-- 				    <li ng-repeat="conceptSpace in conceptSpaces" ng-class="{'highlite': conceptSpace.active}"> -->
+<!-- 				    	<a href="" ng-click="removeConceptSpace($index)"><span class="glyphicon glyphicon-remove-circle"></span></a> -->
+<!-- 				    	<a href="" ng-click="selectConceptSpace($index)">{{conceptSpace.name}}</a> -->
+<!-- 				   	</li> -->
+<!-- 				</ul> -->
+				
+<!-- 				<button class="btn btn-primary" ng-click="addConceptSpace()">Create a new Concept</button> -->
+<!-- 			</accordion-group> -->
 
 <!-- 	<a href="https://github.com/GeoKnow/Facete2" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" src="images/forkme_right_green_007200.png" alt="Fork me on GitHub"></a> -->
 

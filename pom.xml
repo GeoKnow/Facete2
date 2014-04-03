@@ -44,6 +44,7 @@
 		<jassa.version>0.0.3</jassa.version>
 
 		<spring.version>3.2.4.RELEASE</spring.version>
+        <spring.batch.version>2.2.5.RELEASE</spring.batch.version>
 
 
 		<slf4j.version>1.6.0</slf4j.version>
@@ -78,12 +79,13 @@
 				<type>war</type>
 			</dependency>
 
+<!--
 			<dependency>
 				<groupId>org.aksw.sparqlify</groupId>
 				<artifactId>sparqlify-jpa</artifactId>
 				<version>0.6.6-SNAPSHOT</version>
 			</dependency>
-
+-->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-orm</artifactId>
@@ -129,6 +131,13 @@
 				<artifactId>jena-sparql-api-server</artifactId>
 				<version>${jena-sparql-api.version}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.sparqlify</groupId>
+				<artifactId>sparqlify-core</artifactId>
+				<version>0.6.5</version>
+			</dependency>
+
 
 			<dependency>
 				<groupId>org.tuckey</groupId>
@@ -191,6 +200,18 @@
 				<artifactId>junit</artifactId>
 				<version>4.11</version>
 				<scope>test</scope>
+			</dependency>
+			
+			<!-- Spring Batch dependencies -->
+			<dependency>
+			        <groupId>org.springframework.batch</groupId>
+			        <artifactId>spring-batch-core</artifactId>
+			        <version>${spring.batch.version}</version>
+			</dependency>
+			<dependency>
+			        <groupId>org.springframework.batch</groupId>
+			        <artifactId>spring-batch-infrastructure</artifactId>
+			        <version>${spring.batch.version}</version>
 			</dependency>
 
 		</dependencies>
