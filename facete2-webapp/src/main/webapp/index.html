@@ -150,7 +150,12 @@
     
     
     myModule.controller('MyCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
-        
+
+        /**
+         * Used for progress bar
+         */
+        $scope.Math = Math;
+
         
 		$scope.active = {};
 
@@ -239,10 +244,32 @@
 		$scope.active.sparqlService = new service.SparqlServiceDummy();
 		$scope.active.geoConceptFactory = geoConceptFactory;
 
-        $scope.active.serviceConfigs = [{
-            name: 'Freebase Germany',
+        $scope.active.serviceConfigs = [
+			{        
+		        name: 'FP7 ICT Project Partners (local)',
+		        dataService: {
+		            serviceIri: 'http://localhost/data/fp7-pp/sparql',
+		            defaultGraphIris: ['http://fp7-pp.publicdata.eu/']
+		        },
+		        joinSummaryService: {
+		            serviceIri: null,
+		            defaultGraphIris: []
+		        },
+		        conceptPathFinderApiUrl: 'api/path-finding',        
+		        facetTreeConfig: facetTreeConfig,
+		        mapConfig: {
+		            mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+		            geoConcept: geo.GeoConcepts.conceptWgs84,
+					quadTreeConfig: {
+						maxItemsPerTileCount: 1000,
+						maxGlobalItemCount: 2000
+					}
+				}
+			},
+			{
+            name: 'Freebase Germany (local)',
             dataService: {
-                serviceIri: 'http://cstadler.aksw.org/conti/freebase/germany/sparql',
+                serviceIri: 'http://localhost/data/freebase/germany/sparql',
                 defaultGraphIris: ['http://freebase.com/2013-09-22/data/']
             },
             joinSummaryService: {
@@ -259,7 +286,71 @@
 					maxGlobalItemCount: 2000
 				}
             }
-        }, {        
+        },
+        {
+            name: 'GeoStats (local)',
+            dataService: {
+                serviceIri: 'http://localhost/data/geostats/sparql',
+                defaultGraphIris: ['http://localhost/geostats.nt']
+            },
+            joinSummaryService: {
+                serviceIri: null,
+                defaultGraphIris: []
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.ogcVirtMapFactory,
+                geoConcept: geo.GeoConcepts.conceptGeoVocab,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
+        },
+        {        
+            name: 'DBpedia, geo & types (local)',
+            dataService: {
+                serviceIri: 'http://localhost/data/dbpedia/3.9/sparql',
+                defaultGraphIris: ['http://dbpedia.org/3.9/']
+            },
+            joinSummaryService: {
+                serviceIri: null,
+                defaultGraphIris: []
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',        
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+                geoConcept: geo.GeoConcepts.conceptWgs84,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
+        },
+        {
+            name: 'GeoKnow Y1 Demo Dataset (local)',
+            dataService: {
+                serviceIri: 'http://localhost/data/geoknow/demo/y1/sparql',
+                defaultGraphIris: []
+            },
+            joinSummaryService: {
+                serviceIri: null,
+                defaultGraphIris: []
+            },
+            conceptPathFinderApiUrl: 'api/path-finding',
+            facetTreeConfig: facetTreeConfig,
+            mapConfig: {
+                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+                geoConcept: geo.GeoConcepts.conceptWgs84,
+			    quadTreeConfig: {
+					maxItemsPerTileCount: 1000,
+					maxGlobalItemCount: 2000
+				}
+            }
+        },
+        {        
             name: 'FP7 ICT Project Partners (remote)',
             dataService: {
                 serviceIri: 'http://fp7-pp.publicdata.eu/sparql',
@@ -279,68 +370,30 @@
 					maxGlobalItemCount: 2000
 				}
             }
-        }, {        
-            name: 'FP7 ICT Project Partners (local)',
-            dataService: {
-                serviceIri: 'http://localhost:8801/sparql',
-                defaultGraphIris: ['http://fp7-pp.publicdata.eu/']
-            },
-            joinSummaryService: {
-                serviceIri: null,
-                defaultGraphIris: []
-            },
-            conceptPathFinderApiUrl: 'api/path-finding',        
-            facetTreeConfig: facetTreeConfig,
-            mapConfig: {
-                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
-                geoConcept: geo.GeoConcepts.conceptWgs84,
-			    quadTreeConfig: {
-					maxItemsPerTileCount: 1000,
-					maxGlobalItemCount: 2000
-				}
-            }
-        }, {
-            name: 'GeoKnow Demo Dataset (remote)',
-            dataService: {
-                serviceIri: 'http://cstadler.aksw.org/geoknow/sparql',
-                defaultGraphIris: []
-            },
-            joinSummaryService: {
-                serviceIri: null,
-                defaultGraphIris: []
-            },
-            conceptPathFinderApiUrl: 'api/path-finding',
-            facetTreeConfig: facetTreeConfig,
-            mapConfig: {
-                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
-                geoConcept: geo.GeoConcepts.conceptWgs84,
-			    quadTreeConfig: {
-					maxItemsPerTileCount: 1000,
-					maxGlobalItemCount: 2000
-				}
-            }
-        }, {
-            name: 'GeoKnow Demo Dataset (local)',
-            dataService: {
-                serviceIri: 'http://localhost:8870/sparql',
-                defaultGraphIris: []
-            },
-            joinSummaryService: {
-                serviceIri: null,
-                defaultGraphIris: []
-            },
-            conceptPathFinderApiUrl: 'api/path-finding',
-            facetTreeConfig: facetTreeConfig,
-            mapConfig: {
-                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
-                geoConcept: geo.GeoConcepts.conceptWgs84,
-			    quadTreeConfig: {
-					maxItemsPerTileCount: 1000,
-					maxGlobalItemCount: 2000
-				}
-            }
-        }, {        
-            name: 'DBpedia',
+        },
+//         {
+//             name: 'GeoKnow Demo Dataset (remote)',
+//             dataService: {
+//                 serviceIri: 'http://cstadler.aksw.org/geoknow/sparql',
+//                 defaultGraphIris: []
+//             },
+//             joinSummaryService: {
+//                 serviceIri: null,
+//                 defaultGraphIris: []
+//             },
+//             conceptPathFinderApiUrl: 'api/path-finding',
+//             facetTreeConfig: facetTreeConfig,
+//             mapConfig: {
+//                 mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+//                 geoConcept: geo.GeoConcepts.conceptWgs84,
+// 			    quadTreeConfig: {
+// 					maxItemsPerTileCount: 1000,
+// 					maxGlobalItemCount: 2000
+// 				}
+//             }
+//         },
+        {        
+            name: 'DBpedia, official (remote)',
             dataService: {
                 serviceIri: 'http://dbpedia.org/sparql',
                 defaultGraphIris: ['http://dbpedia.org']
@@ -359,8 +412,9 @@
 					maxGlobalItemCount: 2000
 				}
             }
-        }, {
-            name: 'LinkedGeoData',
+        },
+        {
+            name: 'LinkedGeoData (remote)',
             dataService: {
                 serviceIri: 'http://linkedgeodata.org/sparql',
                 defaultGraphIris: ['http://linkedgeodata.org']
@@ -379,67 +433,49 @@
 					maxGlobalItemCount: 2000
 				}
             }
-        }, {
-            name: 'GeoStats (remote)',
-            dataService: {
-                serviceIri: 'http://cstadler.aksw.org/service/geostats/sparql',
-                defaultGraphIris: ['http://geostats.aksw.org/']
-            },
-            joinSummaryService: {
-                serviceIri: null,
-                defaultGraphIris: []
-            },
-            conceptPathFinderApiUrl: 'api/path-finding',
-            facetTreeConfig: facetTreeConfig,
-            mapConfig: {
-                mapFactory: geo.GeoMapFactoryUtils.ogcVirtMapFactory,
-                geoConcept: geo.GeoConcepts.conceptGeoVocab,
-			    quadTreeConfig: {
-					maxItemsPerTileCount: 1000,
-					maxGlobalItemCount: 2000
-				}
-            }
-        }, {
-            name: 'GeoStats (local)',
-            dataService: {
-                serviceIri: 'http://localhost:8860/sparql',
-                defaultGraphIris: ['http://localhost/geostats.nt']
-            },
-            joinSummaryService: {
-                serviceIri: null,
-                defaultGraphIris: []
-            },
-            conceptPathFinderApiUrl: 'api/path-finding',
-            facetTreeConfig: facetTreeConfig,
-            mapConfig: {
-                mapFactory: geo.GeoMapFactoryUtils.ogcVirtMapFactory,
-                geoConcept: geo.GeoConcepts.conceptGeoVocab,
-			    quadTreeConfig: {
-					maxItemsPerTileCount: 1000,
-					maxGlobalItemCount: 2000
-				}
-            }
-        }, {
-            name: 'LGD Sparqlify Localhost',
-            dataService: {
-                serviceIri: 'http://localhost:7531/sparql',
-                defaultGraphIris: []
-            },
-            joinSummaryService: {
-                serviceIri: 'http://linkedgeodata.org/join-summary/sparql',
-                defaultGraphIris: ['http://linkedgeodata.org/join-summary']
-            },
-            conceptPathFinderApiUrl: 'api/path-finding',
-            facetTreeConfig: facetTreeConfig,
-            mapConfig: {
-                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
-                geoConcept: geo.GeoConcepts.conceptWgs84,
-			    quadTreeConfig: {
-					maxItemsPerTileCount: 1000,
-					maxGlobalItemCount: 2000
-				}
-            }
-        }];
+        }
+//         {
+//             name: 'GeoStats (remote)',
+//             dataService: {
+//                 serviceIri: 'http://cstadler.aksw.org/service/geostats/sparql',
+//                 defaultGraphIris: ['http://geostats.aksw.org/']
+//             },
+//             joinSummaryService: {
+//                 serviceIri: null,
+//                 defaultGraphIris: []
+//             },
+//             conceptPathFinderApiUrl: 'api/path-finding',
+//             facetTreeConfig: facetTreeConfig,
+//             mapConfig: {
+//                 mapFactory: geo.GeoMapFactoryUtils.ogcVirtMapFactory,
+//                 geoConcept: geo.GeoConcepts.conceptGeoVocab,
+// 			    quadTreeConfig: {
+// 					maxItemsPerTileCount: 1000,
+// 					maxGlobalItemCount: 2000
+// 				}
+//             }
+//         },
+//         {
+//             name: 'LGD Sparqlify Localhost',
+//             dataService: {
+//                 serviceIri: 'http://localhost:7531/sparql',
+//                 defaultGraphIris: []
+//             },
+//             joinSummaryService: {
+//                 serviceIri: 'http://linkedgeodata.org/join-summary/sparql',
+//                 defaultGraphIris: ['http://linkedgeodata.org/join-summary']
+//             },
+//             conceptPathFinderApiUrl: 'api/path-finding',
+//             facetTreeConfig: facetTreeConfig,
+//             mapConfig: {
+//                 mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+//                 geoConcept: geo.GeoConcepts.conceptWgs84,
+// 			    quadTreeConfig: {
+// 					maxItemsPerTileCount: 1000,
+// 					maxGlobalItemCount: 2000
+// 				}
+//             }
+        ];
 
         
         /**
@@ -726,9 +762,23 @@
         $scope.addConceptSpace = function() {
             var conceptSpaceId = '' + ($scope.nextConceptSpaceId++);
             
+            var conceptSpaceName = 'concept-' + conceptSpaceId;
+            
+            if(conceptSpaceId === '1') {
+				conceptSpaceName = 'Hotels @ DBpedia';
+            }
+
+            if(conceptSpaceId === '2') {
+				conceptSpaceName = 'Hotels @ Wikimapia';
+            }
+
+            if(conceptSpaceId === '3') {
+				conceptSpaceName = 'Airports @ Freebase';
+            }
+
 			var config = {
 			    id: conceptSpaceId,
-			    name: 'concept-' + conceptSpaceId
+			    name: conceptSpaceName
 			};
 			
 			$scope.conceptSpaces.push(config);
@@ -820,12 +870,160 @@
             }
         };
         
+        
+        
+        var metaPrefixes = {
+			'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
+            'batch': 'http://ns.aksw.org/spring/batch/'
+        };
+    	var metaSparqlService = new service.SparqlServiceHttp('api/export-status/sparql', []);	
+    	var metaStore = new sponate.StoreFacade(metaSparqlService, metaPrefixes);
+    	
+   		metaStore.addMap({
+   			name: 'sparqlExports',
+   			template: [{
+   				id: '?je',
+   				context: '?jec',
+   				exitCode: '?jeec',
+   				status: '?jes',
+   				steps: [{
+   					id: '?se',
+   					label: '?sel',
+   					context: '?sec'
+   				}]
+   			}],
+   			from:
+'{ Select ?je ?jeec ?jes ?jec ?se ?sel ?sec {\
+  ?je\
+    a batch:JobExecution ;\
+    batch:exitCode ?jeec ;\
+    batch:status ?jes ;\
+    batch:shortContext ?jec ;\
+    batch:stepExecution ?se .\
+\
+  ?se\
+    rdfs:label ?sel ;\
+    batch:shortContext ?sec .\
+} }'
+   		});
+       
+   		
+   		/**
+   		 * Index the map of a spring batch object
+   		 */
+   		var indexBatchMap = function(map) {
+   		    var result;
+   		    var entry = map ? map.entry : null;
+   		    
+   		    if(!entry) {
+   		        result = {};
+   		    }
+   		    else if(_(entry).isArray()) {
+				result = _(entry).indexBy('string');
+			}
+   		    else {
+				result = {};
+				var key = entry['string'];
+				result[key] = entry;
+   		    }
+   		    
+   		    return result;
+   		}
+        
+   		
+   		var processJobStatus = function(item) {
+		    var jobContext = JSON.parse(item.context);
+
+			var jobMap = indexBatchMap(jobContext.map);
+			console.log(jobMap); 
+
+			var tmp = jobMap['DataCountTasklet.count'];
+			var countStr = tmp ? tmp['long'] : null; 
+			    
+			    
+			var maxItemCount = parseInt(countStr);
+			var itemCount = null;
+		    
+		    _(item.steps).each(function(step) {
+				if(step.label === 'dataFetchStep') {
+				    var stepContext = JSON.parse(step.context);
+				    var stepMap = indexBatchMap(stepContext.map);
+				    
+					itemCount = parseInt(stepMap['FlatFileItemWriter.written']['long']);
+				}
+		    });
+		    
+		    
+		    var result = {
+		        id: item.id.slice(1, -1),
+		        isRunning: item.status !== 'STOPPED' && item.status !== 'COMPLETED' && item.status !== 'FAILED' ,
+		        isCounting: item.status === 'RUNNING' && maxItemCount == null,
+		        isRetrieving: item.status === 'RUNNING' && itemCount != null,
+		        isFinished: item.status === 'STOPPED' || item.status === 'COMPLETED',
+		        isFailed: item.exitCode === 'FAILED',
+		        isSucceeded: item.exitCode === 'COMPLETED',
+		        progress: {
+		            current: itemCount,
+					max: maxItemCount,
+					percentage: Math.floor(itemCount / maxItemCount * 100)
+		        }
+		    };
+		    
+		    //alert(JSON.stringify(result));
+			
+		    
+		    return result;
+   		};
+
+
+        var watchExport = function(jobExecutionUri, status) {
+            var v = rdf.NodeFactory.createVar('je');
+            var elementFilter = new sparql.ElementFilter(new sparql.E_Equals(new sparql.ExprVar(v), sparql.NodeValue.makeNode(rdf.NodeFactory.createUri(jobExecutionUri))));
+            
+            var element = new sparql.ElementGroup([
+				new sparql.ElementTriplesBlock([
+					new rdf.Triple(v, rdf.NodeFactory.createVar('ppp'), rdf.NodeFactory.createVar('ooo'))
+				]),
+				elementFilter
+			]);
+            
+            var concept = new facete.Concept(element, v);
+	
+			var promise = metaStore.sparqlExports.find().concept(concept).asList();
+			promise.done(function(data) {
+			    
+			    var item = data[0];
+				
+			    //alert('yay' + JSON.stringify(item));
+			    
+			    var jobStatus = processJobStatus(item);
+			    
+		        status.jobStatus = jobStatus;		        
+                applyRootScope($scope);
+
+				console.log('Still alive: ', jobStatus.isRunning);
+
+			    if(jobStatus.isRunning) {
+				    setTimeout(function() {				        
+				        watchExport(jobExecutionUri, status);
+				    }, 500);
+			    }
+
+			}).fail(function() {
+			    alert('fail');
+			});
+        }
+        
         $scope.exportAll = function() {
             var queryFactory = $scope.active.allFacetTableConfig.queryFactory;
             var query = queryFactory.createQuery();
             //alert('' + query);
 
-            $scope.notifications.push({msg: 'Export started.'});
+            var status = {
+				msg: 'Export started.'
+            };
+            
+            $scope.notifications.push(status);
                 //applyRootScope($scope);
 
             
@@ -841,13 +1039,16 @@
             	}
             });
             
-            promise.done(function() {
-                $scope.notifications.push({msg: 'Export succeeded.'});
-                applyRootScope($scope);
+            promise.done(function(data) {
+                //$scope.notifications.push({msg: 'Export successfully started: ' + data.id});
+                status.msg = 'Export successfully started: ' + data.id;
+               	applyRootScope($scope);
+                
+                watchExport(data.id, status);
                 
             }).fail(function() {
-                $scope.notifications.push({msg: 'Export failed.'});
-                applyRootScope($scope);
+                status.msg = 'Export failed: '; // + data.id;
+               	applyRootScope($scope);
             })
         }
         
@@ -882,15 +1083,28 @@
 	          			<input type="text" ng-model="app.searchString" class="form-control" placeholder="Find Place...">
 	        		</div>
 	        		<button type="submit" ng-click="doSearch(app.searchString)" class="btn btn-default">Submit</button>
-				</form>			
-			
+				</form>
+
+<!-- 				<ul class="nav navbar-nav"> -->
+<!-- 					<li class="dropdown"><a href="#" class="dropdown-toggle" -->
+<!-- 						data-toggle="dropdown">Tools <b class="caret"></b></a> -->
+<!-- 						<ul class="dropdown-menu"> -->
+<!-- 							<li><a href="#">Interlinking</a></li> -->
+<!-- 							<li><a href="#">Fusion</a></li> -->
+<!-- 						</ul></li> -->
+<!-- 				</ul> -->
+
 				<ul class="nav nav-pills navbar-nav navbar-right">
 					<li class="dropdown" ng-class="{'active': (notifications.length > 0)}">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown">Notifications <span class="badge">{{notifications.length}}</span> <b class="caret"></b></a>
 						<ul class="dropdown-menu">
 							<li ng-if="!(notifications.length > 0)">(empty list)</li>
 							<li ng-repeat="item in notifications | reverse">
-								<a href="">{{item}}</a>
+								<progressbar class="active" ng-class="{'progress-striped': item.jobStatus.isRunning}" animate="true" value="item.jobStatus.progress.percentage" type="{{(item.jobStatus.isRunning || item.jobStatus.isSucceeded) ? 'success' : 'danger'}}"><b>{{item.jobStatus.progress.current}} / {{item.jobStatus.progress.max}}</b></progressbar>
+								{{item.jobStatus.progress.current}} / {{item.jobStatus.progress.max}}
+<!-- 								<progressbar class="active progress-striped" ng-class="{'': item.jobStatus.isRunning}" animate="true" value="50" max="100" type="success"><b>50%</b></progressbar> -->
+							
+								<!-- <a href="">{{item}}</a>  -->
 								<!-- For now we support only export {started, cancelled, failed and finished} -->
 							</li>
 <!-- 							<li><a href="#">Action</a></li> -->
@@ -942,6 +1156,23 @@
 
 				<select ng-model="active.service" ng-options="item.name for item in active.serviceConfigs"></select>
 			</accordion-group>
+
+<!-- 			<accordion-group style="pointer-events: auto;" is-open="isOpenConcepts"> -->
+<!-- 				<accordion-heading> -->
+<!-- 					<i class="glyphicon" ng-class="{'glyphicon-chevron-down': isOpenConcepts, 'glyphicon-chevron-right': !isOpenConcepts}"></i> -->
+<!-- 					Concepts {{active.service ? '[' + active.service.name + ']': ''}} -->
+<!-- 				</accordion-heading> -->
+				
+<!-- 				<ul> -->
+<!-- 			    	<li ng-show="conceptSpaces.length == 0" class="inactive">(there are no concepts yet)</li> -->
+<!-- 				    <li ng-repeat="conceptSpace in conceptSpaces" ng-class="{'highlite': conceptSpace.active}"> -->
+<!-- 				    	<a href="" ng-click="removeConceptSpace($index)"><span class="glyphicon glyphicon-remove-circle"></span></a> -->
+<!-- 				    	<a href="" ng-click="selectConceptSpace($index)">{{conceptSpace.name}}</a> -->
+<!-- 				   	</li> -->
+<!-- 				</ul> -->
+				
+<!-- 				<button class="btn btn-primary" ng-click="addConceptSpace()">Create a new Concept</button> -->
+<!-- 			</accordion-group> -->
 
 			<accordion-group class="portlet" style="pointer-events: auto;" is-open="app.geoLinks.isOpen">
 				<accordion-heading>
@@ -1019,28 +1250,42 @@
 						<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig"></sparql-table>
 					</tab>
 				
-					<tab ng-show="hideCreateDataSource != true" heading="Data Source">
-						<form class="well form-horizontal">
-							<div class="form-group">
-								<label>Title: <input ng-model="edit.name" type="text" class="form-control"></input></label>
-							</div>
-							<div class="form-group">					
-								<label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label>
-							</div>
-							<div class="form-group">					
-								<label>Named Graphs: <input ng-model="edit.dataGraphIris" type="text" class="form-control"></input></label>
-							</div>
-							<div class="form-group">										
-								<label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>
-							</div>
-							<div class="form-group">										
-								<label>Join Summary Graphs: <input ng-model="edit.jsGraphIris" type="text" class="form-control"></input></label>
-							</div>
+<!-- 					<tab ng-show="hideCreateDataSource != true" heading="Data Source"> -->
+<!-- 						<form class="well form-horizontal"> -->
+<!-- 							<div class="form-group"> -->
+<!-- 								<label>Title: <input ng-model="edit.name" type="text" class="form-control"></input></label> -->
+<!-- 							</div> -->
+<!-- 							<div class="form-group">					 -->
+<!-- 								<label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label> -->
+<!-- 							</div> -->
+<!-- 							<div class="form-group">					 -->
+<!-- 								<label>Named Graphs: <input ng-model="edit.dataGraphIris" type="text" class="form-control"></input></label> -->
+<!-- 							</div> -->
+<!-- 							<div class="form-group">										 -->
+<!-- 								<label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label> -->
+<!-- 							</div> -->
+<!-- 							<div class="form-group">										 -->
+<!-- 								<label>Join Summary Graphs: <input ng-model="edit.jsGraphIris" type="text" class="form-control"></input></label> -->
+<!-- 							</div> -->
 		
-							<button class="btn btn-primary" ng-click="hideCreateDataSource=true">Cancel</button>
-							<button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>			
-		            	</form>
-					</tab>
+<!-- 							<button class="btn btn-primary" ng-click="hideCreateDataSource=true">Cancel</button> -->
+<!-- 							<button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>			 -->
+<!-- 		            	</form> -->
+<!-- 					</tab> -->
+
+<!-- 					<tab heading="Interlinking"> -->
+<!-- 						<form class="well form-horizontal"> -->
+<!-- 							<div class="form-group"> -->
+<!-- 								<label>Source Concept: <input ng-model="edit.name" type="text" class="form-control"></input></label> -->
+<!-- 							</div> -->
+<!-- 							<div class="form-group">					 -->
+<!-- 								<label>Target Concept: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label> -->
+<!-- 							</div> -->
+<!-- 							<button class="btn btn-primary" ng-click="hideCreateDataSource=true">Cancel</button> -->
+<!-- 							<button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>			 -->
+<!-- 		            	</form> -->
+<!-- 					</tab> -->
+
 				</tabset>
 			</accordion-group>
 		</accordion>
@@ -1050,22 +1295,6 @@
     <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.mapConfig" sources="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>
 
 
-<!-- 			<accordion-group style="pointer-events: auto;" is-open="isOpenConcepts"> -->
-<!-- 				<accordion-heading> -->
-<!-- 					<i class="glyphicon" ng-class="{'glyphicon-chevron-down': isOpenConcepts, 'glyphicon-chevron-right': !isOpenConcepts}"></i> -->
-<!-- 					Concepts {{active.service ? '[' + active.service.name + ']': ''}} -->
-<!-- 				</accordion-heading> -->
-				
-<!-- 				<ul> -->
-<!-- 			    	<li ng-show="conceptSpaces.length == 0" class="inactive">(there are no concepts yet)</li> -->
-<!-- 				    <li ng-repeat="conceptSpace in conceptSpaces" ng-class="{'highlite': conceptSpace.active}"> -->
-<!-- 				    	<a href="" ng-click="removeConceptSpace($index)"><span class="glyphicon glyphicon-remove-circle"></span></a> -->
-<!-- 				    	<a href="" ng-click="selectConceptSpace($index)">{{conceptSpace.name}}</a> -->
-<!-- 				   	</li> -->
-<!-- 				</ul> -->
-				
-<!-- 				<button class="btn btn-primary" ng-click="addConceptSpace()">Create a new Concept</button> -->
-<!-- 			</accordion-group> -->
 
 <!-- 	<a href="https://github.com/GeoKnow/Facete2" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" src="images/forkme_right_green_007200.png" alt="Fork me on GitHub"></a> -->
 

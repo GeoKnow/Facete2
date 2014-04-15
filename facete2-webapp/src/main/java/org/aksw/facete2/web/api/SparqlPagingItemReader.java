@@ -25,8 +25,8 @@ public class SparqlPagingItemReader<T>
     private BindingMapper<T> bindingMapper;
 
     //private String queryString;
-    private String serviceUri;
-    private Collection<String> defaultGraphUris;
+//    private String serviceUri;
+//    private Collection<String> defaultGraphUris;
     
     //private volatile PagingQuery pagingQuery;
     private volatile Query query = null;
@@ -63,28 +63,32 @@ public class SparqlPagingItemReader<T>
         return "" + query;
     }
 
+    
+    
+    /*
     public void setQueryString(String queryString) {
         Query query = QueryFactory.create(queryString, Syntax.syntaxSPARQL_11);
 
         this.query = query;
         //this.queryString = queryString;
     }
+    */
 
-    public String getServiceUri() {
-        return serviceUri;
-    }
-
-    public void setServiceUri(String serviceUri) {
-        this.serviceUri = serviceUri;
-    }
-
-    public Collection<String> getDefaultGraphUris() {
-        return defaultGraphUris;
-    }
-
-    public void setDefaultGraphUris(Collection<String> defaultGraphUris) {
-        this.defaultGraphUris = defaultGraphUris;
-    }
+//    public String getServiceUri() {
+//        return serviceUri;
+//    }
+//
+//    public void setServiceUri(String serviceUri) {
+//        this.serviceUri = serviceUri;
+//    }
+//
+//    public Collection<String> getDefaultGraphUris() {
+//        return defaultGraphUris;
+//    }
+//
+//    public void setDefaultGraphUris(Collection<String> defaultGraphUris) {
+//        this.defaultGraphUris = defaultGraphUris;
+//    }
 
     public void setBindingMapper(BindingMapper<T> bindingMapper) {
         this.bindingMapper = bindingMapper;

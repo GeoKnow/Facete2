@@ -1,13 +1,21 @@
 package org.aksw.facete2.web.main;
 
+import javax.sql.DataSource;
+
 import org.aksw.facete2.web.api.FileStreamSink;
 import org.aksw.facete2.web.api.StreamSink;
+import org.aksw.sparqlify.config.syntax.Config;
+import org.aksw.sparqlify.core.sparql.QueryExecutionFactoryEx;
+import org.aksw.sparqlify.util.SparqlifyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 @Configuration
 @ComponentScan({"org.aksw.jassa.web", "org.aksw.facete2.web"})
@@ -24,6 +32,20 @@ public class AppConfig {
     public StreamSink sparqlExportSink() {
         StreamSink result = new FileStreamSink("/tmp/facete2/");
         return result;
+    }
+    
+    @Bean
+    @Autowired
+    public QueryExecutionFactoryEx batchSparqlService(DataSource dataSource)
+        throws Exception
+    {
+        
+        Resource springBatchSml = new ClassPathResource("org/springframework/batch/rdb2rdf/rdf-mapping-h2.sml");
+        Config config = SparqlifyUtils.parseSmlConfig(springBatchSml.getInputStream(), logger);
+        
+        QueryExecutionFactoryEx qef = SparqlifyUtils.createDefaultSparqlifyEngine(dataSource, config, 1000l, 30);
+        
+        return qef;
     }
     
     /*

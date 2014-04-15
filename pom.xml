@@ -40,8 +40,8 @@
 
 		<!-- Dependency Versions -->
 		<!-- facete2 only works with jena-sparql-api version 2.10.0-27 and onwards -->
-		<jena-sparql-api.version>2.10.0-40</jena-sparql-api.version>
-		<jassa.version>0.0.3</jassa.version>
+		<jena-sparql-api.version>2.11.1-44</jena-sparql-api.version>
+		<jassa.version>0.0.4</jassa.version>
 
 		<spring.version>3.2.4.RELEASE</spring.version>
         <spring.batch.version>2.2.5.RELEASE</spring.batch.version>
@@ -135,7 +135,7 @@
 			<dependency>
 				<groupId>org.aksw.sparqlify</groupId>
 				<artifactId>sparqlify-core</artifactId>
-				<version>0.6.5</version>
+				<version>0.6.8</version>
 			</dependency>
 
 
@@ -345,7 +345,7 @@
 					<!-- excluding some jars, if jar name contains any of these strings 
 						it won't be analyzed -->
 					<excludes>
-						<!-- <exclude>postgresql-</exclude> -->
+						<exclude>postgresql-</exclude>
 
 						<exclude>commons-beanutils-</exclude>
 
