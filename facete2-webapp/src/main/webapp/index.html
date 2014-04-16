@@ -941,8 +941,8 @@
 			var countStr = tmp ? tmp['long'] : null; 
 			    
 			    
-			var maxItemCount = parseInt(countStr);
-			var itemCount = null;
+			var maxItemCount = countStr != null ? parseInt(countStr) : null;
+			var itemCount = 0;
 		    
 		    _(item.steps).each(function(step) {
 				if(step.label === 'dataFetchStep') {
@@ -953,19 +953,20 @@
 				}
 		    });
 		    
+		    var isRunning = item.status !== 'STOPPED' && item.status !== 'COMPLETED' && item.status !== 'FAILED'; 
 		    
 		    var result = {
 		        id: item.id.slice(1, -1),
-		        isRunning: item.status !== 'STOPPED' && item.status !== 'COMPLETED' && item.status !== 'FAILED' ,
-		        isCounting: item.status === 'RUNNING' && maxItemCount == null,
-		        isRetrieving: item.status === 'RUNNING' && itemCount != null,
-		        isFinished: item.status === 'STOPPED' || item.status === 'COMPLETED',
-		        isFailed: item.exitCode === 'FAILED',
-		        isSucceeded: item.exitCode === 'COMPLETED',
+		        isRunning: isRunning,
+		        isCounting: isRunning && maxItemCount == null,
+		        isRetrieving: isRunning && maxItemCount != null,
+		        isFinished: !isRunning,
+		        isFailed: !isRunning && item.exitCode !== 'COMPLETED',
+		        isSucceeded: !isRunning && item.exitCode === 'COMPLETED',
 		        progress: {
 		            current: itemCount,
 					max: maxItemCount,
-					percentage: Math.floor(itemCount / maxItemCount * 100)
+					percentage: (maxItemCount != null) ? Math.floor(itemCount / maxItemCount * 100) : 0
 		        }
 		    };
 		    
@@ -1100,11 +1101,17 @@
 						<ul class="dropdown-menu">
 							<li ng-if="!(notifications.length > 0)">(empty list)</li>
 							<li ng-repeat="item in notifications | reverse">
-								<progressbar class="active" ng-class="{'progress-striped': item.jobStatus.isRunning}" animate="true" value="item.jobStatus.progress.percentage" type="{{(item.jobStatus.isRunning || item.jobStatus.isSucceeded) ? 'success' : 'danger'}}"><b>{{item.jobStatus.progress.current}} / {{item.jobStatus.progress.max}}</b></progressbar>
-								{{item.jobStatus.progress.current}} / {{item.jobStatus.progress.max}}
-								<a href="api/export/retrieve?id={{item.jobStatus.id}}">Download</a>
+								<div style="border-style:solid; border-color: #eeeeee; border-width: 1px; margin: 5px; padding: 5px; width: 250px;" />
+									<b ng-if="item.jobStatus.isCounting">Preparing export (counting)...</b>
+									<b ng-if="item.jobStatus.isRetrieving">Preparing export (retrieving)...</b>
+									<b ng-if="item.jobStatus.isSucceeded">Export suceeded.</b>
+									<b ng-if="item.jobStatus.isFailed">Export failed.</b>
+									<a ng-if="item.jobStatus.isSucceeded" class="btn btn-primary btn-large" style="width: 100%"href="api/export/retrieve?id={{item.jobStatus.id}}">Download</a>
+									<progressbar class="active" ng-class="{'progress-striped': item.jobStatus.isRunning}" animate="true" value="item.jobStatus.progress.percentage" type="{{(item.jobStatus.isRunning || item.jobStatus.isSucceeded) ? 'success' : 'danger'}}"><b>{{item.jobStatus.progress.percentage}}%</b></progressbar>
+									<span>Processed {{item.jobStatus.progress.current || '0'}} / {{item.jobStatus.progress.max || '?'}} items.</span>
 <!-- 								<progressbar class="active progress-striped" ng-class="{'': item.jobStatus.isRunning}" animate="true" value="50" max="100" type="success"><b>50%</b></progressbar> -->
 							
+								</div>
 								<!-- <a href="">{{item}}</a>  -->
 								<!-- For now we support only export {started, cancelled, failed and finished} -->
 							</li>
