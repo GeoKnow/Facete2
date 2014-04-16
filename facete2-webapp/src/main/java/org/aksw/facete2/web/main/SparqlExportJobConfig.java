@@ -406,11 +406,10 @@ public class SparqlExportJobConfig {
 
     
     public static String toXmlStringBindingItem(String varName, Node node) {
-        String result
-            = "<binding name=\"" + varName + "\">"
-            + toXmlStringNode(node)
-            + "</binding>"
-            ;
+        String nodeStr = toXmlStringNode(node);
+        
+        String result = nodeStr == null ? "" : "<binding name=\"" + varName + "\">" + nodeStr + "</binding>";
+
         return result;
     }
     
@@ -435,24 +434,24 @@ public class SparqlExportJobConfig {
         return result;
     }
 
-    public static String toStringXmlBinding(String varName, Node node)
-    {
-        if(node == null) {
-            return null;
-        }
-        
-        String nodeStr = toXmlStringNode(node);
-        
-        String result;
-        if(nodeStr == null) {
-            result = "";
-        }
-        else {
-            result = "<binding name=\"" + varName + "\" />" + nodeStr + "</binding>";
-        }
- 
-        return result;
-    }
+//    public static String toStringXmlBinding(String varName, Node node)
+//    {
+//        if(node == null) {
+//            return null;
+//        }
+//        
+//        String nodeStr = toXmlStringNode(node);
+//        
+//        String result;
+//        if(nodeStr == null) {
+//            result = "";
+//        }
+//        else {
+//            result = "<binding name=\"" + varName + "\" />" + nodeStr + "</binding>";
+//        }
+// 
+//        return result;
+//    }
     
     public static String toXmlStringLiteral(Node node)
     {
