@@ -3,6 +3,7 @@ package org.aksw.facete2.web.api;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.aksw.facete2.web.main.SparqlExportManager;
@@ -46,6 +48,7 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.vocabulary.RDF;
+import com.sun.jersey.core.header.ContentDisposition;
 
 
 @Service
@@ -176,7 +179,7 @@ public class SparqlExportServlet {
     @javax.ws.rs.Path("/retrieve")
     @GET
     @Produces({ MediaType.APPLICATION_OCTET_STREAM })
-    public StreamingOutput retrieveExport(@QueryParam("id") String id) throws FileNotFoundException {
+    public Response retrieveExport(@QueryParam("id") String id) throws FileNotFoundException {
         
         Triple t = new Triple(NodeFactory.createURI(id), RDF.type.asNode(), NodeFactory.createURI("http://ns.aksw.org/spring/batch/JobExecution"));
         Quad quad = new Quad(Quad.defaultGraphNodeGenerated, t);
@@ -196,7 +199,12 @@ public class SparqlExportServlet {
 
         InputStream in = sparqlExportManager.getTargetInputStream(jobExecutionId);
 
-        StreamingOutput result = new StreamingOutputInputStream(in);
+        StreamingOutput out = new StreamingOutputInputStream(in);
+
+        ContentDisposition contentDisposition = ContentDisposition.type("attachment")
+                .fileName("export.xml").creationDate(new Date()).build();
+        
+        Response result = Response.ok(out).header("Content-Disposition", contentDisposition).build();
 
         
         return result;
