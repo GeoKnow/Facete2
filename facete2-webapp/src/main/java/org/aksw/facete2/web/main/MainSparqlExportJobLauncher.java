@@ -5,24 +5,20 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
+import javax.ws.rs.core.StreamingOutput;
+
+import org.aksw.facete2.web.api.StreamingOutputInputStream;
+import org.aksw.sparqlify.inverse.SparqlSqlInverseMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.JobOperator;
-import org.springframework.batch.core.launch.NoSuchJobException;
-import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
@@ -31,7 +27,6 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import com.google.common.base.Joiner;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 
@@ -60,9 +55,9 @@ class ExportProgress {
     
 }
 
-public class SparqlExportJobLauncher {
+public class MainSparqlExportJobLauncher {
 
-    private static final Logger logger = LoggerFactory.getLogger(SparqlExportJobLauncher.class);
+    private static final Logger logger = LoggerFactory.getLogger(MainSparqlExportJobLauncher.class);
     
     
     /**
@@ -86,7 +81,10 @@ public class SparqlExportJobLauncher {
         String fileName = "/tmp/people8.txt";
         //String queryString = "Select * { ?s a <http://schema.org/Person> . }";
         String queryString = "Select * { ?s a <http://schema.org/Airport> . }";
-        JobExecution je = launchSparqlExport("http://localhost/data/dbpedia/3.9/sparql", Arrays.asList("http://dbpedia.org/3.9/"), queryString, fileName);
+        
+        SparqlExportManager sparqlExportManager = SparqlExportManager.createTestInstance();
+        
+        JobExecution je = sparqlExportManager.launchSparqlExport("http://localhost/data/dbpedia/3.9/sparql", Arrays.asList("http://dbpedia.org/3.9/"), queryString, fileName);
 
         
         if(je.getStatus().equals(BatchStatus.COMPLETED)) {
@@ -117,7 +115,6 @@ public class SparqlExportJobLauncher {
             //System.out.println(entrySet);
         }
     }
-    
     
     public static void cleanUp() {
         ApplicationContext context = new AnnotationConfigApplicationContext(SparqlExportJobConfig.class);
@@ -187,53 +184,5 @@ public class SparqlExportJobLauncher {
         //jobExplorer.findRunningJobExecutions();
     }
     
-    
-    
-    public static Object getExportProgess(String jobId) {
-        ApplicationContext context = new AnnotationConfigApplicationContext(SparqlExportJobConfig.class);
-        JobRepository jobRepository = context.getBean(JobRepository.class);
 
-        //jobRepository.
-        
-        return null;
-    }
-    
-    public static JobExecution launchSparqlExport(String serviceUri, Collection<String> defaultGraphUris, String queryString, String targetResource) throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException
-    {
-        ApplicationContext context = new AnnotationConfigApplicationContext(SparqlExportJobConfig.class);
-        JobRepository jobRepository = context.getBean(JobRepository.class);
-        JobLauncher jobLauncher = context.getBean(JobLauncher.class);
-        Job job = context.getBean(Job.class);
-
-        
-        Set<String> tmp = new TreeSet<String>(defaultGraphUris);
-        String dgu = Joiner.on(' ').join(tmp);
-        
-        JobParameters jobParameters = new JobParametersBuilder()
-            .addString(SparqlExportJobConfig.JOBPARAM_SERVICE_URI, serviceUri, true)
-            .addString(SparqlExportJobConfig.JOBPARAM_DEFAULT_GRAPH_URIS, dgu, true)
-            .addString(SparqlExportJobConfig.JOBPARAM_QUERY_STRING, queryString, true)
-            .addString(SparqlExportJobConfig.JOBPARAM_TARGET_RESOURCE, targetResource, true)
-            .toJobParameters();
-
-        JobExecution result = jobRepository.getLastJobExecution(job.getName(), jobParameters);
-        
-        // If there was a prior job, return its execution context
-        BatchStatus status = result == null ? null : result.getStatus();
-        if(status != null) {
-            if(status.isRunning() || status.equals(BatchStatus.COMPLETED)) {
-                return result;
-            }
-        }
-
-//        switch(status) {
-//        case COMPLETED:
-//            break;
-//            default
-//        }
-        
-        result = jobLauncher.run(job, jobParameters);
-       
-        return result;
-    }
 }

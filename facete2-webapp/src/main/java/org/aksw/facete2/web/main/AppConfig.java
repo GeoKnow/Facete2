@@ -5,7 +5,12 @@ import javax.sql.DataSource;
 import org.aksw.facete2.web.api.FileStreamSink;
 import org.aksw.facete2.web.api.StreamSink;
 import org.aksw.sparqlify.config.syntax.Config;
+import org.aksw.sparqlify.core.algorithms.CandidateViewSelectorImpl;
+import org.aksw.sparqlify.core.interfaces.SparqlSqlOpRewriterImpl;
+import org.aksw.sparqlify.core.interfaces.SqlTranslator;
 import org.aksw.sparqlify.core.sparql.QueryExecutionFactoryEx;
+import org.aksw.sparqlify.inverse.SparqlSqlInverseMapper;
+import org.aksw.sparqlify.inverse.SparqlSqlInverseMapperImpl;
 import org.aksw.sparqlify.util.SparqlifyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +52,18 @@ public class AppConfig {
         
         return qef;
     }
+    
+    @Bean
+    public SparqlSqlInverseMapper sparqlSqlInverseMapper(QueryExecutionFactoryEx sparqlService) {
+        SparqlSqlOpRewriterImpl opRewriter = SparqlifyUtils.unwrapOpRewriter(sparqlService);
+        CandidateViewSelectorImpl candidateViewSelector = SparqlifyUtils.unwrapCandidateViewSelector(opRewriter);
+        SqlTranslator sqlTranslator = SparqlifyUtils.unwrapSqlTransformer(opRewriter);
+        
+        SparqlSqlInverseMapper result = new SparqlSqlInverseMapperImpl(candidateViewSelector, sqlTranslator);
+        
+        return result;
+    }
+
     
     /*
      * JPA Layer config 
