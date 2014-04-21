@@ -60,6 +60,7 @@ case "$1" in
   configure)
 
     updateDbCredentials "$dbc_dbuser" "$dbc_dbpass"
+    chown -R tomcat7:tomcat7 /var/cache/facete2/exports
     service tomcat7 restart
 
   ;;

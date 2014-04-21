@@ -1,9 +1,9 @@
 package org.aksw.facete2.web.main;
 
+import java.io.File;
+
 import javax.sql.DataSource;
 
-import org.aksw.facete2.web.api.FileStreamSink;
-import org.aksw.facete2.web.api.StreamSink;
 import org.aksw.sparqlify.config.syntax.Config;
 import org.aksw.sparqlify.core.algorithms.CandidateViewSelectorImpl;
 import org.aksw.sparqlify.core.interfaces.SparqlSqlOpRewriterImpl;
@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
@@ -32,12 +33,46 @@ public class AppConfig {
     private static final Logger logger = LoggerFactory
             .getLogger(AppConfig.class);
 
+    @javax.annotation.Resource
+    private Environment env;
     
+    /*
     @Bean
     public StreamSink sparqlExportSink() {
         StreamSink result = new FileStreamSink("/tmp/facete2/");
         return result;
     }
+    */
+    
+    @Bean
+    public File sparqlExportPath() {
+        String exportPathName = env.getRequiredProperty("fs.exportPath");
+        
+        File result = new File(exportPathName);
+        
+        if(!result.exists()) {
+                        
+            boolean isCreated = result.mkdirs();
+            if(!isCreated) {
+                String msg = "Failed to create export path [" + exportPathName + "]. Export feature will NOT be available!";
+                throw new RuntimeException(msg);
+            }            
+        }
+        
+        if(result.isFile()) {
+            String msg = "Export path [" + exportPathName + "] is a file instead of a directory. Export feature will NOT be available!";
+            throw new RuntimeException(msg);                
+        }
+
+        if(!result.canWrite()) {
+            String msg = "Cannot write to export path [" + exportPathName + "]; check file system permissions. Export feature will NOT be available!";
+            throw new RuntimeException(msg);            
+        }
+
+        
+        return result;
+    }
+    
     
     @Bean
     @Autowired

@@ -156,7 +156,7 @@
          */
         $scope.Math = Math;
 
-        
+
 		$scope.active = {};
 
 		
@@ -244,6 +244,9 @@
 		$scope.active.sparqlService = new service.SparqlServiceDummy();
 		$scope.active.geoConceptFactory = geoConceptFactory;
 
+		
+		
+		
         $scope.active.serviceConfigs = [
 			{        
 		        name: 'FP7 ICT Project Partners (local)',
@@ -803,7 +806,8 @@
 				isOpen: false
 			},
 			dataSources: {
-				isOpen: false
+				isOpen: false,
+				showAddDialog: false
 			},
 			data: {
 				isOpen: false
@@ -1101,12 +1105,13 @@
 						<ul class="dropdown-menu">
 							<li ng-if="!(notifications.length > 0)">(empty list)</li>
 							<li ng-repeat="item in notifications | reverse">
-								<div style="border-style:solid; border-color: #eeeeee; border-width: 1px; margin: 5px; padding: 5px; width: 250px;" />
+								<div style="border-style:solid; border-color: #eeeeee; border-width: 1px; margin: 5px; padding: 5px; width: 250px;">
 									<b ng-if="item.jobStatus.isCounting">Preparing export (counting)...</b>
 									<b ng-if="item.jobStatus.isRetrieving">Preparing export (retrieving)...</b>
-									<b ng-if="item.jobStatus.isSucceeded">Export suceeded.</b>
+									<b ng-if="item.jobStatus.isSucceeded">Export succeeded.</b>
 									<b ng-if="item.jobStatus.isFailed">Export failed.</b>
-									<a ng-if="item.jobStatus.isSucceeded" class="btn btn-primary btn-large" style="width: 100%"href="api/export/retrieve?id={{item.jobStatus.id}}">Download</a>
+									<a ng-if="item.jobStatus.isSucceeded" class="btn btn-primary btn-large" target="_blank" style="width: 50%"href="api/export/retrieve?id={{item.jobStatus.id}}&format=csv">CSV</a>
+									<a ng-if="item.jobStatus.isSucceeded" class="btn btn-primary btn-large" target="_blank" style="width: 50%"href="api/export/retrieve?id={{item.jobStatus.id}}&format=xml">XML</a>
 									<progressbar class="active" ng-class="{'progress-striped': item.jobStatus.isRunning}" animate="true" value="item.jobStatus.progress.percentage" type="{{(item.jobStatus.isRunning || item.jobStatus.isSucceeded) ? 'success' : 'danger'}}"><b>{{item.jobStatus.progress.percentage}}%</b></progressbar>
 									<span>Processed {{item.jobStatus.progress.current || '0'}} / {{item.jobStatus.progress.max || '?'}} items.</span>
 <!-- 								<progressbar class="active progress-striped" ng-class="{'': item.jobStatus.isRunning}" animate="true" value="50" max="100" type="success"><b>50%</b></progressbar> -->
@@ -1163,6 +1168,10 @@
 				</accordion-heading>
 
 				<select ng-model="active.service" ng-options="item.name for item in active.serviceConfigs"></select>
+
+				<br />
+				<button class="btn btn-primary" ng-class="{'active': app.dataSources.showAddDialog}" ng-click="app.dataSources.showAddDialog=!app.dataSources.showAddDialog">Add Data Source</button>
+				
 			</accordion-group>
 
 <!-- 			<accordion-group style="pointer-events: auto;" is-open="isOpenConcepts"> -->
@@ -1257,29 +1266,7 @@
 					<tab heading="Selection">
 						<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig"></sparql-table>
 					</tab>
-				
-<!-- 					<tab ng-show="hideCreateDataSource != true" heading="Data Source"> -->
-<!-- 						<form class="well form-horizontal"> -->
-<!-- 							<div class="form-group"> -->
-<!-- 								<label>Title: <input ng-model="edit.name" type="text" class="form-control"></input></label> -->
-<!-- 							</div> -->
-<!-- 							<div class="form-group">					 -->
-<!-- 								<label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label> -->
-<!-- 							</div> -->
-<!-- 							<div class="form-group">					 -->
-<!-- 								<label>Named Graphs: <input ng-model="edit.dataGraphIris" type="text" class="form-control"></input></label> -->
-<!-- 							</div> -->
-<!-- 							<div class="form-group">										 -->
-<!-- 								<label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label> -->
-<!-- 							</div> -->
-<!-- 							<div class="form-group">										 -->
-<!-- 								<label>Join Summary Graphs: <input ng-model="edit.jsGraphIris" type="text" class="form-control"></input></label> -->
-<!-- 							</div> -->
-		
-<!-- 							<button class="btn btn-primary" ng-click="hideCreateDataSource=true">Cancel</button> -->
-<!-- 							<button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>			 -->
-<!-- 		            	</form> -->
-<!-- 					</tab> -->
+
 
 <!-- 					<tab heading="Interlinking"> -->
 <!-- 						<form class="well form-horizontal"> -->
@@ -1297,6 +1284,37 @@
 				</tabset>
 			</accordion-group>
 		</accordion>
+	</div>
+
+	<div style="position: absolute; margin: 0px; top: 50px; left: 530px; top: 50px; overflow: auto; pointer-events: none;">
+		<tabset style="pointer-events: auto;">		
+			<tab ng-if="app.dataSources.showAddDialog" heading="Data Source" style="width: 500px;">
+
+				<div style="border-style:solid; background-color:#ffffff; #eeeeee; border-width: 1px; margin: 5px; padding: 5px;">
+
+					<form class="well form-horizontal">
+						<div class="form-group">
+							<label>Title: <input ng-model="edit.name" type="text" class="form-control"></input></label>
+						</div>
+						<div class="form-group">					
+							<label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label>
+						</div>
+						<div class="form-group">					
+							<label>Named Graphs (Separate entries with white space): <input ng-model="edit.dataGraphIris" type="text" class="form-control"></input></label>
+						</div>
+						<div class="form-group">										
+							<label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>
+						</div>
+						<div class="form-group">										
+							<label>Join Summary Graphs (Separate entries with white space): <input ng-model="edit.jsGraphIris" type="text" class="form-control"></input></label>
+						</div>
+		
+						<button class="btn btn-primary" ng-click="app.dataSources.showAddDialog=false">Cancel</button>
+						<button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>			
+		           	</form>
+				</div>
+			</tab>
+		</tabset>	
 	</div>
 
 

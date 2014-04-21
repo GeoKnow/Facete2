@@ -51,7 +51,7 @@ public class DataSourceConfig {
         DataSource dsBean = null;
 
         try {
-            String jndiName = "java:comp/env/jdbc/facete2Ds";
+            String jndiName = "java:comp/env/jdbc/facete2/dataSource";
             Context ctx = new InitialContext();
             dsBean = (DataSource) ctx.lookup(jndiName);
             

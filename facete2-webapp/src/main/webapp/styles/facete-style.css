@@ -1,3 +1,6 @@
+.form-group label {
+	width: 100%;
+}
 
 .pagination {
     margin-top: 5px;
