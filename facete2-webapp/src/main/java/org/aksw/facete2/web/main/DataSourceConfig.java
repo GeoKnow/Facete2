@@ -1,13 +1,18 @@
 package org.aksw.facete2.web.main;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import javax.annotation.Resource;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.aksw.jdbc_utils.core.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -117,4 +122,17 @@ public class DataSourceConfig {
         return result;
     }
 
+    
+    @Bean
+    @Autowired
+    public Schema schema(DataSource dataSource) throws SQLException {
+        Schema result = null;
+        Connection conn = dataSource.getConnection();
+        try {
+            result = Schema.create(conn);
+        } finally {
+            conn.close();
+        }
+        return result;
+    }
 }

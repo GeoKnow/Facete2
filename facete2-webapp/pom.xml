@@ -191,6 +191,11 @@
 			<artifactId>sparqlify-core</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.aksw.jdbc-utils</groupId>
+			<artifactId>jdbc-utils-core</artifactId>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.tuckey</groupId>

@@ -159,6 +159,27 @@
 
 		$scope.active = {};
 
+
+		/* Application UI state */
+        $scope.app = {
+   			search: {
+   				show: false,
+   				isOpen: false
+   			},
+   			dataSources: {
+   				isOpen: false,
+   				showAddDialog: false
+   			},
+   			data: {
+   				isOpen: false
+   			},
+   			geoLinks: {
+   				isOpen: false
+   			},
+   			facets: {
+   			    isOpen: false
+   			}
+        };
 		
         $scope.edit = {
 	        id: null,
@@ -168,9 +189,109 @@
 	        jsGraphIris: ''
 		};
             
+        
+        var storeApiUrl = 'api/store';
 
+        
+        
+        var createDefaultWorkspaceConfig = function() {
+	        var result = {
+		        name: 'Unnamed Data Source',
+		        dataService: {
+		            serviceIri: '',
+		            defaultGraphIris: []
+		        },
+		        joinSummaryService: {
+		            serviceIri: '',
+		            defaultGraphIris: []
+		        },
+		        conceptPathFinderApiUrl: 'api/path-finding',        
+		        facetTreeConfig: facetTreeConfig,
+		        mapConfig: {
+		            mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+		            geoConcept: geo.GeoConcepts.conceptWgs84,
+					quadTreeConfig: {
+						maxItemsPerTileCount: 1000,
+						maxGlobalItemCount: 2000
+		        	}
+		      	}
+		    };
+	        
+	        return result;
+        };
+        
+        
+        var applyScope = function() {
+			if(!$scope.$$phase) {
+                $scope.$apply();
+            }			
+        };
+        
+        refreshDataSources = function() {
+			var spec = {
+				url: storeApiUrl + '/loadState',
+				traditional: true,
+				data: {
+					type: 'dataSource'
+				},
+				dataType: 'json'
+			};
+            
+            jQuery.ajax(spec).done(function(response) {
+                
+                var configs = _(response).map(function(record) {
+                    var item = record.data;
+                    var spec = createDefaultWorkspaceConfig();
+                    console.log('ITEM', item);
+                    spec.id = item.id;
+                    spec.name = item.name;
+                    spec.dataService.serviceIri = item.dataServiceIri;
+                    spec.dataService.defaultGraphIris = item.dataGraphIris;
+                    spec.joinSummaryService.serviceIri = item.jsServiceIri;
+                    spec.joinSummaryService. defaultGraphIris = item.jsGraphIris;
+                    
+                    return spec;
+                });
+                console.log('CONFIGS', configs);
+                
+                $scope.active.serviceConfigs = configs;
+                
+                applyScope();
+                //alert('yay' + JSON.stringify(response));
+            }).fail(function() {
+                alert('Failed to retrieve data sources');
+            });
+        };
+        
+        
         $scope.addDataSource = function() {
-			alert('yay' + JSON.stringify($scope.edit));
+            var raw = $scope.edit;
+            raw.dataGraphIris = raw.dataGraphIris.match(/\S+/g);
+            raw.jsGraphIris = raw.jsGraphIris.match(/\S+/g);
+            
+            var data = JSON.stringify(raw);
+            
+			var spec = {
+				url: storeApiUrl + '/saveState',
+				type: 'POST',
+				traditional: true,
+				data: {
+				    type: 'dataSource',
+				    data: data
+				},
+				dataType: 'json'
+			};
+            
+            jQuery.ajax(spec).done(function(response) {
+                // Hide data source creation dialog
+                $scope.app.dataSources.isOpen = false;
+
+            	refreshDataSources();
+    			//alert('yay' + JSON.stringify(response));
+            }).fail(function() {
+				alert('Failed to store data');
+            });
+            
         };
 
 		
@@ -797,27 +918,6 @@
         
         $scope.removeConceptSpace = function(index) {
 			$scope.conceptSpaces.splice(index, 1);
-        };
-
-
-        $scope.app = {
-			search: {
-				show: false,
-				isOpen: false
-			},
-			dataSources: {
-				isOpen: false,
-				showAddDialog: false
-			},
-			data: {
-				isOpen: false
-			},
-			geoLinks: {
-				isOpen: false
-			},
-			facets: {
-			    isOpen: false
-			}
         };
         
         

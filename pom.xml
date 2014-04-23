@@ -176,6 +176,11 @@
 		            </exclusions>
 		    </dependency>
 
+			<dependency>
+				<groupId>org.aksw.jdbc-utils</groupId>
+				<artifactId>jdbc-utils-core</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.slf4j</groupId>

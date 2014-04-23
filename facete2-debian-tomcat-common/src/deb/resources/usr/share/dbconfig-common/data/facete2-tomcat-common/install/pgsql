@@ -14,6 +14,14 @@ CREATE INDEX "idx_query_cache_time_of_expiration" ON "query_cache"("time_of_expi
 CREATE INDEX "idx_query_cache_hit_count" ON "query_cache"("hit_count");
 
 
+CREATE TABLE IF NOT EXISTS "data_store" (
+    "type" text NOT NULL,
+    "instance_id" int NOT NULL,
+    "data" text NOT NULL,
+    "ip_addr" text NOT NULL,
+
+    PRIMARY KEY("type", "instance_id")
+);
 
 
 
