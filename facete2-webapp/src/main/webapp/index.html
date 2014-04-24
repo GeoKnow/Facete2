@@ -194,6 +194,8 @@
 
         
         
+        var facetTableConfig; // Initialized later - TODO Fix the order
+        
         var createDefaultWorkspaceConfig = function() {
 	        var result = {
 		        name: 'Unnamed Data Source',
@@ -214,7 +216,8 @@
 						maxItemsPerTileCount: 1000,
 						maxGlobalItemCount: 2000
 		        	}
-		      	}
+		      	},
+	            facetTableConfig: facetTableConfig
 		    };
 	        
 	        return result;
@@ -241,6 +244,8 @@
                 
                 var configs = _(response).map(function(record) {
                     var item = record.data;
+                    item.id = record.id;
+                    
                     var spec = createDefaultWorkspaceConfig();
                     console.log('ITEM', item);
                     spec.id = item.id;
@@ -264,8 +269,40 @@
         };
         
         
+        $scope.deleteDataSource = function(id) {
+            
+            var c = confirm('Delete dataset with id ' + id + '?');
+            if(!c) {
+                return;
+            }
+
+			var spec = {
+					url: storeApiUrl + '/deleteState',
+					type: 'POST',
+					traditional: true,
+					data: {
+					    type: 'dataSource',
+					    id: id
+					},
+					dataType: 'json'
+			};
+
+            jQuery.ajax(spec).done(function(response) {
+				// FIXME Verify the response for success
+            }).fail(function() {
+				alert('Failed to delete data source with id ' + id);
+		        //$scope.active.service = serviceConfigs.length === 0 ? null : serviceConfigs[0];
+
+            }).then(function() {
+            	refreshDataSources();                
+            });
+
+        }
+        
         $scope.addDataSource = function() {
-            var raw = $scope.edit;
+            var raw = _($scope.edit).clone();
+            
+            
             raw.dataGraphIris = raw.dataGraphIris.match(/\S+/g);
             raw.jsGraphIris = raw.jsGraphIris.match(/\S+/g);
             
@@ -284,7 +321,8 @@
             
             jQuery.ajax(spec).done(function(response) {
                 // Hide data source creation dialog
-                $scope.app.dataSources.isOpen = false;
+                //$scope.app.dataSources.isOpen = false;
+                $scope.app.dataSources.showAddDialog=false
 
             	refreshDataSources();
     			//alert('yay' + JSON.stringify(response));
@@ -319,7 +357,7 @@
 		var taggerMap = pathTaggerManager.getTaggerMap();
 		
 		
-        var facetTableConfig = new facete.FacetTableConfig(facetConfig);
+        facetTableConfig = new facete.FacetTableConfig(facetConfig);
 		var tableMod = facetTableConfig.getTableMod();
 		tableMod.addColumn('s');
 		
@@ -367,8 +405,12 @@
 
 		
 		
+		refreshDataSources();
 		
-        $scope.active.serviceConfigs = [
+        $scope.active.serviceConfigs = [];
+            
+        var deleteThisWhenDbIsDone =
+        [
 			{        
 		        name: 'FP7 ICT Project Partners (local)',
 		        dataService: {
@@ -606,13 +648,14 @@
          * Init of derived attributes
          *
          */
-        _($scope.active.serviceConfigs).each(function(serviceConfig) {
+         
+//        _($scope.active.serviceConfigs).each(function(serviceConfig) {
             // Create the facetTableConfig
 // 			var facetTreeConfig = serviceConfig.facetTreeConfig;
 //             var facetConfig = facetTreeConfig.getFacetConfig()
 
 
-            serviceConfig.facetTableConfig = facetTableConfig;
+//            serviceConfig.facetTableConfig = facetTableConfig;
 
             // Init the taggerMap
 //     		var pathTaggerManager = facetConfig.getPathTaggerManager()
@@ -623,7 +666,7 @@
     		// Init the tableMod
 //     		var tableMod = facetTableConfig.getTableMod();
 //     		tableMod.addColumn('s');
-        });
+//        });
 
         
         $scope.active.path = null;
@@ -825,7 +868,9 @@
 		    }
 		});
 		
-        $scope.active.service = $scope.active.serviceConfigs[0];
+		
+		var serviceConfigs = $scope.active.serviceConfigs
+        $scope.active.service = serviceConfigs.length === 0 ? null : serviceConfigs[0];
 
 
 		
@@ -1271,6 +1316,7 @@
 
 				<br />
 				<button class="btn btn-primary" ng-class="{'active': app.dataSources.showAddDialog}" ng-click="app.dataSources.showAddDialog=!app.dataSources.showAddDialog">Add Data Source</button>
+				<button ng-if="active.service" class="btn" ng-click="deleteDataSource(active.service.id)">Delete Selected Data Source</button>
 				
 			</accordion-group>
 

@@ -80,9 +80,17 @@ public class DataStoreServlet {
 
         
         if(nextId == null) {
-            String maxIdSql = "SELECT MAX(\"instance_id\") FROM \"data_store\" WHERE \"type\" = ?";
-            Integer maxId = t.queryForObject(maxIdSql, Integer.class, type);
-            nextId = maxId == null ? 1 : maxId + 1;
+            // Check if the JSON object provides an ID
+            //Object idObj = map.get("id");
+            //if(idObj == null) {            
+                String maxIdSql = "SELECT MAX(\"instance_id\") FROM \"data_store\" WHERE \"type\" = ?";
+                Integer maxId = t.queryForObject(maxIdSql, Integer.class, type);
+                nextId = maxId == null ? 1 : maxId + 1;
+//            }
+//            else if(idObj instanceof Number) {
+//                Number number = (Number)idObj;
+//                nextId = number.intValue();
+//            }
         }
         
         
@@ -104,7 +112,7 @@ public class DataStoreServlet {
     @Path("/deleteState")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public String load(@QueryParam("type") String type, @QueryParam("id") Long id)
+    public String load(@FormParam("type") String type, @FormParam("id") Long id)
     {    
         if(type == null || id == null) {
             throw new RuntimeException("Type and id must be given");
