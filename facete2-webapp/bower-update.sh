@@ -1,6 +1,5 @@
 #!/bin/bash
-rm -rf app/bower_components
-#rm -rf app/bower_components/jassa
+rm -rf src/main/webapp/bower_components
 bower cache clean
 bower install
-grunt bower-install
+grunt bowerInstall
