@@ -23,6 +23,41 @@
 
     <!-- endbuild -->
 
+    <style>
+    /* possible HACK - Move resize handles into the div, so that overflow divs don't show scrollbars because of the handle */
+    /* FIXME Should not modify global css classes */
+    .ui-resizable-n {
+        top: 0px;
+    }
+
+    .ui-resizable-e {
+        right: 0px;
+    }
+    
+    .ui-resizable-ne {
+        right: 0px;
+        top: 0px;
+    }
+
+    .ui-resizable-handle:hover {
+        background-color: #ddddff;
+    }
+
+/*     .panel-group { */
+/*         max-height: 100%; */
+/*         max-width: 100%; */
+/*         overflow: auto; */
+/*         position: relative;     */
+/*     } */
+
+    /*
+    .tab-content {
+        max-height: 100%;
+        max-width: 100%;
+        overflow: auto;
+    }
+    */
+    </style>
 	
     <!-- build:js scripts/scripts.js -->
 
@@ -30,13 +65,13 @@
 
     <!-- bower:js -->
     <script src="bower_components/jquery/jquery.js"></script>
-    <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/jassa/jassa.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
     <script src="bower_components/ng-grid-bower/ng-grid.js"></script>
     <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
     <script src="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers-tpls.js"></script>
     <!-- endbower -->
@@ -56,18 +91,83 @@
 	<script type="text/javascript">
     _.mixin(_.str.exports());
 
-	var rdf = Jassa.rdf;
-	var sparql = Jassa.sparql;
-    var service = Jassa.service;
-	var sponate = Jassa.sponate;
-    var facete = Jassa.facete;
-	var geo = Jassa.geo;
-	var util = Jassa.util;
+
+    
+    var jassa = jassa || Jassa;
+    
+	var rdf = jassa.rdf;
+	var vocab = jassa.vocab;
+	var sparql = jassa.sparql;
+    var service = jassa.service;
+	var sponate = jassa.sponate;
+    var facete = jassa.facete;
+	var geo = jassa.geo;
+	var util = jassa.util;
 	
 	var client = Jassa.client;
 
     var myModule = angular.module('Facete2', ['ui.bootstrap', 'ui.jassa', 'ngGrid', 'ui.jassa.openlayers', 'ngSanitize']);
 
+    
+    util.LabelService = Class.create({
+        
+    });
+    
+    util.LabelFetcherNode = Class.create({
+        initialize: function(sponateService) { //sparqlService, labelMap) {
+            this.sponateService = sponateService;
+            //this.sparqlService = sparqlService;
+            //this.labelMap = labelMap;
+        },
+        
+        doesAccept: function(obj) {
+            var result = _(obj.isUri).isFunction() || obj.isUri();
+            return result;
+        },
+       
+        fetchLabels: function(objs) {
+            // TODO Implement
+        }
+    });
+    
+    
+    
+    sparql.ElementFactoryTransform = Class.create(sparql.ElementFactory, {
+        initialize: function(baseElementFactory, fn) {
+            this.baseElementFactory = baseElementFactory;
+            this.fn = fn;
+        },
+        
+        createElement: function() {
+            var element = this.baseElementFactory.createElement();
+            var result = this.fn(element);
+            return result;
+        }
+    });
+    
+    facete.ConceptFactoryRename = Class.create(facete.ConceptFactory, {
+        initialize: function(baseConceptFactory, varMap) {
+            this.baseConceptFactory = baseConceptFactory;
+            this.varMap = varMap;
+        },
+        
+        createConcept: function() {
+            var baseConcept = this.baseConceptFactory.createConcept();
+            var v = baseConcept.getVar();
+            var e = baseConcept.getElement();
+
+            var ne = sparql.ElementUtils.createRenamedElement(e, this.varMap);
+            
+            var nv = this.varMap.get(v);
+            if(!nv) {
+                nv = v;
+            }
+            
+            var result = new facete.Concept(ne, nv);
+            return result;
+        }
+    });
+    
     
     myModule.filter('reverse', function() {
 		return function(items) {
@@ -174,6 +274,7 @@
    			},
    			data: {
    				isOpen: false,
+   				tabs: [{isActive: true}, {isActive: false}, {isActive: false}, {isActive: false}],
    				originalBounds: {}, // Bounds to restore size
    				bounds: {} // Bounds for current size; watched and synced by the directive
    			},
@@ -383,7 +484,7 @@
 		
 		var vs = rdf.NodeFactory.createVar('s');
 
-        
+
 		/* Dummy init */
         var dummyQuery = new sparql.Query();
         dummyQuery.getProject().add(vs);
@@ -399,6 +500,11 @@
 
 		var facetTreeConfig = new facete.FacetTreeConfig();
 
+		// On startup, expand the root facet node
+		var rootPath = new facete.Path()
+		facetTreeConfig.getExpansionSet().add(rootPath);
+		facetTreeConfig.getExpansionMap().put(rootPath, 1);
+		
 		var facetConfig = facetTreeConfig.getFacetConfig();
 		var pathTaggerManager = facetConfig.getPathTaggerManager()
 		var taggerMap = pathTaggerManager.getTaggerMap();
@@ -406,7 +512,7 @@
 		
         facetTableConfig = new facete.FacetTableConfig(facetConfig);
 		var tableMod = facetTableConfig.getTableMod();
-		tableMod.addColumn('s');
+		tableMod.addColumn('s'); // TODO Instead of 's' use: facetConfig.getBaseConcept().getVar().getName()
 		
 		taggerMap.table = new facete.ItemTaggerMembership(facetTableConfig.getPaths());
 
@@ -421,11 +527,19 @@
 		
 
 		
+		var visibleControls = new util.HashSet();
+        taggerMap.controls = new facete.ItemTaggerMembership(visibleControls);
+		
 		$scope.facetTreePluginContext = {
+		    toggleControls: function(path) {
+		        if(path) {
+		            util.CollectionUtils.toggleItem(visibleControls, path);
+		        }
+		    },
+
 			toggleTableLink: function(path) {
 			    //var active = $scope.active;
 			    var active = $scope;
-			    
                	if(active.facetTableConfig) {
                	    active.facetTableConfig.togglePath(path);
                	}
@@ -437,7 +551,10 @@
 		};
 
 
-		$scope.facetTreePlugins = ['<a ng-show="data.isHovered || data.item.getTags().table.isContained" href="" ng-click="context.toggleTableLink(data.item.getPath())"><span class="glyphicon glyphicon-list-alt"></span></a>'];
+		$scope.facetTreePlugins = [
+		    '<a style="margin-left: 5px; margin-right: 5px;" ng-show="data.isExpanded && (data.isHovered || data.item.getTags().controls.isContained)" href="" ng-click="context.toggleControls(data.item.getPath())"><span class="glyphicon glyphicon-cog"></span></a>',
+            '<a style="margin-left: 5px; margin-right: 5px;" ng-show="data.isHovered || data.item.getTags().table.isContained" href="" ng-click="context.toggleTableLink(data.item.getPath())"><span class="glyphicon glyphicon-list-alt"></span></a>'
+        ];
 
 		
 		
@@ -716,7 +833,9 @@
 //        });
 
         
-        $scope.active.path = null;
+        // On startup, show the list of types
+        $scope.active.path = facete.Path.parse(vocab.rdf.type.getUri());
+
 
 		
 		/*
@@ -753,9 +872,7 @@
 			
 			
 		    var promise = conceptPathFinder.findPaths(sourceConcept, targetConcept);
-			var result = sponate.angular.bridgePromise(promise, $q.defer(), $rootScope);
-	
-			result.then(function(paths) {
+			var result = sponate.angular.bridgePromise(promise, $q.defer(), $rootScope, function(paths) {
 			    var tmp = _(paths).map(function(path) {
 
 			        var pathName = path.toString();
@@ -771,9 +888,12 @@
 			    });
 			   
 			    $scope.active.geoPaths = tmp;
-			}, function(err) {
+			});
+			/*
+			, function(err) {
 			    alert(err.responseText);
 			});
+    */
 		};
 		        
        	var refreshServices = function(config) {
@@ -790,69 +910,50 @@
     		sparqlService = new service.SparqlServiceCache(sparqlService);
     		sparqlService = new service.SparqlServicePaginate(sparqlService, 1000);
 
-//     		debugger;    		
-//     		var query = new sparql.Query();
-//     		query.getElements().push(new sparql.ElementTriplesBlock([new rdf.Triple(rdf.NodeFactory.createVar('s'), rdf.NodeFactory.createVar('p'), rdf.NodeFactory.createVar('o'))]));
-//     		query.setResultStar(true);
-//     		query.setLimit(10);    		
-//     		sparqlService.createQueryExecution(query).execSelect().done(function(rs) {
-//     		    var hash = Jassa.util.ObjectUtils.hashCode(sparqlService);
-//     			alert(hash);
-//     		});
-
-    		
-    		var conceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
-
-
-    		//var mapFactory =  geo.GeoMapFactoryUtils.ogcVirtMapFactory;
-    		var mapFactory = config.mapFactory;
-    		    		
     		$scope.active.sparqlService = sparqlService;		
             $scope.active.facetTreeConfig = facetTreeConfig;
+
             
-            //$scope.path = null;
-
-            /*
-            var facetConfig = facetTreeConfig.getFacetConfig();
-    		var facetConceptFactory = new facete.ConceptFactoryFacetConfig(facetConfig);
-
-            var dataConcept = facete.ConceptUtils.createSubjectConcept(vs);
-            var elementFactory = new sparql.ElementFactoryJoinConcept(new facete.ConceptFactoryConst(dataConcept), filterConceptFactory);
-                
-            var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
-
-    		$scope.active.facetTableConfig = {
-    			queryFactory: queryFactory,
-    			tableMod: tableMod
-    		};
-            */
-
+            refreshEssentialTables();
             
     		/*
     		 * <- Facet Tree 'Link-Facet-To-Table' Plugin
     		 */
+            var conceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+
     		var facetConfig = facetTreeConfig.getFacetConfig()
+
+    		var facetTreeConfig = $scope.active.facetTreeConfig;
+    	    var facetConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);        
+    	    var facetElementFactory = new facete.ElementFactoryConceptFactory(facetConceptFactory);        
+    		
+    		
             var facetTableConfig = config.facetTableConfig;
     		var tableMod = facetTableConfig.getTableMod();
 
     		
-            var dataConcept = facetTableConfig.createDataConcept();
-            var dataElementFactory = new sparql.ElementFactoryConst(dataConcept.getElement());
+    		var ConceptFactoryFtc = Class.create(facete.ConceptFactory, {
+                initialize: function(facetTableConfig) {
+                    this.facetTableConfig = facetTableConfig;
+                },
+                
+                createConcept: function() {
+                    var result = this.facetTableConfig.createDataConcept();
+                    return result;
+                }
+    		});
+
+    		// TODO The data concept is dynamic
+            //var dataConcept = facetTableConfig.createDataConcept();
+    		var dataConceptFactory = new ConceptFactoryFtc(facetTableConfig);
+    		
+            //var dataElementFactory = new sparql.ElementFactoryConst(dataConcept.getElement());
+            var dataElementFactory = new facete.ElementFactoryConceptFactory(dataConceptFactory);
             
             var filterElementFactory = new facete.ElementFactoryConceptFactory(filterConceptFactory);
-            
-            
-            //var filterConcept = filterConceptFactory.createConcept();
-            
-            //debugger;
+
             // NOTE We assume the data and filter concept share the same variables
             var elementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, filterElementFactory]);
-            //var element = tmp.flatten();
-            
-            //console.log('EEEEEEEelement: ' + element);
-            
-            //var elementFactory = new sparql.ElementFactoryConst(element);
-            //var elementFactory = new sparql.ElementFactoryJoinConcept(new facete.ConceptFactoryConst(dataConcept), filterConceptFactory);           
             var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
 
     		$scope.active.facetTableConfig = {
@@ -861,7 +962,9 @@
     		};
     		
 
-            var allQueryFactory = new facete.QueryFactoryTableMod(dataElementFactory, tableMod);
+            //var allQueryFactory = new facete.QueryFactoryTableMod(dataElementFactory, tableMod);
+            var allElementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, facetElementFactory]);
+            var allQueryFactory = new facete.QueryFactoryTableMod(allElementFactory, tableMod);
 
     		$scope.active.allFacetTableConfig = {
     		    queryFactory: allQueryFactory,
@@ -870,6 +973,7 @@
     		
     		
     		// HACK! because of name clash in .active
+    		// For some reason, this lines makes the toggle column button in the facet tree work - but WHY??????
     		$scope.facetTableConfig = facetTableConfig;
     		//$scope.allFacetTableConfig = $scope.active.allFacetTableConfig;
     		/*
@@ -881,6 +985,7 @@
             
             
     		var mapConfig = config.mapConfig;
+            var mapFactory = config.mapFactory;
     		
             $scope.active.dataSources = [{
     			sparqlService: sparqlService,
@@ -918,6 +1023,16 @@
 		    	refresh(config);
 		    }
 		});
+		
+		
+		$scope.$watch('ObjectUtils.hashCode(active.facetTreeConfig)', function() {
+            var config = $scope.active.service;
+            if(config) {
+                refresh(config);
+            }
+		}, true);
+
+		
 		
 		
 		var serviceConfigs = $scope.active.serviceConfigs
@@ -1213,7 +1328,7 @@
 			}).fail(function() {
 			    alert('fail');
 			});
-        }
+        };
         
         $scope.exportAll = function() {
             var queryFactory = $scope.active.allFacetTableConfig.queryFactory;
@@ -1250,11 +1365,93 @@
             }).fail(function() {
                 status.msg = 'Export failed: '; // + data.id;
                	applyRootScope($scope);
-            })
-        }
+            });
+        };
         
         
+        var refreshEssentialTables = function() {
+
+            /*
+            \
+            { Select Distinct ?instanceUri {\
+              ?instanceUri a ?typeUri\
+            } }\
+            Prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
+                Prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>\
+                Select ?instanceLabel ?typeLabel ?instancePage ?typePage ?instanceUri ?typeUri ?lon ?lat {\
+                    # Only get the most specific types (i.e. those that are not subclass of another)\
+            */
+// Filter(langMatches(lang(?instanceLabel), "de"))
+// Filter(langMatches(lang(?typeLabel), "de"))
+
+var dataElementStr =
+'\
+  Optional {\
+    ?instanceUri a ?typeUri .\
+    Optional {\
+      ?typeUri2 <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?typeUri\
+    }\
+    Filter(!Bound(?typeUri2))\
+  }\
+  Optional { ?instanceUri <http://www.w3.org/2000/01/rdf-schema#label> ?instanceLabel . Filter(langMatches(lang(?instanceLabel), "de"))}\
+  Optional { ?instanceUri <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?lon }\
+  Optional { ?instanceUri <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat }\
+  Optional { ?instanceUri <http://www.w3.org/2000/01/rdf-schema#seeAlso> ?instancePage }\
+  Optional { ?typeUri <http://www.w3.org/2000/01/rdf-schema#label> ?typeLabel .Filter(langMatches(lang(?typeLabel), "en")) }\
+  Optional { ?typeUri <http://www.w3.org/2000/01/rdf-schema#seeAlso> ?typePage }\
+';
+
+        var dataElement = sparql.ElementString.create(dataElementStr);
         
+        var dataConcept = new facete.Concept(dataElement, rdf.NodeFactory.createVar('instanceUri'));
+        
+        var tableMod = new facete.TableMod();
+        //var vs = essentialElement.getVarsMentioned();
+        //var varNames = sparql.VarUtils.getVarNames(vs);
+        var varNames = ['instanceLabel', 'typeLabel', 'instancePage', 'typePage', 'instanceUri', 'typeUri', 'lon', 'lat'];
+        _(varNames).each(function(varName) {
+            tableMod.addColumn(varName);
+        });
+        
+        var varMap = new util.HashMap();
+        var vs = rdf.NodeFactory.createVar('s');
+        var viu = rdf.NodeFactory.createVar('instanceUri');
+        varMap.put(vs, viu);
+        
+        var facetTreeConfig = $scope.active.facetTreeConfig;
+        var baseFacetConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+        var facetConceptFactory = new facete.ConceptFactoryRename(baseFacetConceptFactory, varMap);
+        
+        var facetElementFactory = new facete.ElementFactoryConceptFactory(facetConceptFactory);        
+        
+ 
+        var dataElementFactory = new sparql.ElementFactoryConst(dataConcept.getElement());
+        var renamedFilterConceptFactory = new facete.ConceptFactoryRename(filterConceptFactory, varMap);
+
+        var filterElementFactory = new facete.ElementFactoryConceptFactory(renamedFilterConceptFactory);
+
+        //debugger;
+        // NOTE We assume the data and filter concept share the same variables
+        var elementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, filterElementFactory]);
+                
+            
+        var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
+                       
+            
+        $scope.active.essentialFacetTableConfig = {
+            queryFactory: queryFactory,
+            tableMod: tableMod
+        };
+        
+
+        var allElementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, facetElementFactory]);
+        var allQueryFactory = new facete.QueryFactoryTableMod(allElementFactory, tableMod);
+        $scope.active.allEssentialFacetTableConfig = {
+            queryFactory: allQueryFactory,
+            tableMod: tableMod
+        };
+    };
+
 
     }]);
 	</script>
@@ -1336,7 +1533,7 @@
 		</div>
 	</nav>
 
-	<div style="position: absolute; top: 50px; left: 0px; width: 500px; bottom: 0px; overflow: auto; padding: 5px; pointer-events:none">
+	<div style="position: absolute; top: 50px; left: 0px; width: 500px; bottom: 0px; overflow: auto; padding: 5px; pointer-events:none" pointer-events-scroll-fix>
 
 
 		<accordion close-others="false">
@@ -1446,9 +1643,10 @@
 	</div>
 
 
+    <!-- Note: This div has overflow auto set, but actually it should never be needed -->
 	<div style="position: absolute; margin: 0px; bottom: 20px; left: 530px; top: 50px; right: 5px; overflow: auto; pointer-events: none;">
 
-		<accordion style="background-color: white; position: absolute; bottom: 0px; left: 0px; max-height: 100%; min-height: 50px; min-width: 50px; pointer-events: auto;" resizable="resizableConfig" bounds="app.data.bounds" ng-style="!app.data.isOpen && {width: '', height: ''}">
+		<accordion style="background-color: white; position: absolute; overflow:auto; bottom: 0px; left: 0px; max-height: 100%; min-height: 50px; min-width: 50px; pointer-events: auto;" resizable="resizableConfig" bounds="app.data.bounds" ng-style="!app.data.isOpen && {width: '', height: ''}">
 			<accordion-group is-open="app.data.isOpen">
 				<accordion-heading>
 					<i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.data.isOpen, 'glyphicon-chevron-right': !app.data.isOpen}"></i>
@@ -1456,15 +1654,22 @@
 				</accordion-heading>
 			
 				<tabset>
-					<tab heading="All">
+					<tab heading="All" active="app.data.tabs[0].isActive">
 						<button class="btn btn-primary" ng-click="exportAll()">Export</button>
-						<sparql-table sparql-service="active.sparqlService" config="active.allFacetTableConfig"></sparql-table>
+						<sparql-table sparql-service="active.sparqlService" config="active.allFacetTableConfig" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
 					</tab>
 		
-					<tab heading="Selection">
-						<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig"></sparql-table>
+					<tab heading="Selection" active="app.data.tabs[1].isActive">
+						<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig" disable-requests="!app.data.tabs[1].isActive"></sparql-table>
 					</tab>
 
+                    <tab heading="Essential (All)" active="app.data.tabs[2].isActive">
+                        <sparql-table sparql-service="active.sparqlService" config="active.allEssentialFacetTableConfig" disable-requests="!app.data.tabs[2].isActive"></sparql-table>
+                    </tab>
+
+                    <tab heading="Essential (Selection)" active="app.data.tabs[3].isActive">
+                        <sparql-table sparql-service="active.sparqlService" config="active.essentialFacetTableConfig" disable-requests="!app.data.tabs[3].isActive"></sparql-table>
+                    </tab>
 
 <!-- 					<tab heading="Interlinking"> -->
 <!-- 						<form class="well form-horizontal"> -->
