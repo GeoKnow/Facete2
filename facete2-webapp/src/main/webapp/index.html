@@ -12,6 +12,7 @@
 
     <!-- bower:css -->
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css" />
     <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
     <link rel="stylesheet" href="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers.css" />
     <!-- endbower -->
@@ -69,7 +70,7 @@
     <script src="bower_components/jassa/jassa.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="bower_components/ng-grid-bower/ng-grid.js"></script>
+    <script src="bower_components/ng-grid/build/ng-grid.js"></script>
     <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
     <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
@@ -83,6 +84,8 @@
     <script src="scripts/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
     <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
     <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
+
+    <script src="scripts/lib/snowball/Snowball.js"></script>
 
     <!-- endbuild -->
 
@@ -106,7 +109,47 @@
 	
 	var client = Jassa.client;
 
-    var myModule = angular.module('Facete2', ['ui.bootstrap', 'ui.jassa', 'ngGrid', 'ui.jassa.openlayers', 'ngSanitize']);
+    var myModule = angular.module('Facete2', ['ui.bootstrap', 'ui.jassa', 'ngGrid', 'ui.jassa.openlayers', 'ngSanitize'], function($rootScopeProvider) { 
+        $rootScopeProvider.digestTtl(10); 
+    }); 
+
+
+    var ValueResolver = Class.create({
+        resolve: function(value) {
+            console.log('"resolve" not overridden');
+            throw '"resolve" not overridden';
+        },
+        
+        resolveAll: function(values) {
+            
+        }
+    });
+    
+    var ValueResolverSponate = Class.create({
+        initialize: function(store) {
+            this.store = store;
+        },
+        
+        resolve: function(value) {
+            //store.node(value).find().asSingle();
+        },
+        
+        resolveAll: function(values) {
+            //store.nodes.(vaues).find.asPairs();
+        }
+    });
+    
+    
+    
+    
+    
+//  var snowball = new Snowball('english');
+//  snowball.setCurrent('airports');
+//  snowball.stem();
+//  alert(snowball.getCurrent());
+
+//  // Create a bif:contains qurey
+//  var conceptFactory
 
     
     util.LabelService = Class.create({
@@ -130,6 +173,133 @@
         }
     });
     
+
+/**
+ * Maybe this should be a generic 'object' directive...
+ * A context menu would be a nice addition...
+ *
+ * issue: even if we have service and value, how can we deal with the case when we want labels
+ * to originate from different endpoints?
+ * {
+ *   serviceKey: {uri, defaultGraphs},      
+ *   value: new facete.Path(),   
+ * } 
+ *
+ * The serviceKey is an additional attribute that specifies against which service to resolve the value.
+ *
+ * But maybe the context menu addition could be a directive on the outside???
+ * e.g. <inline-context service="foo" data="bar"><object-view service="baz" data="baa"></object-view>
+ */
+myModule.directive('jassaLabel', function() {
+    return {
+        restrict: 'AE',
+        scope: {
+            service: '=',
+            expr: '=',
+            label: '=',
+            template: '<span>{{label}}</span>'
+        },
+        compile: function() {
+            return {
+                pre: function(scope, elem, attrs) {
+                    scope.on('$destroy', function() {
+                        var service = scope.service;
+
+                        if(service) {
+                            service.unregister(this);
+                        }                        
+                    });
+                    
+                    scope.$watch('service', function(newService, oldService) {
+                        if(oldService) {
+                            oldService.unregister(this);
+                        }
+                        
+                        if(newService) {
+                            newService.register(this);
+                        }
+                    });
+                    
+                    scope.$watch('expr', function(newValue) {
+                        var promise = service.request(newValue);
+                        promise.then(function(label) {
+                            scope.label = label;
+                        });
+                    });
+                    
+                    if(!scope.bounds) {
+                        scope.bounds = {};
+                    }
+
+                    var isInitialized = false;
+
+                    var onConfigChange = function(newConfig) {
+                        //console.log('Setting config', newConfig);
+                        if(isInitialized) {
+                            jQuery(elem).resizable('destroy');
+                        }
+
+                        jQuery(elem).resizable(newConfig);
+                        
+                        isInitialized = true;
+                    };
+                    
+
+                    var propNames = ['top', 'bottom', 'width', 'height'];
+                    
+                    var getCssPropMap = function(propNames) {
+                        var data = elem.prop('style');
+                        var result = _(data).pick(propNames);
+                        
+                        return result;
+                    };
+                    
+                    var setCssPropMap = function(propMap) {
+                        _(propMap).each(function(v, k) {
+                            //console.log('css prop', k, v);
+                            elem.css(k, v);
+                        });
+                    };
+
+                    var bounds = getCssPropMap(propNames);
+                    angular.copy(bounds, scope.bounds);
+                    
+                    if(scope.onResizeInit) {
+                        scope.onResizeInit({
+                            bounds: bounds
+                        });
+                    }
+                    
+                    var onBoundsChange = function(newBounds, oldBounds) {
+                        //console.log('setting bounds', newBounds, oldBounds);
+                        setCssPropMap(newBounds);
+                    };
+                    
+                    scope.$watch('bounds', onBoundsChange, true);
+
+                    jQuery(elem).on('resizestop', function (evt, ui) {
+                        
+                        var bounds = getCssPropMap(propNames);
+                        angular.copy(bounds, scope.bounds);
+                        //console.log('sigh', bounds);
+                        
+                        if (scope.onResize) {
+                            scope.onResize(evt, ui, bounds);
+                        }
+                        
+                        if(!scope.$$phase) {
+                            scope.$apply();
+                        }
+                    });
+
+                    scope.$watch('resizable', onConfigChange);
+                    //onConfigChange(scope.resizable);
+                }
+            };
+        }
+    };
+})
+
     
     
     sparql.ElementFactoryTransform = Class.create(sparql.ElementFactory, {
@@ -252,6 +422,8 @@
     
     myModule.controller('MyCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
 
+                
+        
         /**
          * Used for progress bar
          */
@@ -896,6 +1068,8 @@
     */
 		};
 		        
+		var hashToService = {};
+		
        	var refreshServices = function(config) {
        	    if(!config) {
 				return;
@@ -905,11 +1079,35 @@
 
             var facetTreeConfig = config.facetTreeConfig;
             
-    		var sparqlService = new service.SparqlServiceHttp('cache/sparql', dataCnf.defaultGraphIris, {}, {'service-uri': dataCnf.serviceIri});
+            var serviceState = {
+                url: 'cache/sparql',
+                defaultGraphIris: dataCnf.defaultGraphIris,
+                ajaxOptions: {},
+                httpOptions: {
+                    'service-uri': dataCnf.serviceIri
+                }
+            };
+            
+            var serviceHash = util.ObjectUtils.hashCode(serviceState);
+            var sparqlService = hashToService[serviceHash];
+                        
+            if(!sparqlService) {
+                //alert('Service: ' + serviceHash);
 
-    		sparqlService = new service.SparqlServiceCache(sparqlService);
-    		sparqlService = new service.SparqlServicePaginate(sparqlService, 1000);
-
+	    		sparqlService = new service.SparqlServiceHttp('cache/sparql', dataCnf.defaultGraphIris, {}, {'service-uri': dataCnf.serviceIri});
+	            //var sparqlService = new service.SparqlServiceHttp(dataCnf.serviceIri, dataCnf.defaultGraphIris);
+	    		
+	    		sparqlService = new service.SparqlServiceCache(sparqlService);
+	            sparqlService = new service.SparqlServiceVirtFix(sparqlService);
+	    		sparqlService = new service.SparqlServicePaginate(sparqlService, 1000);
+	    		
+	    		hashToService[serviceHash] = sparqlService;
+            }
+            else {
+                console.log('Service reused: ', serviceHash);
+            }
+            
+            
     		$scope.active.sparqlService = sparqlService;		
             $scope.active.facetTreeConfig = facetTreeConfig;
 
@@ -1024,6 +1222,14 @@
 		    }
 		});
 		
+		//active.allFacetTableConfig
+		//active.sparqlService
+		//$scope.$watch('ObjectUtils.hashCode(active.allFacetTableConfig)', function(n, o) {
+// 		$scope.$watch('active.allFacetTableConfig', function(n, o) {
+// 		    //console.log('Service changed [old]', o);
+// 		    console.log('Service changed [now]', n);
+// 		    debugger;
+// 		});
 		
 		$scope.$watch('ObjectUtils.hashCode(active.facetTreeConfig)', function() {
             var config = $scope.active.service;
@@ -1656,19 +1862,19 @@ var dataElementStr =
 				<tabset>
 					<tab heading="All" active="app.data.tabs[0].isActive">
 						<button class="btn btn-primary" ng-click="exportAll()">Export</button>
-						<sparql-table sparql-service="active.sparqlService" config="active.allFacetTableConfig" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
+						<sparql-grid sparql-service="active.sparqlService" config="active.allFacetTableConfig" disable-requests="!app.data.tabs[0].isActive"></sparql-grid>
 					</tab>
 		
 					<tab heading="Selection" active="app.data.tabs[1].isActive">
-						<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig" disable-requests="!app.data.tabs[1].isActive"></sparql-table>
+						<sparql-grid sparql-service="active.sparqlService" config="active.facetTableConfig" disable-requests="!app.data.tabs[1].isActive"></sparql-grid>
 					</tab>
 
                     <tab heading="Essential (All)" active="app.data.tabs[2].isActive">
-                        <sparql-table sparql-service="active.sparqlService" config="active.allEssentialFacetTableConfig" disable-requests="!app.data.tabs[2].isActive"></sparql-table>
+                        <sparql-grid sparql-service="active.sparqlService" config="active.allEssentialFacetTableConfig" disable-requests="!app.data.tabs[2].isActive"></sparql-grid>
                     </tab>
 
                     <tab heading="Essential (Selection)" active="app.data.tabs[3].isActive">
-                        <sparql-table sparql-service="active.sparqlService" config="active.essentialFacetTableConfig" disable-requests="!app.data.tabs[3].isActive"></sparql-table>
+                        <sparql-grid sparql-service="active.sparqlService" config="active.essentialFacetTableConfig" disable-requests="!app.data.tabs[3].isActive"></sparql-grid>
                     </tab>
 
 <!-- 					<tab heading="Interlinking"> -->
