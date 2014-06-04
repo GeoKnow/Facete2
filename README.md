@@ -20,6 +20,8 @@ Import the public key with
     sudo su
     wget -O - http://cstadler.aksw.org/repos/apt/conf/packages.precise.gpg.key | apt-key add -
 
+Please note that you have to adjust some settings; check the prerequisites section of [this guide](https://github.com/AKSW/Sparqlify/tree/master/sparqlify-debian-tomcat7).
+
 Install the application with
 
     sudo apt-get install facete2-tomcat7
