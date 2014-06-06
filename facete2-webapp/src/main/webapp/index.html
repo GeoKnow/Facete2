@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css" />
     <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
     <link rel="stylesheet" href="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers.css" />
+    <link rel="stylesheet" href="bower_components/ng-table/ng-table.css" />
     <!-- endbower -->
 
 	<link rel="stylesheet" href="bower_components/ng-grid-bower/ng-grid.css" />
@@ -44,6 +45,9 @@
         background-color: #ddddff;
     }
 
+    .panel-body {
+        overflow: auto;
+    }
 /*     .panel-group { */
 /*         max-height: 100%; */
 /*         max-width: 100%; */
@@ -75,6 +79,7 @@
     <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
     <script src="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers-tpls.js"></script>
+    <script src="bower_components/ng-table/ng-table.js"></script>
     <!-- endbower -->
 
 
@@ -109,7 +114,7 @@
 	
 	var client = Jassa.client;
 
-    var myModule = angular.module('Facete2', ['ui.bootstrap', 'ui.jassa', 'ngGrid', 'ui.jassa.openlayers', 'ngSanitize'], function($rootScopeProvider) { 
+    var myModule = angular.module('Facete2', ['ui.bootstrap', 'ui.jassa', 'ngGrid', 'ngTable', 'ui.jassa.openlayers', 'ngSanitize'], function($rootScopeProvider) { 
         $rootScopeProvider.digestTtl(10); 
     }); 
 
@@ -172,7 +177,298 @@
             // TODO Implement
         }
     });
+
+myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($scope, $rootScope, $q) {
     
+
+    var rdf = jassa.rdf;
+    var sparql = jassa.sparql;
+    var service = jassa.service;
+    var util = jassa.util;
+    var facete = jassa.facete;    
+    var sponate = jassa.sponate;
+    
+    var syncTableMod = function(sortInfo, tableMod) {
+        
+        var newSortConditions = [];
+        for(var i = 0; i < sortInfo.fields.length; ++i) {
+            var columnId = sortInfo.fields[i];
+            var dir = sortInfo.directions[i];
+            
+            var d = 0;
+            if(dir === 'asc') {
+                d = 1;
+            }
+            else if(dir === 'desc') {
+                d = -1;
+            }
+            
+            if(d !== 0) {
+                var sortCondition = new facete.SortCondition(columnId, d);
+                newSortConditions.push(sortCondition);
+            }
+        }
+
+        var oldSortConditions = tableMod.getSortConditions();
+        
+        var isTheSame = _(newSortConditions).isEqual(oldSortConditions);
+        if(!isTheSame) {
+            util.ArrayUtils.replace(oldSortConditions, newSortConditions);
+        }
+
+    };
+
+    
+    var createTableService = function() {
+        var config = $scope.config;
+        
+        var sparqlService = $scope.sparqlService;
+        var queryFactory = config ? config.queryFactory : null;
+        
+        var query = queryFactory ? queryFactory.createQuery() : null;
+        
+        var result = new service.SparqlTableService(sparqlService, query);
+        
+        return result;
+    };
+
+    var sync = function() {
+        var config = $scope.config;
+
+        var tableMod = config ? config.tableMod : null;
+
+        if(tableMod != null) {
+            syncTableMod($scope.gridOptions.sortInfo, tableMod);
+        }
+    };
+
+    
+    $scope.$watch('gridOptions.sortInfo', function(sortInfo) {
+        
+        sync();
+        
+        $scope.refreshData();
+    }, true);
+
+
+    $scope.$watch('[pagingOptions, filterOptions]', function (newVal, oldVal) {
+        $scope.refreshData();
+    }, true);
+    
+    var update = function() {
+        $scope.refresh();
+    };
+    
+    
+    $scope.ObjectUtils = util.ObjectUtils;
+    $scope.Math = Math;
+
+    $scope.$watch('[ObjectUtils.hashCode(config), disableRequests]', function (newVal, oldVal) {
+        update();
+    }, true);
+    
+    $scope.$watch('sparqlService', function() {
+        update();
+    });
+    
+    
+    $scope.totalServerItems = 0;
+        
+    $scope.pagingOptions = {
+        pageSizes: [10, 50, 100],
+        pageSize: 10,
+        currentPage: 1
+    };
+    
+    $scope.selectPage = function() {
+
+    };
+
+    $scope.refresh = function() {
+        var tableService = createTableService();
+
+        if($scope.disableRequests) {
+            util.ArrayUtils.clear($scope.myData);
+            return;
+        }
+        
+
+        $scope.refreshSchema(tableService);
+        $scope.refreshPageCount(tableService);
+        $scope.refreshData(tableService);
+    };
+
+    $scope.refreshSchema = function(tableService) {
+        tableService = tableService || createTableService();
+
+        var oldSchema = $scope.colDefs;
+        var newSchema = tableService.getSchema();
+        
+        var isTheSame = _(newSchema).isEqual(oldSchema);
+        if(!isTheSame) {
+            $scope.colDefs = newSchema;
+        }
+    };
+
+    $scope.refreshPageCount = function(tableService) {
+        tableService = tableService || createTableService();
+        
+        var promise = tableService.fetchCount();
+
+        jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(countInfo) {
+            // Note: There is also countInfo.hasMoreItems and countInfo.limit (limit where the count was cut off)
+            $scope.totalServerItems = countInfo.count;
+        });
+    };
+    
+    $scope.refreshData = function(tableService) {
+        tableService = tableService || createTableService();
+
+        var page = $scope.pagingOptions.currentPage;
+        var pageSize = $scope.pagingOptions.pageSize;
+        
+        var offset = (page - 1) * pageSize;
+
+        
+        var promise = tableService.fetchData(pageSize, offset);
+
+        jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(data) {
+            var isTheSame = _(data).isEqual($scope.myData);
+            if(!isTheSame) {
+                $scope.myData = data;
+            }
+            //util.ArrayUtils.replace($scope.myData, data);
+            
+            // Using equals gives digest iterations exceeded errors; could be https://github.com/angular-ui/ng-grid/issues/873
+            //$scope.myData = data;
+        });
+    };
+
+        
+//     var plugins = [];
+    
+//     if(ngGridFlexibleHeightPlugin) {
+//         // js-hint will complain on lower case ctor call
+//         var PluginCtor = ngGridFlexibleHeightPlugin;
+        
+//         plugins.push(new PluginCtor(30));
+//     }
+    
+    /*
+    $scope.$watch('[totalServerItems, pagingOptions.pageSize]', function(val) {
+        $scope.numPages = Math.ceil($scope.totalServerItems / $scope.pagingOptions.pageSize);
+    }, true);
+    */
+    //$scope.numPages = 10;
+    $scope.maxSize = 7;
+    
+    $scope.myData = [];
+    
+    $scope.getSortDir = function(field) {
+        var map = {};
+        var fields = $scope.gridOptions.sortInfo.fields;
+        var dirs = $scope.gridOptions.sortInfo.directions;
+        
+        var n = Math.max(fields.length, dirs.length);
+        for(var i = 0; i < n; ++i) {
+            var f = fields[i];
+            var dir = dirs[i];
+            
+            map[f] = dir;
+        }
+        
+        var result = map[field];
+        return result;
+    }
+
+    $scope.setSortCondition = function(field, dir, append) {
+        var fields = $scope.gridOptions.sortInfo.fields;
+        var dirs = $scope.gridOptions.sortInfo.directions;
+        
+        if(!append) {
+            jassa.util.ArrayUtils.replace(fields, [field]);
+            jassa.util.ArrayUtils.replace(dirs, [dir]);
+        } else {
+            var indexes = jassa.util.ArrayUtils.indexesOf(fields, field);
+            
+            jassa.util.ArrayUtils.removeIndexes(fields, indexes);
+            jassa.util.ArrayUtils.removeIndexes(dirs, indexes);
+
+            fields.push(field);
+            dirs.push(dir);
+        }
+        //alert(append);
+    }
+    
+    $scope.gridOptions = {
+        data: 'myData',
+        enablePaging: true,
+        useExternalSorting: true,
+        showFooter: true,
+        totalServerItems: 'totalServerItems',
+        enableHighlighting: true,
+        sortInfo: {
+            fields: [],
+            directions: []
+            //columns: []
+        },
+        pagingOptions: $scope.pagingOptions,
+        filterOptions: $scope.filterOptions,
+        //plugins: plugins,
+        columnDefs: 'colDefs'
+    };
+
+//     $scope.tableParams = new ngTableParams({
+//         page: 1,            // show first page
+//         count: 10           // count per page
+//     }, {
+//         total: data.length, // length of data
+//         getData: function($defer, params) {
+//             $defer.resolve(data.slice((params.page() - 1) * params.count(), params.page() * params.count()));
+//         }
+//     });
+
+//     $scope.tableParams = new ngTableParams({
+//         page: 1,            // show first page
+//         count: 10,          // count per page
+//         sorting: {
+//             //name: 'asc'     // initial sorting
+//         }
+//     }, {
+//         total: 0,           // length of data
+//         getData: function($defer, params) {
+//             // ajax request to api
+//             Api.get(params.url(), function(data) {
+//                 $timeout(function() {
+//                     // update table params
+//                     params.total(data.total);
+//                     // set new data
+//                     $defer.resolve(data.result);
+//                 }, 500);
+//             });
+//         }
+//     });
+}]);
+
+myModule.directive('sparqlTable', [function() {
+    return {
+        restrict: 'EA',
+        replace: true,
+        templateUrl: 'partials/sparql-table/sparql-table.html',
+        transclude: false,
+        scope: {
+            sparqlService: '=',
+            config: '=',
+            disableRequests: '='
+//            onSelect: '&select',
+//            onUnselect: '&unselect'
+        },
+        controller: 'SparqlTableCtrl',
+        link: function (scope, element, attrs) {
+                
+        }
+    }
+}]);
 
 /**
  * Maybe this should be a generic 'object' directive...
@@ -189,7 +485,7 @@
  *
  * But maybe the context menu addition could be a directive on the outside???
  * e.g. <inline-context service="foo" data="bar"><object-view service="baz" data="baa"></object-view>
- */
+ */ 
 myModule.directive('jassaLabel', function() {
     return {
         restrict: 'AE',
@@ -298,7 +594,9 @@ myModule.directive('jassaLabel', function() {
             };
         }
     };
-})
+});
+ 
+ 
 
     
     
@@ -419,10 +717,183 @@ myModule.directive('jassaLabel', function() {
 	    });
     })();
     
-    
-    myModule.controller('MyCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
+//     var refEquals = function(a, b) {
+//         var result = a == b;
+//         return result;
+//     };
 
+//     var uniqRefs = function(arr) {
+//         var result = [];
+//         _(arr).each(function(item) {
+//             var found = _(result).find(result, refEquals);
+//             if(!found) {
+//                 result.push(item);
+//             }
+//         });
+        
+//         return result;
+//     };
+    
+    var SponateLookupServiceImpl = Class.create({
+        initialize: function(source, query, v, requestCache) {
+            // FIXME By flow we mean e.g. store.labels
+            this.source = source;
+
+            this.requestCache = requestCache || new service.RequestCache();
+        },
+        
+        /**
+         * Function for actually retrieving data from the underlying service and updating caches as needed.
+         *
+         * Don't call this method directly; it may corrupt caches!
+         */
+        fetchDocs: function(nodes) {
+            var resultCache = this.requestCache.getResultCache();
+            
+            var executionCache = this.requestCache.getExecutionCache();
+
+            var result = this.source.find().nodes(nodes).asList(true).pipe(function(docs) {
                 
+                var r = new util.HashMap();
+
+                _(docs).each(function(doc) {
+                    var id = doc.id;
+                    resultCache.setItem('' + id, doc);
+                    r.put(id, doc);
+                });
+
+                _(nodes).each(function(item) {
+                    delete executionCache['' + item];
+                });
+                
+                return r;
+            });
+
+            _(nodes).each(function(item) {
+                executionCache['' + item] = result;
+            });
+            
+            
+            return result;
+        },
+        
+        lookup: function(nodes) {
+            var self = this;
+
+            //console.log('cache status [BEFORE] ' + JSON.stringify(self.requestCache));
+
+            // Make nodes unique
+            var uniq = _(nodes).uniq(false, function(x) {
+                // FIXME Meh, uniq only supports transformations but not a custom equals method
+                //return util.defaultEquals(a, b);
+                return '' + x;
+            });
+
+            var resultMap = new util.HashMap();
+
+            var resultCache = this.requestCache.getResultCache();
+            var executionCache = this.requestCache.getExecutionCache();
+            
+            // Check whether we need to wait for promises that are already executing
+            var open = [];
+            var waitForNodes = [];
+            var waitForPromises = [];
+            
+            _(uniq).each(function(node) {
+                var id = '' + node;
+
+                var val = resultCache.getItem(id);
+                if(!val) {
+                    
+                    var promise = executionCache[id];
+                    if(promise) {
+                        waitForNodes.push(node);
+
+                        var found = _(waitForPromises).find(function(x) {
+                            var r = x == promise;
+                            return r;
+                        });
+
+                        if(!found) {
+                            waitForPromises.push(promise);
+                        }
+                    }
+                    else {
+                        open.push(node);
+                        waitForNodes.push(node);
+                    }
+                } else {
+                    resultMap.put(node, val);
+                }
+            });
+            
+            
+            if(open.length > 0) {
+                var p = this.fetchDocs(open);
+                waitForPromises.push(p);
+            }
+            
+            var result = jQuery.when.apply(window, waitForPromises).pipe(function() {
+                var maps = arguments;
+                _(waitForNodes).each(function(node) {
+                    
+                    var val = null;
+                    _(maps).find(function(map) {
+                        val = map.get(node);
+                        return !!val;
+                    });
+                    
+                    if(val) {
+                        resultMap.put(node, val);
+                    }
+                });
+                
+                return resultMap;
+            });
+            
+            return result;
+        }
+    });
+        
+    
+    myModule.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
+
+        
+        // Quick test of the the .nodes() parameter
+        if(false) {
+            var sparqlService = new service.SparqlServiceHttp('http://dbpedia.org/sparql', ['http://dbpedia.org']);
+
+            var nodes = [rdf.NodeFactory.createUri('http://dbpedia.org/resource/London'), rdf.NodeFactory.createUri('http://dbpedia.org/resource/Leipzig')];
+            var store = new sponate.StoreFacade(sparqlService);
+            
+            var labelMap = sponate.SponateUtils.createDefaultLabelMap();
+            store.addMap(labelMap, 'labels');
+            var labelsStore = store.labels;    
+
+            var labelService = new SponateLookupServiceImpl(labelsStore);
+            for(var i = 0; i < 10; ++i) {
+	            (function(i) {
+		            labelService.lookup(nodes).done(function(result) {
+		                console.log('lookup result [' + i + ']: ' + JSON.stringify(result.entries()));
+		            });
+	                labelService.lookup([nodes[0]]).done(function(result) {
+	                    console.log('lookup result [' + i + ']: ' + JSON.stringify(result.entries()));
+	                });
+	                labelService.lookup([nodes[1]]).done(function(result) {
+	                    console.log('lookup result [' + i + ']: ' + JSON.stringify(result.entries()));
+	                });
+	            })(i);
+            }
+            
+            /*
+            store.labels.find().nodes(nodes).asList().done(function(result) {
+                alert(JSON.stringify(result));
+            });
+            */
+
+        }   
+            
+
         
         /**
          * Used for progress bar
@@ -446,7 +917,7 @@ myModule.directive('jassaLabel', function() {
    			},
    			data: {
    				isOpen: false,
-   				tabs: [{isActive: true}, {isActive: false}, {isActive: false}, {isActive: false}],
+   				tabs: [{isActive: true}, {isActive: false}, {isActive: false}, {isActive: false}, {isActive: false}],
    				originalBounds: {}, // Bounds to restore size
    				bounds: {} // Bounds for current size; watched and synced by the directive
    			},
@@ -671,11 +1142,17 @@ myModule.directive('jassaLabel', function() {
 
 
 		var facetTreeConfig = new facete.FacetTreeConfig();
+        var targetFacetTreeConfig = new facete.FacetTreeConfig();
 
+		
 		// On startup, expand the root facet node
 		var rootPath = new facete.Path()
 		facetTreeConfig.getExpansionSet().add(rootPath);
 		facetTreeConfig.getExpansionMap().put(rootPath, 1);
+
+        targetFacetTreeConfig.getExpansionSet().add(rootPath);
+        targetFacetTreeConfig.getExpansionMap().put(rootPath, 1);
+
 		
 		var facetConfig = facetTreeConfig.getFacetConfig();
 		var pathTaggerManager = facetConfig.getPathTaggerManager()
@@ -1007,8 +1484,33 @@ myModule.directive('jassaLabel', function() {
         
         // On startup, show the list of types
         $scope.active.path = facete.Path.parse(vocab.rdf.type.getUri());
+        $scope.active.targetPath = facete.Path.parse(vocab.rdf.type.getUri());
 
 
+        $scope.findConceptPaths = function(sourceConcept, targetConcept) {
+            var conceptPathFinder = $scope.active.conceptPathFinder;
+
+            var promise = conceptPathFinder.findPaths(sourceConcept, targetConcept);
+            var result = sponate.angular.bridgePromise(promise, $q.defer(), $rootScope, function(paths) {
+                var tmp = _(paths).map(function(path) {
+
+                    var pathName = path.toString();
+                    if(pathName === '') {
+                        pathName = '(empty path)';
+                    }
+
+                    var r = {
+                        name: pathName,
+                        path: path
+                    };
+                    return r;
+                });
+                
+                return tmp;
+            });
+            
+            return result;
+        };
 		
 		/*
 		 * Concept Path Finding
@@ -1025,7 +1527,8 @@ myModule.directive('jassaLabel', function() {
 		    var geoConcept = config.mapConfig.geoConcept;
 		    
 		    var conceptPathFinder = new client.ConceptPathFinderApi(conceptPathFinderApiUrl, sparqlServiceIri, defaultGraphIris, joinSummaryServiceIri, joinSummaryDefaultGraphIris);
-
+            $scope.active.conceptPathFinder = conceptPathFinder;
+		    
             var facetTreeConfig = config.facetTreeConfig;
     		var conceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
 
@@ -1042,7 +1545,12 @@ myModule.directive('jassaLabel', function() {
 // 			    alert('fail');
 // 			});
 			
+			$scope.findConceptPaths(sourceConcept, targetConcept).then(function(tmp) {
+			    $scope.active.geoPaths = tmp;
+			});
+			             
 			
+            /*
 		    var promise = conceptPathFinder.findPaths(sourceConcept, targetConcept);
 			var result = sponate.angular.bridgePromise(promise, $q.defer(), $rootScope, function(paths) {
 			    var tmp = _(paths).map(function(path) {
@@ -1110,6 +1618,7 @@ myModule.directive('jassaLabel', function() {
             
     		$scope.active.sparqlService = sparqlService;		
             $scope.active.facetTreeConfig = facetTreeConfig;
+            $scope.active.targetFacetTreeConfig = targetFacetTreeConfig;
 
             
             refreshEssentialTables();
@@ -1222,6 +1731,21 @@ myModule.directive('jassaLabel', function() {
 		    }
 		});
 		
+		
+		
+		$scope.$watch('ObjectUtils.hashCode(active.targetFacetTreeConfig)', function() {
+            var sourceConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+            var sourceConcept = sourceConceptFactory.createConcept();     
+
+            var targetConceptFactory = new facete.ConceptFactoryFacetTreeConfig(targetFacetTreeConfig);
+            var targetConcept = targetConceptFactory.createConcept();     
+            
+		    $scope.findConceptPaths(sourceConcept, targetConcept).then(function(tmp) {
+                $scope.active.targetGeoPaths = tmp;
+            });
+		    
+		});
+		
 		//active.allFacetTableConfig
 		//active.sparqlService
 		//$scope.$watch('ObjectUtils.hashCode(active.allFacetTableConfig)', function(n, o) {
@@ -1252,6 +1776,10 @@ myModule.directive('jassaLabel', function() {
 
         $scope.selectFacet = function(path) {
             $scope.active.path = path;
+        };
+
+        $scope.selectTargetFacet = function(path) {
+            $scope.active.targetPath = path;
         };
 
         $scope.selectGeom = function(data) {
@@ -1664,7 +2192,7 @@ var dataElementStr =
 
 </head>
 
-<body ng-controller="MyCtrl">
+<body ng-controller="FaceteAppCtrl">
 
 	<nav class="navbar navbar-default" role="navigation">
 		<div class="container-fluid">
@@ -1850,9 +2378,9 @@ var dataElementStr =
 
 
     <!-- Note: This div has overflow auto set, but actually it should never be needed -->
-	<div style="position: absolute; margin: 0px; bottom: 20px; left: 530px; top: 50px; right: 5px; overflow: auto; pointer-events: none;">
+	<div style="position: absolute; margin: 0px; bottom: 20px; left: 530px; top: 50px; right: 5px; pointer-events: none;">
 
-		<accordion style="background-color: white; position: absolute; overflow:auto; bottom: 0px; left: 0px; max-height: 100%; min-height: 50px; min-width: 50px; pointer-events: auto;" resizable="resizableConfig" bounds="app.data.bounds" ng-style="!app.data.isOpen && {width: '', height: ''}">
+		<accordion style="background-color: white; position: absolute; overflow: auto; bottom: 0px; left: 0px; max-height: 100%; min-height: 50px; min-width: 50px; max-width: 100%; pointer-events: auto;" resizable="resizableConfig" bounds="app.data.bounds" ng-style="!app.data.isOpen && {width: '', height: ''}">
 			<accordion-group is-open="app.data.isOpen">
 				<accordion-heading>
 					<i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.data.isOpen, 'glyphicon-chevron-right': !app.data.isOpen}"></i>
@@ -1862,19 +2390,20 @@ var dataElementStr =
 				<tabset>
 					<tab heading="All" active="app.data.tabs[0].isActive">
 						<button class="btn btn-primary" ng-click="exportAll()">Export</button>
-						<sparql-grid sparql-service="active.sparqlService" config="active.allFacetTableConfig" disable-requests="!app.data.tabs[0].isActive"></sparql-grid>
+<!-- 						<sparql-grid sparql-service="active.sparqlService" config="active.allFacetTableConfig" disable-requests="!app.data.tabs[0].isActive"></sparql-grid> -->
+                        <sparql-table sparql-service="active.sparqlService" config="active.allFacetTableConfig" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
 					</tab>
 		
 					<tab heading="Selection" active="app.data.tabs[1].isActive">
-						<sparql-grid sparql-service="active.sparqlService" config="active.facetTableConfig" disable-requests="!app.data.tabs[1].isActive"></sparql-grid>
+						<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig" disable-requests="!app.data.tabs[1].isActive"></sparql-table>
 					</tab>
 
                     <tab heading="Essential (All)" active="app.data.tabs[2].isActive">
-                        <sparql-grid sparql-service="active.sparqlService" config="active.allEssentialFacetTableConfig" disable-requests="!app.data.tabs[2].isActive"></sparql-grid>
+                        <sparql-table sparql-service="active.sparqlService" config="active.allEssentialFacetTableConfig" disable-requests="!app.data.tabs[2].isActive"></sparql-table>
                     </tab>
 
                     <tab heading="Essential (Selection)" active="app.data.tabs[3].isActive">
-                        <sparql-grid sparql-service="active.sparqlService" config="active.essentialFacetTableConfig" disable-requests="!app.data.tabs[3].isActive"></sparql-grid>
+                        <sparql-table sparql-service="active.sparqlService" config="active.essentialFacetTableConfig" disable-requests="!app.data.tabs[3].isActive"></sparql-table>
                     </tab>
 
 <!-- 					<tab heading="Interlinking"> -->
@@ -1889,6 +2418,45 @@ var dataElementStr =
 <!-- 							<button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>			 -->
 <!-- 		            	</form> -->
 <!-- 					</tab> -->
+                    <tab heading="Find Relations" active="app.data.tabs[4].isActive">
+                        <table>
+                        <tr><td>
+			                <div class="panel panel-info"> 
+			                    <div class="panel-heading portlet-heading">
+			                        Facet Tree
+			                    </div>
+			                    <div class="panel-body">
+			                       <facet-tree sparql-service="active.sparqlService" facet-tree-config="active.targetFacetTreeConfig" select="selectTargetFacet(path)"></facet-tree>
+			                    </div>
+			                </div>
+			        
+			                <div class="panel panel-info"> 
+			                    <div class="panel-heading portlet-heading">
+			                        Facet Values
+			                    </div>
+			                    <div class="panel-body">
+			                        <facet-value-list sparql-service="active.sparqlService" facet-tree-config="active.targetFacetTreeConfig" path="active.targetPath"></facet-value-list>
+			                    </div>
+			                </div>
+			        
+			                <div class="panel panel-info"> 
+			                    <div class="panel-heading portlet-heading">
+			                        Constraints
+			                    </div>
+			                    <div class="panel-body">
+			                        <constraint-list sparql-service="active.sparqlService" facet-tree-config="active.targetFacetTreeConfig"></constraint-list>
+			                    </div>
+			                </div>
+			            </td><td>
+			                 Candidates
+			                 <ul>
+                            <li ng-repeat="geoPath in active.targetGeoPaths">
+                                <a href="">{{geoPath.name}}</a>
+                            </li>
+			                 </ul>
+                        </td></tr>
+			            </table>
+                    </tab>
 
 				</tabset>
 			</accordion-group>

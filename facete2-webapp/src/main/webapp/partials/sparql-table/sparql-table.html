@@ -1,0 +1,47 @@
+<div style="max-width: 100%; overflow: auto;">
+<div style="max-width: 100%; overflow: auto;">
+<table show-filter="true" class="table">
+    <thead>
+    <tr>
+<!--         <th ng-repeat="column in gridOptions.columnDefs" ng-show="column.visible" -->
+<!--             class="text-center sortable" ng-class="{ -->
+<!--                 'sort-asc': tableParams.isSortBy(column.field, 'asc'), -->
+<!--                 'sort-desc': tableParams.isSortBy(column.field, 'desc') -->
+<!--               }" -->
+<!--             ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')"> -->
+<!--             {{column.title}} -->
+<!--         </th> -->
+        <th ng-repeat="column in colDefs">
+            {{column}}
+            <a href="" ng-show="getSortDir(column.field) !== 'asc'" ng-click="setSortCondition(column.field, 'asc', $event.shiftKey)"><span class="glyphicon glyphicon-chevron-up"></span></a>
+            <a href="" ng-show="getSortDir(column.field) !== 'desc'" ng-click="setSortCondition(column.field, 'desc', $event.shiftKey)"><span class="glyphicon glyphicon-chevron-down"></span></a>
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <td ng-show="!(myData.length > 0)" colspan="{{colDefs.length}}" style="text-align:center">
+        This table is empty.
+    </td>
+
+    <tr ng-repeat="obj in myData">
+        <td ng-repeat="column in colDefs"> <!-- ng-show="column.visible">  -->
+        {{obj[column.field]}}
+        </td>
+    </tr>
+    </tbody>
+<!--     <tfoot> -->
+<!--         <tr> -->
+<!--             <td colspan="colDefs.length"> -->
+<!--             </td> -->
+<!--         </tr> -->
+<!--     </tfoot> -->
+</table>
+</div>
+<!-- <pagination class="pagination-small" total-items="totalServerItems" page="pagingOptions.currentPage" max-size="pagingOptions.pageSize" boundary-links="true" rotate="false" num-pages="Math.ceil(totalServerItems / pageOptions.pageSize)"></pagination> -->
+<pagination class="pagination-small" page="pagingOptions.currentPage" total-items="totalServerItems" items-per-page="pagingOptions.pageSize" max-Size="maxSize" boundary-links="true" rotate="false"></pagination>
+<br />
+<!-- <span>{{totalServerItems}} items in the table.</span> -->
+<span>Showing {{myData.length || 0}} entries in the positions {{myData.length ? (pagingOptions.currentPage - 1) * pagingOptions.pageSize + 1 : 0}} - {{(pagingOptions.currentPage - 1) * pagingOptions.pageSize + myData.length}} out of {{totalServerItems || 0}} items in total.</span>
+<!-- Num pages is {{numPages}} -->
+</div>
+
