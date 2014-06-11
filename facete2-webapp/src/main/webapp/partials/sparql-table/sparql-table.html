@@ -1,6 +1,6 @@
 <div style="max-width: 100%; overflow: auto;">
 <div style="max-width: 100%; overflow: auto;">
-<table show-filter="true" class="table">
+<table show-filter="true" class="table" ng-controller="ListController">
     <thead>
     <tr>
 <!--         <th ng-repeat="column in gridOptions.columnDefs" ng-show="column.visible" -->
@@ -11,21 +11,22 @@
 <!--             ng-click="tableParams.sorting(column.field, tableParams.isSortBy(column.field, 'asc') ? 'desc' : 'asc')"> -->
 <!--             {{column.title}} -->
 <!--         </th> -->
-        <th ng-repeat="column in colDefs">
-            {{column}}
-            <a href="" ng-show="getSortDir(column.field) !== 'asc'" ng-click="setSortCondition(column.field, 'asc', $event.shiftKey)"><span class="glyphicon glyphicon-chevron-up"></span></a>
-            <a href="" ng-show="getSortDir(column.field) !== 'desc'" ng-click="setSortCondition(column.field, 'desc', $event.shiftKey)"><span class="glyphicon glyphicon-chevron-down"></span></a>
+        <th ng-repeat="colDef in schema.colDefs">
+            {{colDef.displayName}}
+            <a href="" ng-show="getSortDir(colDef.field) !== 'asc'" ng-click="setSortCondition(colDef.field, 'asc', $event.shiftKey)"><span class="glyphicon glyphicon-chevron-up"></span></a>
+            <a href="" ng-show="getSortDir(colDef.field) !== 'desc'" ng-click="setSortCondition(colDef.field, 'desc', $event.shiftKey)"><span class="glyphicon glyphicon-chevron-down"></span></a>
         </th>
     </tr>
     </thead>
     <tbody>
-    <td ng-show="!(myData.length > 0)" colspan="{{colDefs.length}}" style="text-align:center">
+    <td ng-show="!(myData.length > 0)" colspan="{{schema.colDefs.length}}" style="text-align:center">
         This table is empty.
     </td>
 
-    <tr ng-repeat="obj in myData">
-        <td ng-repeat="column in colDefs"> <!-- ng-show="column.visible">  -->
-        {{obj[column.field]}}
+    <tr ng-repeat="row in myData">
+        <td class="show-on-hover-parent-inline" ng-repeat="colDef in schema.colDefs" ng-init="item = row[colDef.field]"> <!-- ng-show="column.visible">  -->
+            <span title="{{item.node.toString()}}" class="">{{item.displayLabel}} <span style="cursor: pointer;" ng-context-menu="menuOptions" class="show-on-hover-child glyphicon glyphicon-asterisk"></span></span>                       
+
         </td>
     </tr>
     </tbody>

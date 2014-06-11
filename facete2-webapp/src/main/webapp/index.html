@@ -48,6 +48,15 @@
     .panel-body {
         overflow: auto;
     }
+    
+    .show-on-hover-child {
+        display: none;    
+    }
+    
+    .show-on-hover-parent-inline:hover .show-on-hover-child {
+        display: inline;  
+    }
+    
 /*     .panel-group { */
 /*         max-height: 100%; */
 /*         max-width: 100%; */
@@ -114,6 +123,74 @@
 	
 	var client = Jassa.client;
 
+
+	
+    var ConceptFactoryTableConfigFacet = Class.create(facete.ConceptFactory, {
+        initialize: function(tableConfigFacet) {
+            this.tableConfigFacet = tableConfigFacet;
+        },
+        
+        createConcept: function() {
+            var result = this.tableConfigFacet.createDataConcept();
+            return result;
+        }
+    });
+
+
+    service.LookupServicePathLabels = Class.create(service.LookupServiceBase, {
+        initialize: function(lookupServiceBase) {
+            this.lookupServiceBase = lookupServiceBase;
+        },
+        
+        lookup: function(paths) {
+            var nodes = _(paths).chain()
+                // Get all unique mentioned property names and turn them to jassa nodes
+                .map(function(path) {
+                    var r = _(path.getSteps()).map(function(step) {
+                        return step.getPropertyName();
+                    });
+                    return r;
+                })
+                .flatten()
+                .uniq()
+                .map(function(propertyName) {
+                    return rdf.NodeFactory.createUri(propertyName);
+                })
+                .value();
+
+            // Do a lookup with all the nodes
+            var result = this.lookupServiceBase.lookup(nodes).pipe(function(map) {
+                var r = new util.HashMap();
+                _(paths).each(function(path) {
+                    var label = _(path.getSteps()).reduce(function(memo, step) {
+                        var result = memo;
+                        
+                        var property = rdf.NodeFactory.createUri(step.getPropertyName());
+                        var label = map.get(property);
+                        
+                        result = result === '' ? result : result + ' ';
+                        result += label;
+                        result = !step.isInverse() ? result : result + '&sup1';
+
+                        return result;
+                    }, '');
+                    
+                    if(label === '') {
+                        label = 'Items';
+                    }
+                    
+                    r.put(path, label);
+                });
+                
+                return r;
+            });
+
+            return result;
+        }
+    });
+	
+	
+	
     var myModule = angular.module('Facete2', ['ui.bootstrap', 'ui.jassa', 'ngGrid', 'ngTable', 'ui.jassa.openlayers', 'ngSanitize'], function($rootScopeProvider) { 
         $rootScopeProvider.digestTtl(10); 
     }); 
@@ -178,6 +255,8 @@
         }
     });
 
+    
+
 myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($scope, $rootScope, $q) {
     
 
@@ -219,23 +298,31 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
     };
 
     
+    
     var createTableService = function() {
-        var config = $scope.config;
+//         var config = $scope.config;
         
-        var sparqlService = $scope.sparqlService;
-        var queryFactory = config ? config.queryFactory : null;
+//         var sparqlService = $scope.sparqlService;
+//         var queryFactory = config ? config.queryFactory : null;
         
-        var query = queryFactory ? queryFactory.createQuery() : null;
+//         var query = queryFactory ? queryFactory.createQuery() : null;
         
-        var result = new service.SparqlTableService(sparqlService, query);
+//         //var result = new service.TableServiceSparqlQuery(sparqlService, query);
+//         var result = new service.TableServiceFacet(sparqlService, query);
         
-        return result;
+        //return $scope.tableService;
+        
+        var config = $scope.configSupplier();
+        $scope.tableService = $scope.tableServiceSupplier(config);
+        
+        return $scope.tableService;
     };
 
     var sync = function() {
-        var config = $scope.config;
-
-        var tableMod = config ? config.tableMod : null;
+        //var config = $scope.config;
+        //var tableMod = config ? config.tableMod : null;
+        
+        var tableMod = $scope.tableMod;
 
         if(tableMod != null) {
             syncTableMod($scope.gridOptions.sortInfo, tableMod);
@@ -263,11 +350,11 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
     $scope.ObjectUtils = util.ObjectUtils;
     $scope.Math = Math;
 
-    $scope.$watch('[ObjectUtils.hashCode(config), disableRequests]', function (newVal, oldVal) {
+    $scope.$watch('[ObjectUtils.hashCode(configSupplier()), ObjectUtils.hashCode(tableMod), disableRequests]', function (newVal, oldVal) {
         update();
     }, true);
     
-    $scope.$watch('sparqlService', function() {
+    $scope.$watch('tableServiceSupplier', function() {
         update();
     });
     
@@ -280,9 +367,8 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
         currentPage: 1
     };
     
-    $scope.selectPage = function() {
-
-    };
+//     $scope.selectPage = function() {
+//     };
 
     $scope.refresh = function() {
         var tableService = createTableService();
@@ -301,13 +387,15 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
     $scope.refreshSchema = function(tableService) {
         tableService = tableService || createTableService();
 
-        var oldSchema = $scope.colDefs;
-        var newSchema = tableService.getSchema();
-        
-        var isTheSame = _(newSchema).isEqual(oldSchema);
-        if(!isTheSame) {
-            $scope.colDefs = newSchema;
-        }
+        var oldSchema = $scope.schema;
+        var promise = tableService.fetchSchema();
+        jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(newSchema) {
+            var isTheSame = _(newSchema).isEqual(oldSchema);
+            if(!isTheSame) {
+
+                $scope.schema = newSchema;
+            }
+        });
     };
 
     $scope.refreshPageCount = function(tableService) {
@@ -329,12 +417,12 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
         
         var offset = (page - 1) * pageSize;
 
-        
         var promise = tableService.fetchData(pageSize, offset);
 
         jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(data) {
             var isTheSame = _(data).isEqual($scope.myData);
             if(!isTheSame) {
+
                 $scope.myData = data;
             }
             //util.ArrayUtils.replace($scope.myData, data);
@@ -415,7 +503,7 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
         pagingOptions: $scope.pagingOptions,
         filterOptions: $scope.filterOptions,
         //plugins: plugins,
-        columnDefs: 'colDefs'
+        columnDefs: 'schema.colDefs'
     };
 
 //     $scope.tableParams = new ngTableParams({
@@ -457,18 +545,171 @@ myModule.directive('sparqlTable', [function() {
         templateUrl: 'partials/sparql-table/sparql-table.html',
         transclude: false,
         scope: {
-            sparqlService: '=',
-            config: '=',
+//            sparqlService: '=',
+// TODO Would it be ok to say: The config object should hold (references to) all attributes whose change should cause the table to refresh? 
+            // A function that is expected to yield a table service
+            tableServiceSupplier: '=',
+            // Some config object that upon change will be passed to the tableServiceSupplier
+
+            configSupplier: '=',
+
+            // Hash function used to detect changes in the config object
+//            configHasher: '=',
+//            tableService: '=',
+
+            tableMod: '=',
             disableRequests: '='
 //            onSelect: '&select',
 //            onUnselect: '&unselect'
         },
         controller: 'SparqlTableCtrl',
         link: function (scope, element, attrs) {
-                
+//             if(!scope.configHasher) {
+//                 scope.configHasher = 
+//             }
         }
     }
 }]);
+
+/*
+myModule.controller("NodeCtrl", function($scope) {
+    $scope.isVisible = true;
+    $scope.hide = function() {
+      $scope.isVisible = false;
+    };
+});
+*/
+    
+myModule.controller('ListController', ['$scope',
+    function ($scope) {
+    $scope.player = {
+            gold: 100
+        };
+        $scope.items = [
+            { name: 'Small Health Potion', cost: 4 },
+            { name: 'Small Mana Potion', cost: 5 },
+            { name: 'Iron Short Sword', cost: 12 }
+        ];
+        $scope.menuOptions = [
+            ['View Resource in a new Data Tab', function ($itemScope) {
+                console.log('ItemScope', $itemScope);
+                //$scope.player.gold -= $itemScope.item.cost;
+            }],
+            null,
+            ['Filter by this value', function ($itemScope) {
+                //$scope.player.gold += $itemScope.item.cost;
+            }]
+        ];
+        
+        $scope.menuOptions = function($scope) {
+            var result = [];
+
+            var item = $scope.item;
+            var node = item ? item.node : null;
+            if(node && node.isUri && node.isUri()) {
+                result.push({
+                    //html: '<a href="' + node.getUri() + '">Show resource in new Browser Tab<a/>',
+                    text: 'Show resource in new browser tab',
+                    linkAttrs: {
+                        href: node.getUri(),
+                        target: '_blank'
+                    }
+                });
+            }
+            
+            return result;
+        };
+    }
+]);
+
+myModule.filter('sparqlLabel', function() {
+    return function(lookupService) {
+        
+    }
+});
+
+myModule.directive('ngContextMenu', function ($parse) {
+    var renderContextMenu = function ($scope, event, options) {
+        if (!$) { var $ = angular.element; }
+        $(event.target).addClass('context');
+        var $contextMenu = $('<div>');
+        $contextMenu.addClass('dropdown clearfix');
+        var $ul = $('<ul>');
+        $ul.addClass('dropdown-menu');
+        $ul.attr({ 'role': 'menu' });
+        $ul.css({
+            display: 'block',
+            position: 'absolute',
+            left: event.pageX + 'px',
+            top: event.pageY + 'px'
+        });
+        angular.forEach(options, function (item, i) {
+            var $li = $('<li>');
+            if (item === null) {
+                $li.addClass('divider');
+            } else {
+                $a = $('<a>');
+                $a.attr({ tabindex: '-1', href: '#' });
+                
+                if(item.linkAttrs) {
+                    $a.attr(item.linkAttrs);
+                }
+                
+                
+                $a.text(item.text);
+                $li.append($a);
+                $li.on('click', function () {
+                    $scope.$apply(function() {
+                        if(item.callback) {
+                            item.callback.call($scope, $scope);
+                        }
+                    });
+                });
+            }
+            $ul.append($li);
+        });
+        $contextMenu.append($ul);
+        $contextMenu.css({
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            zIndex: 9999
+        });
+        $(document).find('body').append($contextMenu);
+
+        $contextMenu
+            .on("click", function (e) {
+                $(event.target).removeClass('context');
+                $contextMenu.remove();
+            })
+            .on('contextmenu', function (event) {
+                $(event.target).removeClass('context');
+                event.preventDefault();
+                $contextMenu.remove();
+            });
+    };
+    return function ($scope, element, attrs) {
+        //element.on('contextmenu', function (event) {
+        element.on('click', function (event) {
+            $scope.$apply(function () {
+                event.preventDefault();
+                var options = $scope.$eval(attrs.ngContextMenu);
+                if(typeof(options) === 'function') {
+                    options = options($scope);
+                }
+                
+                if (options instanceof Array) {
+                    renderContextMenu($scope, event, options);
+                } else {
+                    throw '"' + attrs.ngContextMenu + '" not an array';                    
+                }
+            });
+        });
+    };
+});
+
 
 /**
  * Maybe this should be a generic 'object' directive...
@@ -733,128 +974,8 @@ myModule.directive('jassaLabel', function() {
         
 //         return result;
 //     };
+
     
-    var SponateLookupServiceImpl = Class.create({
-        initialize: function(source, query, v, requestCache) {
-            // FIXME By flow we mean e.g. store.labels
-            this.source = source;
-
-            this.requestCache = requestCache || new service.RequestCache();
-        },
-        
-        /**
-         * Function for actually retrieving data from the underlying service and updating caches as needed.
-         *
-         * Don't call this method directly; it may corrupt caches!
-         */
-        fetchDocs: function(nodes) {
-            var resultCache = this.requestCache.getResultCache();
-            
-            var executionCache = this.requestCache.getExecutionCache();
-
-            var result = this.source.find().nodes(nodes).asList(true).pipe(function(docs) {
-                
-                var r = new util.HashMap();
-
-                _(docs).each(function(doc) {
-                    var id = doc.id;
-                    resultCache.setItem('' + id, doc);
-                    r.put(id, doc);
-                });
-
-                _(nodes).each(function(item) {
-                    delete executionCache['' + item];
-                });
-                
-                return r;
-            });
-
-            _(nodes).each(function(item) {
-                executionCache['' + item] = result;
-            });
-            
-            
-            return result;
-        },
-        
-        lookup: function(nodes) {
-            var self = this;
-
-            //console.log('cache status [BEFORE] ' + JSON.stringify(self.requestCache));
-
-            // Make nodes unique
-            var uniq = _(nodes).uniq(false, function(x) {
-                // FIXME Meh, uniq only supports transformations but not a custom equals method
-                //return util.defaultEquals(a, b);
-                return '' + x;
-            });
-
-            var resultMap = new util.HashMap();
-
-            var resultCache = this.requestCache.getResultCache();
-            var executionCache = this.requestCache.getExecutionCache();
-            
-            // Check whether we need to wait for promises that are already executing
-            var open = [];
-            var waitForNodes = [];
-            var waitForPromises = [];
-            
-            _(uniq).each(function(node) {
-                var id = '' + node;
-
-                var val = resultCache.getItem(id);
-                if(!val) {
-                    
-                    var promise = executionCache[id];
-                    if(promise) {
-                        waitForNodes.push(node);
-
-                        var found = _(waitForPromises).find(function(x) {
-                            var r = x == promise;
-                            return r;
-                        });
-
-                        if(!found) {
-                            waitForPromises.push(promise);
-                        }
-                    }
-                    else {
-                        open.push(node);
-                        waitForNodes.push(node);
-                    }
-                } else {
-                    resultMap.put(node, val);
-                }
-            });
-            
-            
-            if(open.length > 0) {
-                var p = this.fetchDocs(open);
-                waitForPromises.push(p);
-            }
-            
-            var result = jQuery.when.apply(window, waitForPromises).pipe(function() {
-                var maps = arguments;
-                _(waitForNodes).each(function(node) {
-                    
-                    var val = null;
-                    _(maps).find(function(map) {
-                        val = map.get(node);
-                        return !!val;
-                    });
-                    
-                    if(val) {
-                        resultMap.put(node, val);
-                    }
-                });
-                
-                return resultMap;
-            });
-            
-            return result;
-        }
-    });
-        
     
     myModule.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
 
@@ -870,7 +991,32 @@ myModule.directive('jassaLabel', function() {
             store.addMap(labelMap, 'labels');
             var labelsStore = store.labels;    
 
-            var labelService = new SponateLookupServiceImpl(labelsStore);
+            var labelService = new service.LookupServiceSponate(labelsStore);
+            labelService = new service.LookupServiceTimeout(labelService, 2000);
+            labelService = new service.LookupServiceTransform(labelService, function(doc, id) {
+                var result = doc ? doc.displayLabel : null;
+                
+                if(!result) {
+                    if(id.isUri()) {
+                        result = sponate.extractLabelFromUri(id.getUri());
+                    } else {
+                        result = '' + id;
+                    }
+                }
+                
+                return result; 
+            });
+            labelService = new service.LookupServiceCache(labelService);
+
+            var ls = new service.LookupServicePathLabels(labelService);
+            var paths = [
+                facete.Path.parse('http://www.w3.org/1999/02/22-rdf-syntax-ns#type http://www.w3.org/2000/01/rdf-schema#label')
+            ];
+            ls.lookup(paths).pipe(function(map) {
+                console.log('PATH LABELS', map);
+            });
+
+            
             for(var i = 0; i < 10; ++i) {
 	            (function(i) {
 		            labelService.lookup(nodes).done(function(result) {
@@ -901,7 +1047,9 @@ myModule.directive('jassaLabel', function() {
         $scope.Math = Math;
 
 
-		$scope.active = {};
+		$scope.active = {
+		    services: {}
+		};
 
 		
 
@@ -985,7 +1133,7 @@ myModule.directive('jassaLabel', function() {
 
         
         
-        var facetTableConfig; // Initialized later - TODO Fix the order
+        var tableConfigFacet; // Initialized later - TODO Fix the order
         
         var createDefaultWorkspaceConfig = function() {
 	        var result = {
@@ -1008,7 +1156,7 @@ myModule.directive('jassaLabel', function() {
 						maxGlobalItemCount: 2000
 		        	}
 		      	},
-	            facetTableConfig: facetTableConfig
+	            tableConfigFacet: tableConfigFacet
 		    };
 	        
 	        return result;
@@ -1135,10 +1283,10 @@ myModule.directive('jassaLabel', function() {
         
         var tmpTableMod = new facete.TableMod();
         tmpTableMod.addColumn('s');
-        $scope.active.facetTableConfig = {
-            queryFactory: new facete.QueryFactoryConst(dummyQuery),
-            tableMod: tmpTableMod
-        };
+//         $scope.active.tableConfigFacet = {
+//             queryFactory: new facete.QueryFactoryConst(dummyQuery),
+//             tableMod: tmpTableMod
+//         };
 
 
 		var facetTreeConfig = new facete.FacetTreeConfig();
@@ -1159,11 +1307,14 @@ myModule.directive('jassaLabel', function() {
 		var taggerMap = pathTaggerManager.getTaggerMap();
 		
 		
-        facetTableConfig = new facete.FacetTableConfig(facetConfig);
-		var tableMod = facetTableConfig.getTableMod();
-		tableMod.addColumn('s'); // TODO Instead of 's' use: facetConfig.getBaseConcept().getVar().getName()
+        tableConfigFacet = new facete.TableConfigFacet(facetConfig);
+        tableConfigFacet.togglePath(new facete.Path());
+
+        
+		var tableMod = tableConfigFacet.getTableMod();
+		//tableMod.addColumn('s'); // TODO Instead of 's' use: facetConfig.getBaseConcept().getVar().getName()
 		
-		taggerMap.table = new facete.ItemTaggerMembership(facetTableConfig.getPaths());
+		taggerMap.table = new facete.ItemTaggerMembership(tableConfigFacet.getPaths());
 
 		
 		
@@ -1188,13 +1339,13 @@ myModule.directive('jassaLabel', function() {
 
 			toggleTableLink: function(path) {
 			    //var active = $scope.active;
-			    var active = $scope;
-               	if(active.facetTableConfig) {
-               	    active.facetTableConfig.togglePath(path);
+			    //var active = $scope;
+               	if(tableConfigFacet) {
+               	    tableConfigFacet.togglePath(path);
                	}
                	
-//                	if(active.allFacetTableConfig) {
-//                	    active.allFacetTableConfig.togglePath(path);
+//                	if(active.allTableConfigFacet) {
+//                	    active.allTableConfigFacet.togglePath(path);
 //                	}
 			}
 		};
@@ -1213,7 +1364,7 @@ myModule.directive('jassaLabel', function() {
 //         tableMod.addColumn('_o_');
 
 		
-		$scope.active.sparqlService = new service.SparqlServiceDummy();
+		$scope.active.services.sparqlService = new service.SparqlServiceDummy();
 		$scope.active.geoConceptFactory = geoConceptFactory;
 
 		
@@ -1463,21 +1614,21 @@ myModule.directive('jassaLabel', function() {
          */
          
 //        _($scope.active.serviceConfigs).each(function(serviceConfig) {
-            // Create the facetTableConfig
+            // Create the tableConfigFacet
 // 			var facetTreeConfig = serviceConfig.facetTreeConfig;
 //             var facetConfig = facetTreeConfig.getFacetConfig()
 
 
-//            serviceConfig.facetTableConfig = facetTableConfig;
+//            serviceConfig.tableConfigFacet = tableConfigFacet;
 
             // Init the taggerMap
 //     		var pathTaggerManager = facetConfig.getPathTaggerManager()
 //     		var taggerMap = pathTaggerManager.getTaggerMap();
     		
-//     		taggerMap.table = new facete.ItemTaggerMembership(facetTableConfig.getPaths());
+//     		taggerMap.table = new facete.ItemTaggerMembership(tableConfigFacet.getPaths());
     		
     		// Init the tableMod
-//     		var tableMod = facetTableConfig.getTableMod();
+//     		var tableMod = tableConfigFacet.getTableMod();
 //     		tableMod.addColumn('s');
 //        });
 
@@ -1576,7 +1727,7 @@ myModule.directive('jassaLabel', function() {
     */
 		};
 		        
-		var hashToService = {};
+		var hashToServices = {};
 		
        	var refreshServices = function(config) {
        	    if(!config) {
@@ -1597,11 +1748,16 @@ myModule.directive('jassaLabel', function() {
             };
             
             var serviceHash = util.ObjectUtils.hashCode(serviceState);
-            var sparqlService = hashToService[serviceHash];
+            var services = hashToServices[serviceHash];
                         
-            if(!sparqlService) {
+            if(!services) {
+                
+                services = hashToServices[serviceHash] = {};
+                
                 //alert('Service: ' + serviceHash);
 
+                // Init Sparql Service
+                
 	    		sparqlService = new service.SparqlServiceHttp('cache/sparql', dataCnf.defaultGraphIris, {}, {'service-uri': dataCnf.serviceIri});
 	            //var sparqlService = new service.SparqlServiceHttp(dataCnf.serviceIri, dataCnf.defaultGraphIris);
 	    		
@@ -1609,85 +1765,57 @@ myModule.directive('jassaLabel', function() {
 	            sparqlService = new service.SparqlServiceVirtFix(sparqlService);
 	    		sparqlService = new service.SparqlServicePaginate(sparqlService, 1000);
 	    		
-	    		hashToService[serviceHash] = sparqlService;
+	    		services.sparqlService = sparqlService;
+	    		
+	    		
+	    		// Init Lookup Service
+	    		// TODO: The label map must remain dynamic
+                var store = new sponate.StoreFacade(sparqlService);
+	            
+	    		var labelMap = sponate.SponateUtils.createDefaultLabelMap();
+	            store.addMap(labelMap, 'labels');
+	            var labelsStore = store.labels;    
+
+	            var lookupServiceNodeLabels = new service.LookupServiceSponate(labelsStore);
+	            lookupServiceNodeLabels = new service.LookupServiceTimeout(lookupServiceNodeLabels, 2000);
+	            lookupServiceNodeLabels = new service.LookupServiceTransform(lookupServiceNodeLabels, function(doc, id) {
+	                var result = doc ? doc.displayLabel : null;
+	                
+	                if(!result) {
+	                    if(id.isUri()) {
+	                        result = sponate.extractLabelFromUri(id.getUri());
+	                    } else {
+	                        result = '' + id;
+	                    }
+	                }
+	                
+	                return result; 
+	            });
+	            var lookupServiceNodeLabels = new service.LookupServiceCache(lookupServiceNodeLabels);
+
+	    		services.lookupServiceNodeLabels = lookupServiceNodeLabels;
+	    		
+	    		
+	    		// Init Lookup Service for Path Labels
+	    		var lookupServicePathLabels = new service.LookupServicePathLabels(lookupServiceNodeLabels);
+	    		
+	    		services.lookupServicePathLabels = lookupServicePathLabels;
+	    		
+	    		
+	    		//services.tableService = new service.TableServiceFacet(services.sparqlService, tableConfigFacet, services.lookupServiceNodeLabels, services.lookupServicePathLabels, 3000, 1000);
             }
             else {
                 console.log('Service reused: ', serviceHash);
-            }
+            }            
             
-            
-    		$scope.active.sparqlService = sparqlService;		
+    		$scope.active.services = services;//.sparqlService;
+    		$scope.active.lookupServiceNodeLabels = lookupServiceNodeLabels;
             $scope.active.facetTreeConfig = facetTreeConfig;
             $scope.active.targetFacetTreeConfig = targetFacetTreeConfig;
 
             
             refreshEssentialTables();
-            
-    		/*
-    		 * <- Facet Tree 'Link-Facet-To-Table' Plugin
-    		 */
-            var conceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
-
-    		var facetConfig = facetTreeConfig.getFacetConfig()
-
-    		var facetTreeConfig = $scope.active.facetTreeConfig;
-    	    var facetConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);        
-    	    var facetElementFactory = new facete.ElementFactoryConceptFactory(facetConceptFactory);        
-    		
-    		
-            var facetTableConfig = config.facetTableConfig;
-    		var tableMod = facetTableConfig.getTableMod();
-
-    		
-    		var ConceptFactoryFtc = Class.create(facete.ConceptFactory, {
-                initialize: function(facetTableConfig) {
-                    this.facetTableConfig = facetTableConfig;
-                },
-                
-                createConcept: function() {
-                    var result = this.facetTableConfig.createDataConcept();
-                    return result;
-                }
-    		});
-
-    		// TODO The data concept is dynamic
-            //var dataConcept = facetTableConfig.createDataConcept();
-    		var dataConceptFactory = new ConceptFactoryFtc(facetTableConfig);
-    		
-            //var dataElementFactory = new sparql.ElementFactoryConst(dataConcept.getElement());
-            var dataElementFactory = new facete.ElementFactoryConceptFactory(dataConceptFactory);
-            
-            var filterElementFactory = new facete.ElementFactoryConceptFactory(filterConceptFactory);
-
-            // NOTE We assume the data and filter concept share the same variables
-            var elementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, filterElementFactory]);
-            var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
-
-    		$scope.active.facetTableConfig = {
-    			queryFactory: queryFactory,
-    			tableMod: tableMod
-    		};
-    		
-
-            //var allQueryFactory = new facete.QueryFactoryTableMod(dataElementFactory, tableMod);
-            var allElementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, facetElementFactory]);
-            var allQueryFactory = new facete.QueryFactoryTableMod(allElementFactory, tableMod);
-
-    		$scope.active.allFacetTableConfig = {
-    		    queryFactory: allQueryFactory,
-    		    tableMod: tableMod
-    		};
-    		
-    		
-    		// HACK! because of name clash in .active
-    		// For some reason, this lines makes the toggle column button in the facet tree work - but WHY??????
-    		$scope.facetTableConfig = facetTableConfig;
-    		//$scope.allFacetTableConfig = $scope.active.allFacetTableConfig;
-    		/*
-    		 * ->
-    		 */
-            
-
+            refreshFacetTables(config);
             
             
             
@@ -1746,10 +1874,10 @@ myModule.directive('jassaLabel', function() {
 		    
 		});
 		
-		//active.allFacetTableConfig
-		//active.sparqlService
-		//$scope.$watch('ObjectUtils.hashCode(active.allFacetTableConfig)', function(n, o) {
-// 		$scope.$watch('active.allFacetTableConfig', function(n, o) {
+		//active.allTableConfigFacet
+		//active.services.sparqlService
+		//$scope.$watch('ObjectUtils.hashCode(active.allTableConfigFacet)', function(n, o) {
+// 		$scope.$watch('active.allTableConfigFacet', function(n, o) {
 // 		    //console.log('Service changed [old]', o);
 // 		    console.log('Service changed [now]', n);
 // 		    debugger;
@@ -2065,7 +2193,7 @@ myModule.directive('jassaLabel', function() {
         };
         
         $scope.exportAll = function() {
-            var queryFactory = $scope.active.allFacetTableConfig.queryFactory;
+            var queryFactory = $scope.active.allTableConfigFacet.queryFactory;
             var query = queryFactory.createQuery();
             //alert('' + query);
 
@@ -2100,6 +2228,103 @@ myModule.directive('jassaLabel', function() {
                 status.msg = 'Export failed: '; // + data.id;
                	applyRootScope($scope);
             });
+        };
+        
+        
+        
+        var refreshFacetTables = function(config) {
+            // Input: facetTreeConfig, config.tableConfigFacet,
+            
+            
+            /*
+             * <- Facet Tree 'Link-Facet-To-Table' Plugin
+             */
+             
+            // TODO This could be written with function composition rather than objects
+            // But for this we would first have to convert the factories to operations on functions
+            var facetTreeConfig = $scope.active.facetTreeConfig;
+            var conceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+
+            var facetConfig = facetTreeConfig.getFacetConfig();
+
+            var facetConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+            var facetElementFactory = new facete.ElementFactoryConceptFactory(facetConceptFactory);        
+            
+            
+            var tableConfigFacet = config.tableConfigFacet;
+            var tableMod = tableConfigFacet.getTableMod();
+
+            /*
+            var testFunction = function() {
+                var dataConcept = this.tableConfigFacet.createDataConcept();
+                var dataElement = dataConcept.getElement();
+                var filter
+            }
+            */
+            
+            var dataConceptFactory = new ConceptFactoryTableConfigFacet(tableConfigFacet);          
+            var dataElementFactory = new facete.ElementFactoryConceptFactory(dataConceptFactory);            
+            var filterElementFactory = new facete.ElementFactoryConceptFactory(filterConceptFactory);
+
+            // NOTE We assume the data and filter concept share the same variables
+            var elementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, filterElementFactory]);
+            var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
+
+//             $scope.active.tableConfigFacet = {
+//                 queryFactory: queryFactory,
+//                 tableMod: tableMod
+//             };
+            
+            
+            /*
+            var getTableService = function() {
+                return function() {
+                    var conceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+                    var concept = conceptFactory.createConcet                    
+                    
+                    var query = queryFactory.createQuery();
+                    var tableService = new service.TableServiceSparqlQuery(sparqlService, query);
+                    tableService = new service.TableServiceFacet(tableService, services.lookupServiceNodeLabels, services.lookupServicePathLabels);
+                    return tableService;
+                }
+            }*/
+            
+            
+
+            //var allQueryFactory = new facete.QueryFactoryTableMod(dataElementFactory, tableMod);
+            var allElementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, facetElementFactory]);
+            var allQueryFactory = new facete.QueryFactoryTableMod(allElementFactory, tableMod);
+
+            
+            var services = $scope.active.services;
+
+            $scope.active.tableFacet = {
+                tableServiceSupplier: function(config) {
+                    var query = config.query;
+                    var tableService = new service.TableServiceQuery(sparqlService, query);
+                    var result = new service.TableServiceFacet(tableService, tableConfigFacet, services.lookupServiceNodeLabels, services.lookupServicePathLabels);
+
+                    return result;
+                },
+                configSupplier: function() {
+                    return {
+                        query: allQueryFactory.createQuery(),
+                        tableConfigFacet: tableConfigFacet
+                    }                    
+                },
+                //queryFactory: allQueryFactory,
+                //facetConfig: facetConfig,
+                tableMod: tableMod
+            };
+            
+            
+            // HACK! because of name clash in .active
+            // For some reason, this lines makes the toggle column button in the facet tree work - but WHY??????
+            //$scope.tableConfigFacet = tableConfigFacet;
+            //$scope.allTableConfigFacet = $scope.active.allTableConfigFacet;
+            /*
+             * ->
+             */
         };
         
         
@@ -2172,7 +2397,7 @@ var dataElementStr =
         var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
                        
             
-        $scope.active.essentialFacetTableConfig = {
+        $scope.active.essentialtableConfigFacet = {
             queryFactory: queryFactory,
             tableMod: tableMod
         };
@@ -2180,7 +2405,7 @@ var dataElementStr =
 
         var allElementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, facetElementFactory]);
         var allQueryFactory = new facete.QueryFactoryTableMod(allElementFactory, tableMod);
-        $scope.active.allEssentialFacetTableConfig = {
+        $scope.active.allEssentialtableConfigFacet = {
             queryFactory: allQueryFactory,
             tableMod: tableMod
         };
@@ -2350,7 +2575,7 @@ var dataElementStr =
 						Facet Tree
 					</div>
 					<div class="panel-body">
-					   <facet-tree sparql-service="active.sparqlService" facet-tree-config="active.facetTreeConfig" select="selectFacet(path)" plugins="facetTreePlugins" plugin-context="facetTreePluginContext"></facet-tree>
+					   <facet-tree sparql-service="active.services.sparqlService" facet-tree-config="active.facetTreeConfig" select="selectFacet(path)" plugins="facetTreePlugins" plugin-context="facetTreePluginContext"></facet-tree>
 					</div>
 				</div>
 		
@@ -2359,7 +2584,7 @@ var dataElementStr =
 						Facet Values
 					</div>
 					<div class="panel-body">
-		   				<facet-value-list sparql-service="active.sparqlService" facet-tree-config="active.facetTreeConfig" path="active.path"></facet-value-list>
+		   				<facet-value-list sparql-service="active.services.sparqlService" facet-tree-config="active.facetTreeConfig" path="active.path"></facet-value-list>
 					</div>
 				</div>
 		
@@ -2368,7 +2593,7 @@ var dataElementStr =
 						Constraints
 					</div>
 					<div class="panel-body">
-		   				<constraint-list sparql-service="active.sparqlService" facet-tree-config="active.facetTreeConfig"></constraint-list>
+		   				<constraint-list sparql-service="active.services.sparqlService" facet-tree-config="active.facetTreeConfig"></constraint-list>
 					</div>
 				</div>
 			</accordion-group>
@@ -2390,20 +2615,28 @@ var dataElementStr =
 				<tabset>
 					<tab heading="All" active="app.data.tabs[0].isActive">
 						<button class="btn btn-primary" ng-click="exportAll()">Export</button>
-<!-- 						<sparql-grid sparql-service="active.sparqlService" config="active.allFacetTableConfig" disable-requests="!app.data.tabs[0].isActive"></sparql-grid> -->
-                        <sparql-table sparql-service="active.sparqlService" config="active.allFacetTableConfig" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
+						
+<!-- 						  <span>Some text <span style="cursor: pointer;"ng-context-menu="menuOptions">Click me!</span></span>						 -->
+						  
+						
+						
+<!-- 						<sparql-grid sparql-service="active.services.sparqlService" config="active.allTableConfigFacet" disable-requests="!app.data.tabs[0].isActive"></sparql-grid> -->
+<!--                         <sparql-table sparql-service="active.services.sparqlService" config="active.allTableConfigFacet" disable-requests="!app.data.tabs[0].isActive"></sparql-table> -->
+<!--                         <sparql-table table-service="active.services.tableService" table-mod="active.allTableConfigFacet" disable-requests="!app.data.tabs[0].isActive"></sparql-table> -->
+                        <sparql-table table-service-supplier="active.tableFacet.tableServiceSupplier" config-supplier="active.tableFacet.configSupplier" table-mod="active.tableFacet.tableMod" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
+<!--                         </div> -->
 					</tab>
 		
 					<tab heading="Selection" active="app.data.tabs[1].isActive">
-						<sparql-table sparql-service="active.sparqlService" config="active.facetTableConfig" disable-requests="!app.data.tabs[1].isActive"></sparql-table>
+<!-- 						<sparql-table sparql-service="active.services.sparqlService" config="active.tableConfigFacet" disable-requests="!app.data.tabs[1].isActive"></sparql-table> -->
 					</tab>
 
                     <tab heading="Essential (All)" active="app.data.tabs[2].isActive">
-                        <sparql-table sparql-service="active.sparqlService" config="active.allEssentialFacetTableConfig" disable-requests="!app.data.tabs[2].isActive"></sparql-table>
+<!--                         <sparql-table sparql-service="active.services.sparqlService" config="active.allEssentialtableConfigFacet" disable-requests="!app.data.tabs[2].isActive"></sparql-table> -->
                     </tab>
 
                     <tab heading="Essential (Selection)" active="app.data.tabs[3].isActive">
-                        <sparql-table sparql-service="active.sparqlService" config="active.essentialFacetTableConfig" disable-requests="!app.data.tabs[3].isActive"></sparql-table>
+<!--                         <sparql-table sparql-service="active.services.sparqlService" config="active.essentialtableConfigFacet" disable-requests="!app.data.tabs[3].isActive"></sparql-table> -->
                     </tab>
 
 <!-- 					<tab heading="Interlinking"> -->
@@ -2426,7 +2659,7 @@ var dataElementStr =
 			                        Facet Tree
 			                    </div>
 			                    <div class="panel-body">
-			                       <facet-tree sparql-service="active.sparqlService" facet-tree-config="active.targetFacetTreeConfig" select="selectTargetFacet(path)"></facet-tree>
+			                       <facet-tree sparql-service="active.services.sparqlService" facet-tree-config="active.targetFacetTreeConfig" select="selectTargetFacet(path)"></facet-tree>
 			                    </div>
 			                </div>
 			        
@@ -2435,7 +2668,7 @@ var dataElementStr =
 			                        Facet Values
 			                    </div>
 			                    <div class="panel-body">
-			                        <facet-value-list sparql-service="active.sparqlService" facet-tree-config="active.targetFacetTreeConfig" path="active.targetPath"></facet-value-list>
+			                        <facet-value-list sparql-service="active.services.sparqlService" facet-tree-config="active.targetFacetTreeConfig" path="active.targetPath"></facet-value-list>
 			                    </div>
 			                </div>
 			        
@@ -2444,7 +2677,7 @@ var dataElementStr =
 			                        Constraints
 			                    </div>
 			                    <div class="panel-body">
-			                        <constraint-list sparql-service="active.sparqlService" facet-tree-config="active.targetFacetTreeConfig"></constraint-list>
+			                        <constraint-list sparql-service="active.services.sparqlService" facet-tree-config="active.targetFacetTreeConfig"></constraint-list>
 			                    </div>
 			                </div>
 			            </td><td>
