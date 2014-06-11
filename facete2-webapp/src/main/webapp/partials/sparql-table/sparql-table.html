@@ -1,6 +1,6 @@
 <div style="max-width: 100%; overflow: auto;">
 <div style="max-width: 100%; overflow: auto;">
-<table show-filter="true" class="table" ng-controller="ListController">
+<table show-filter="true" class="table">
     <thead>
     <tr>
 <!--         <th ng-repeat="column in gridOptions.columnDefs" ng-show="column.visible" -->
@@ -12,7 +12,7 @@
 <!--             {{column.title}} -->
 <!--         </th> -->
         <th ng-repeat="colDef in schema.colDefs">
-            {{colDef.displayName}}
+            <span title="{{'' + colDef.path}}">{{colDef.displayName}}</span>
             <a href="" ng-show="getSortDir(colDef.field) !== 'asc'" ng-click="setSortCondition(colDef.field, 'asc', $event.shiftKey)"><span class="glyphicon glyphicon-chevron-up"></span></a>
             <a href="" ng-show="getSortDir(colDef.field) !== 'desc'" ng-click="setSortCondition(colDef.field, 'desc', $event.shiftKey)"><span class="glyphicon glyphicon-chevron-down"></span></a>
         </th>
@@ -24,8 +24,8 @@
     </td>
 
     <tr ng-repeat="row in myData">
-        <td class="show-on-hover-parent-inline" ng-repeat="colDef in schema.colDefs" ng-init="item = row[colDef.field]"> <!-- ng-show="column.visible">  -->
-            <span title="{{item.node.toString()}}" class="">{{item.displayLabel}} <span style="cursor: pointer;" ng-context-menu="menuOptions" class="show-on-hover-child glyphicon glyphicon-asterisk"></span></span>                       
+        <td class="show-on-hover-parent-inline" ng-repeat="colDef in schema.colDefs" ng-init="cell=row[colDef.field]"> <!-- ng-show="column.visible">  -->
+            <span title="{{cell.node.toString()}}" class="">{{cell.displayLabel}} <span style="cursor: pointer;" ng-context-menu="context.menuOptions" class="show-on-hover-child glyphicon glyphicon-asterisk"></span></span>                       
 
         </td>
     </tr>
