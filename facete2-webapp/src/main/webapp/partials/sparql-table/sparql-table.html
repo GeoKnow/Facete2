@@ -1,5 +1,13 @@
 <div style="max-width: 100%; overflow: auto;">
 <div style="max-width: 100%; overflow: auto;">
+
+<span ng-show="loading.schema || loading.data || loading.pageCount">
+    <img src="images/ajax-loader.gif" /> Loading... 
+    <span ng-show="loading.schema">(schema)</span>
+    <span ng-show="loading.data">(data)</span>
+    <span ng-show="loading.pageCount">(page count)</span>
+</span>
+
 <table show-filter="true" class="table">
     <thead>
     <tr>

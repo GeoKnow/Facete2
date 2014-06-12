@@ -376,6 +376,12 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
     
     $scope.totalServerItems = 0;
         
+    $scope.loading = {
+        schema: false,
+        pageCount: false,
+        data: false
+    };
+    
     $scope.pagingOptions = {
         pageSizes: [10, 50, 100],
         pageSize: 10,
@@ -404,12 +410,17 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
 
         var oldSchema = $scope.schema;
         var promise = tableService.fetchSchema();
+        
+        $scope.loading.schema = true;
+
         jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(newSchema) {
             var isTheSame = _(newSchema).isEqual(oldSchema);
             if(!isTheSame) {
 
                 $scope.schema = newSchema;
             }
+            
+            $scope.loading.schema = false;
         });
     };
 
@@ -418,9 +429,13 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
         
         var promise = tableService.fetchCount();
 
+        $scope.loading.pageCount = true;
+
         jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(countInfo) {
             // Note: There is also countInfo.hasMoreItems and countInfo.limit (limit where the count was cut off)
             $scope.totalServerItems = countInfo.count;
+        
+            $scope.loading.pageCount = false;
         });
     };
     
@@ -434,11 +449,14 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
 
         var promise = tableService.fetchData(pageSize, offset);
 
+        $scope.loading.data = true;
+
         jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(data) {
             var isTheSame = _(data).isEqual($scope.myData);
             if(!isTheSame) {
 
                 $scope.myData = data;
+                $scope.loading.data = false;
             }
             //util.ArrayUtils.replace($scope.myData, data);
             
@@ -990,6 +1008,7 @@ myModule.directive('jassaLabel', function() {
     
     myModule.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
 
+
         
         // Quick test of the the .nodes() parameter
         if(false) {
@@ -1005,7 +1024,13 @@ myModule.directive('jassaLabel', function() {
             var labelService = new service.LookupServiceSponate(labelsStore);
             labelService = new service.LookupServiceIdFilter(labelService, function(node) {
                 // TODO Using a proper URI validator would increase quality
-                var r = node && node.isUri() && !node.getUri().contains(' ');
+                var r = node && node.isUri();
+                if(r) {
+                    var uri = node.getUri();
+                    r = r && !uri.contains(' ');
+                    r = r && !uri.contains('<');
+                    r = r && !uri.contains('>');
+                }
                 return r;
             });
             labelService = new service.LookupServiceTimeout(labelService, 20);
@@ -1090,7 +1115,9 @@ myModule.directive('jassaLabel', function() {
    			},
    			facets: {
    			    isOpen: false
-   			}
+   			},
+   			baseConceptFilterString: null,
+   			baseConceptFilterStringTmp: '',
         };
 
 		
@@ -1342,7 +1369,55 @@ myModule.directive('jassaLabel', function() {
 		var filterConceptFactory = new facete.ConceptFactoryConst(conceptFalse)
 		
 
-        
+		
+		var createBaseConcept = function(filterString, baseVar) {
+            var result;
+            var vs = baseVar || rdf.NodeFactory.createVar('s');
+            if(filterString == null || filterString === '') {
+                result = facete.ConceptUtils.createSubjectConcept(vs);
+            }
+            else {
+                var vo = rdf.NodeFactory.createVar('bcl'); // bif contains label
+                var evo = new sparql.ExprVar(vo);
+                
+                var no = rdf.NodeFactory.createPlainLiteral(filterString);
+                var eno = sparql.NodeValue.makeNode(no);
+                
+                //var es = new sparql.ExprVar(vs);
+                var element =
+                    new sparql.ElementGroup([
+                        new sparql.ElementTriplesBlock([
+                            new rdf.Triple(vs, vocab.rdfs.label, vo)
+                        ]),
+                        new sparql.ElementFilter(
+                            new sparql.E_Function('<bif:contains>', [evo, eno])
+                        )
+                    ]);
+                
+                //debugger;
+                //console.log('element', element.copySubstitute(function(x) {return x; }));
+                //alert('element ' + element);
+                //alert('element ' + element.copy());
+                result = new facete.Concept(element, vs);
+            }
+            
+            return result;
+		};
+
+        $scope.setBaseConcept = function(filterString) {
+
+            var baseConcept = createBaseConcept(filterString);
+            
+            facetTreeConfig.getFacetConfig().setBaseConcept(baseConcept);
+
+            if(filterString == null || filterString === '') {
+                $scope.app.baseConceptFilterString = null;
+            } else {
+                $scope.app.baseConceptFilterString = filterString;
+            }            
+        }
+		
+		
         $scope.tableContext = {};
 		
 		$scope.tableContext.menuOptions = function($scope) {
@@ -1839,7 +1914,7 @@ console.log('CELL SCOPE', $scope);
 	            var labelsStore = store.labels;    
 
 	            var lookupServiceNodeLabels = new service.LookupServiceSponate(labelsStore);
-	            lookupServiceNodeLabels = new service.LookupServiceTimeout(lookupServiceNodeLabels, 2000);
+	            lookupServiceNodeLabels = new service.LookupServiceTimeout(lookupServiceNodeLabels, 20);
 	            lookupServiceNodeLabels = new service.LookupServiceTransform(lookupServiceNodeLabels, function(doc, id) {
 	                var result = doc ? doc.displayLabel : null;
 	                
@@ -2344,6 +2419,9 @@ console.log('CELL SCOPE', $scope);
                         return result;
                     },
                     configSupplier: function() {
+                        console.log('dataElement: ' + dataElementFactory.createElement());
+                        console.log('facetElement: ' + facetElementFactory.createElement());
+                        console.log('filterElement: ' + filterElementFactory.createElement());
                         return {
                             query: queryFactory.createQuery(),
                             tableConfigFacet: tableConfigFacet
@@ -2411,7 +2489,7 @@ console.log('CELL SCOPE', $scope);
 
             
             
-            
+            /*
             $scope.active.tableFacetSelection = {
                     tableServiceSupplier: function(config) {
                         var query = config.query;
@@ -2430,7 +2508,7 @@ console.log('CELL SCOPE', $scope);
                     //facetConfig: facetConfig,
                     tableMod: tableMod
                 };
-            
+            */
             // HACK! because of name clash in .active
             // For some reason, this lines makes the toggle column button in the facet tree work - but WHY??????
             //$scope.tableConfigFacet = tableConfigFacet;
@@ -2683,6 +2761,31 @@ var dataElementStr =
 					Facets
 				</accordion-heading>
 
+                <div class="panel panel-info">
+                    <div class="panel-heading portlet-heading">
+                        Base concept
+                    </div>
+                    <div class="panel-body">
+                    
+	                    <div ng-show="app.baseConceptFilterString == null">
+	                        <form>
+							    <div class="input-group">
+	<!--                                 <label>Base concept: -->
+	                                <input ng-model="app.baseConceptFilterStringTmp" type="text" class="form-control"></input>
+							        <span class="input-group-btn">
+							            <button type="submit" ng-click="setBaseConcept(app.baseConceptFilterStringTmp)" class="btn btn-default" type="button">Set base filter</button>
+	                                </span>
+	<!--                                 </label> -->
+							    </div>
+							</form>                    
+		                </div>
+	                    <div ng-show="app.baseConceptFilterString != null">
+	                        Base concept: {{app.baseConceptFilterString}}
+	                        <a href="" ng-click="setBaseConcept(null)"><span class="glyphicon glyphicon-remove-circle"></span></a>
+	                    </div>	                
+                    </div>	                
+                </div>
+
 				<div class="panel panel-info"> 
 					<div class="panel-heading portlet-heading">
 						Facet Tree
@@ -2742,7 +2845,7 @@ var dataElementStr =
 		
 					<tab heading="Selection" active="app.data.tabs[1].isActive">
 <!-- 						<sparql-table sparql-service="active.services.sparqlService" config="active.tableConfigFacet" disable-requests="!app.data.tabs[1].isActive"></sparql-table> -->
-                        <sparql-table table-service-supplier="active.tableFacetSelection.tableServiceSupplier" config-supplier="active.tableFacetSelection.configSupplier" table-mod="active.tableFacetSelection.tableMod" context="tableContext" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
+                        <sparql-table table-service-supplier="active.tableFacetSelection.tableServiceSupplier" config-supplier="active.tableFacetSelection.configSupplier" table-mod="active.tableFacetSelection.tableMod" context="tableContext" disable-requests="!app.data.tabs[1].isActive"></sparql-table>
 					</tab>
 
                     <tab heading="Essential (All)" active="app.data.tabs[2].isActive">
