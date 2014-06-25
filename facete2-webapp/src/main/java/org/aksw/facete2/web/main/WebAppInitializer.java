@@ -50,7 +50,7 @@ public class WebAppInitializer
 		dispatcherContext.register(WebMvcConfig.class);
 		
 		ServletRegistration.Dynamic jassaServlet = servletContext.addServlet("jassa-servlet", new SpringServlet());
-		jassaServlet.setInitParameter("com.sun.jersey.config.property.packages", "org.aksw.jassa.web.api");
+		jassaServlet.setInitParameter("com.sun.jersey.config.property.packages", "org.aksw.jena_sparql_api.web.servlets"); //"org.aksw.jassa.web.api");
 		//ServletRegistration.Dynamic jassaServlet = servletContext.addServlet("jassa-servlet", new DispatcherServlet(dispatcherContext));
 		jassaServlet.addMapping("/api/*");
 		jassaServlet.setLoadOnStartup(1);

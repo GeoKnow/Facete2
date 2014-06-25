@@ -28,8 +28,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.aksw.facete2.web.main.SparqlExportManager;
-import org.aksw.jassa.sparql_path.core.SparqlServiceFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
+import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
 import org.aksw.sparqlify.algebra.sql.exprs2.S_ColumnRef;
 import org.aksw.sparqlify.core.cast.SqlValue;
 import org.aksw.sparqlify.inverse.SparqlSqlInverseMap;

@@ -28,7 +28,7 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan(basePackages = "org.aksw.facete2.web.api")
+@ComponentScan(basePackages = {"org.aksw.facete2.web.api", "org.aksw.jena_sparql_api.web.servlets"})
 public class WebMvcConfig
 	extends WebMvcConfigurerAdapter
 {

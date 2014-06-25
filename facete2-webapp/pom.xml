@@ -174,17 +174,23 @@
 <!-- 			<artifactId>spring-orm</artifactId> -->
 <!-- 		</dependency> -->
 
-
+<!--
 		<dependency>
 			<groupId>org.aksw.jassa</groupId>
 			<artifactId>jassa-servlets</artifactId>
 		</dependency>
+-->
 
 		<dependency>
 			<groupId>org.aksw.jena-sparql-api</groupId>
 			<artifactId>jena-sparql-api-server</artifactId>
 		</dependency>
 
+                <dependency>
+                        <groupId>org.aksw.jena-sparql-api</groupId>
+                        <artifactId>jena-sparql-api-servlets</artifactId>
+                        <scope>provided</scope>
+                </dependency>
 
 		<dependency>
 			<groupId>org.aksw.sparqlify</groupId>

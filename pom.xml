@@ -40,8 +40,8 @@
 
 		<!-- Dependency Versions -->
 		<!-- facete2 only works with jena-sparql-api version 2.10.0-27 and onwards -->
-		<jena-sparql-api.version>2.11.1-48</jena-sparql-api.version>
-		<jassa.version>0.0.4</jassa.version>
+		<jena-sparql-api.version>2.11.2-52-SNAPSHOT</jena-sparql-api.version>
+<!--		<jassa.version>0.0.4</jassa.version> -->
 
 		<spring.version>3.2.4.RELEASE</spring.version>
         <spring.batch.version>2.2.5.RELEASE</spring.batch.version>
@@ -119,18 +119,26 @@
 -->
 
 			<!-- Jassa API -->
+<!--
 			<dependency>
 				<groupId>org.aksw.jassa</groupId>
 				<artifactId>jassa-servlets</artifactId>
 				<version>${jassa.version}</version>
-<!--				<type>war</type> -->
 			</dependency>
+-->
+
 
 			<dependency>
 				<groupId>org.aksw.jena-sparql-api</groupId>
 				<artifactId>jena-sparql-api-server</artifactId>
 				<version>${jena-sparql-api.version}</version>
 			</dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jena-sparql-api</groupId>
+                                <artifactId>jena-sparql-api-servlets</artifactId>
+                                <version>${jena-sparql-api.version}</version>
+                        </dependency>
 
 			<dependency>
 				<groupId>org.aksw.sparqlify</groupId>

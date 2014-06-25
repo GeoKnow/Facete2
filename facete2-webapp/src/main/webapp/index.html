@@ -123,6 +123,106 @@
 	
 	var client = Jassa.client;
 
+
+	service.TableServiceDelegateBase = Class.create(service.TableService, {
+	    initialize: function(delegate) {
+	        this.delegate = delegate;
+	    },
+
+        fetchSchema: function() {
+            var result = this.delegate.fetchSchema();
+            return result;
+        },
+        
+        /**
+         * Expected to return a promise which yields an integral value for the total number of rows
+         */
+        fetchCount: function() {
+            var result = this.delegate.fetchCount();
+            return result;
+        },        
+        
+        /**
+         * Expected to return a promise which yields an array of objects (maps) from field name to field data
+         */
+        fetchData: function(limit, offset) {
+            var result = this.delegate.fetchData();
+            return result;
+        }	    	    
+	});
+
+	service.TableServiceGeoLink = Class.create(service.TableServiceDelegateBase, {
+	    initialize: function($super, delegate, lookupServicePaths, pathColId, labelColId) {
+	        $super(delegate);
+	        this.lookupServicePaths = lookupServicePaths;
+            this.pathColId = pathColId;
+            this.labelColId = labelColId;
+	    },
+	    
+	    fetchSchema: function() {
+	        var self = this;
+
+	        var result = this.delegate.fetchSchema().pipe(function(schema) {
+	            console.log('SCHEMA', schema);
+	            
+	            // Hide the label column in the schema
+	            schema.colDefs = _(schema.colDefs).chain()
+	               .filter(function(colDef) {
+	                   return colDef.field != self.labelColId;
+	               })
+	               .compact()
+	               .value();
+	            	            
+	            return schema;
+	        });
+	        
+	        return result;
+	    },
+	    
+	    fetchData: function(limit, offset) {
+	        var deferred = jQuery.Deferred();
+
+	        var tmp = this.delegate.fetchData(limit, offset);
+	        
+	        var self = this;
+	        tmp.pipe(function(rows) {
+	            
+	            // Collect all paths
+	            var paths = _(rows).map(function(row) {
+	                var col = row[self.pathColId];
+	                
+	                var labelField = row[self.labelColId];
+	                var pathStr = labelField.node.getLiteralValue();
+	                var r = facete.Path.parse(pathStr);
+	                
+	                // Add the path object to the row
+	                row[self.labelColId].path = r;
+	                
+	                return r;
+	            });
+	            
+	            var p = self.lookupServicePaths.lookup(paths).done(function(map) {
+	                _(rows).map(function(row) {
+	                    var path = row[self.labelColId].path;
+	                    var doc = map.get(path);
+	                    if(doc) {
+	                        row[self.pathColId].displayLabel = doc;// displayLabel;
+	                    }
+	                });
+
+	                deferred.resolve(rows);
+	            }).fail(function() {
+	                deferred.fail();
+	            });
+	            
+	            
+	        }).fail(function() {
+	            deferred.fail();
+	        });
+	        
+	        return deferred.promise();
+	    }
+	});
 	
 	/**
 	 * Lookup Service which can filter keys. Used to e.g. get rid of invalid URIs which would
@@ -130,7 +230,8 @@
 	 */
 	service.LookupServiceIdFilter = Class.create(service.LookupServiceDelegateBase, {
 	    initialize: function($super, delegate, predicateFn) {
-	        $super(delegate)
+	        $super(delegate);
+	        this.predicateFn = predicateFn;
 	    },
 	    
 	    lookup: function(keys) {
@@ -195,6 +296,12 @@
                     }
                     
                     r.put(path, label);
+                    /*
+                    r.put(path, {
+                        id: path,
+                        displayLabel: label);
+                    });
+                    */
                 });
                 
                 return r;
@@ -270,7 +377,7 @@
         }
     });
 
-    
+
 
 myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($scope, $rootScope, $q) {
     
@@ -281,6 +388,9 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
     var util = jassa.util;
     var facete = jassa.facete;    
     var sponate = jassa.sponate;
+    
+    
+    // TODO Watch the tableMod object
     
     var syncTableMod = function(sortInfo, tableMod) {
         
@@ -454,10 +564,10 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
         jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(data) {
             var isTheSame = _(data).isEqual($scope.myData);
             if(!isTheSame) {
-
                 $scope.myData = data;
-                $scope.loading.data = false;
             }
+            console.log('GEOLINK DATA', data);
+            $scope.loading.data = false;
             //util.ArrayUtils.replace($scope.myData, data);
             
             // Using equals gives digest iterations exceeded errors; could be https://github.com/angular-ui/ng-grid/issues/873
@@ -519,7 +629,16 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
             dirs.push(dir);
         }
         //alert(append);
-    }
+    };
+    
+    // TODO Turn this into a plugin
+    $scope.removeColumn = function(field) {
+        $scope.configSupplier().tableConfigFacet.removeColumn(field);
+
+        //$scope.refreshData();
+        //$scope.refreshSchema();
+        $scope.refresh();
+    };
     
     $scope.gridOptions = {
         data: 'myData',
@@ -1318,6 +1437,24 @@ myModule.directive('jassaLabel', function() {
 		
 		var vs = rdf.NodeFactory.createVar('s');
 
+		
+		
+		//var tableModGeoPath = new facete.TableMod();
+		//tableMode.addColumn('s');
+		var vPath = rdf.NodeFactory.createUri('http://ns.aksw.org/jassa/ontology/Path');
+		var facetTreeConfigGeoLink = new facete.FacetTreeConfig();
+		var facetConfigGeoLink = facetTreeConfigGeoLink.getFacetConfig();
+		var baseConcept = new facete.Concept(new sparql.ElementTriplesBlock([new rdf.Triple(vs, vocab.rdf.type, vPath)]), vs);		
+        facetConfigGeoLink.setBaseConcept(baseConcept);
+        tableConfigGeoLink = new facete.TableConfigFacet(facetConfigGeoLink);
+        tableConfigGeoLink.togglePath(new facete.Path());
+        tableConfigGeoLink.togglePath(facete.Path.parse(vocab.rdfs.label.getUri()));
+        tableConfigGeoLink.togglePath(facete.Path.parse('http://ns.aksw.org/jassa/ontology/pathLength'));
+		var pathLengthColId = tableConfigGeoLink.getColIdForPath(facete.Path.parse('http://ns.aksw.org/jassa/ontology/pathLength'));
+
+		//tableConfigGeoLink.getTableMod().getSortConditions().push(new facete.SortCondition(pathLengthColId, -1));
+
+		
 
 		/* Dummy init */
         var dummyQuery = new sparql.Query();
@@ -1823,7 +1960,58 @@ console.log('CELL SCOPE', $scope);
 		    
 		    var sourceConcept = conceptFactory.createConcept(); 	
 			var targetConcept = geoConcept;
-								
+
+			
+			var lookupServicePathLabels = $scope.active.services.lookupServicePathLabels;
+			
+			
+			
+            var createTableConfigGeoLink = function(tableConfig, conceptPathFinder, sourceConcept, targetConcept) {
+                return {
+                    tableServiceSupplier: function(config) {
+                        
+                        var services = $scope.active.services;
+                        
+                        var sparqlService = conceptPathFinder.createSparqlService(config.sourceConcept, config.targetConcept)
+                        
+                        var tableService = new service.TableServiceQuery(sparqlService, config.query);
+                        tableService = new service.TableServiceFacet(tableService, config.tableConfig, services.lookupServiceNodeLabels, services.lookupServicePathLabels);
+                        
+                        var pathColId = config.tableConfig.getColIdForPath(new facete.Path());
+                        var labelColId = config.tableConfig.getColIdForPath(facete.Path.parse(vocab.rdfs.label.getUri()));
+                        
+                        tableService = new service.TableServiceGeoLink(tableService, services.lookupServicePathLabels, pathColId, labelColId);
+
+                        return tableService;
+                    },
+                    configSupplier: function() {
+
+                        //var facetTreeConfig = geoLinkfacetTreeConfig;
+                        //var facetConfig = geoLinkFacetConfig; //facetTreeConfig.getFacetConfig();
+                        //var conceptFactory = new facete.ConceptFactoryFacetConfig(facetConfig);
+                        //var facetConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+                        //var facetConfig = facetConfigGeoLink; //facetTreeConfig.getFacetConfig();
+
+                        var tableMod = tableConfig.getTableMod();
+                        var conceptFactory = new ConceptFactoryTableConfigFacet(tableConfig);
+                        var elementFactory = new facete.ElementFactoryConceptFactory(conceptFactory);        
+                        var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
+
+                        return {
+                            query: queryFactory.createQuery(),
+                            tableConfig: tableConfig,
+                            
+                            conceptPathFinder: conceptPathFinder,
+                            sourceConcept: sourceConcept,
+                            targetConcept: targetConcept
+                        }                    
+                    },
+                    tableMod: tableConfig.getTableMod()
+                }
+            };		
+			
+            $scope.active.tableGeoLink = createTableConfigGeoLink(tableConfigGeoLink, conceptPathFinder, sourceConcept, targetConcept);
+			
 			
 // 			var cpfSparqlService = conceptPathFinder.createSparqlService(sourceConcept, targetConcept);
 // 			var qe = cpfSparqlService.createQueryExecution('Select * { ?s ?p ?o } Limit 10');
@@ -1832,11 +2020,39 @@ console.log('CELL SCOPE', $scope);
 // 			}).fail(function() {
 // 			    alert('fail');
 // 			});
-			
+
+/*
 			$scope.findConceptPaths(sourceConcept, targetConcept).then(function(tmp) {
-			    $scope.active.geoPaths = tmp;
+			    
+			    //console.log('GEOPATHS', tmp);
+			    var paths = _(tmp).pluck('path');
+			    
+			    lookupServicePathLabels.lookup(paths).pipe(function(map) {
+			        var items = (paths).map(function(path) {
+			            var label = map.get(path) || '' + path;
+			            var item = {
+                            path: path,
+                            name: label
+			            };
+			            return item;
+			        });
+			        return items;
+			    }).pipe(function(items) {
+	                $scope.active.geoPaths = items;
+	                
+	                applyScope($scope);
+			    }).fail(function() {
+			        alert('Failed to fetch geopath labels: ' + JSON.stringify(arguments));
+			    });
 			});
-			             
+*/			
+			
+			
+			
+			
+			
+			
+			
 			
             /*
 		    var promise = conceptPathFinder.findPaths(sourceConcept, targetConcept);
@@ -1913,15 +2129,34 @@ console.log('CELL SCOPE', $scope);
 	            store.addMap(labelMap, 'labels');
 	            var labelsStore = store.labels;    
 
-	            var lookupServiceNodeLabels = new service.LookupServiceSponate(labelsStore);
+	            var lookupServiceNodeLabels = new service.LookupServiceSponate(labelsStore);	            
+	            lookupServiceNodeLabels = new service.LookupServiceChunker(lookupServiceNodeLabels, 20);
+                lookupServiceNodeLabels = new service.LookupServiceIdFilter(lookupServiceNodeLabels, function(node) {
+                    // TODO Using a proper URI validator would increase quality
+                    var r = node && node.isUri();
+                    if(r) {
+                        var uri = node.getUri();
+                        r = r && !_(uri).include(' ');
+                        r = r && !_(uri).include('<');
+                        r = r && !_(uri).include('>');
+                    }
+                    return r;
+                });	            
 	            lookupServiceNodeLabels = new service.LookupServiceTimeout(lookupServiceNodeLabels, 20);
 	            lookupServiceNodeLabels = new service.LookupServiceTransform(lookupServiceNodeLabels, function(doc, id) {
 	                var result = doc ? doc.displayLabel : null;
 	                
 	                if(!result) {
-	                    if(id.isUri()) {
+	                    if(!id) {
+	                        result = '(null id)';
+	                    }
+	                    else if(id.isUri()) {
 	                        result = sponate.extractLabelFromUri(id.getUri());
-	                    } else {
+	                    }
+	                    else if(id.isLiteral()) {
+	                        result = '' + id.getLiteralValue();
+	                    }
+	                    else {
 	                        result = '' + id;
 	                    }
 	                }
@@ -1946,7 +2181,7 @@ console.log('CELL SCOPE', $scope);
             }            
             
     		$scope.active.services = services;//.sparqlService;
-    		$scope.active.lookupServiceNodeLabels = lookupServiceNodeLabels;
+    		//$scope.active.lookupServiceNodeLabels = lookupServiceNodeLabels;
             $scope.active.facetTreeConfig = facetTreeConfig;
             $scope.active.targetFacetTreeConfig = targetFacetTreeConfig;
 
@@ -2710,12 +2945,14 @@ var dataElementStr =
 					Data Sources {{active.service ? '[' + active.service.name + ']': ''}}
 				</accordion-heading>
 
-				<select ng-model="active.service" ng-options="item.name for item in active.serviceConfigs"></select>
 
-				<br />
-				<button class="btn btn-primary" ng-class="{'active': app.dataSources.showAddDialog}" ng-click="app.dataSources.showAddDialog=!app.dataSources.showAddDialog">Add Data Source</button>
-				<button ng-if="active.service" class="btn" ng-click="deleteDataSource(active.service.id)">Delete Selected Data Source</button>
-				
+                <div class="form-group">
+				    <label>Available Data Sources:<select ng-model="active.service" ng-options="item.name for item in active.serviceConfigs" class="form-control"></select></label>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary" ng-class="{'active': app.dataSources.showAddDialog}" ng-click="app.dataSources.showAddDialog=!app.dataSources.showAddDialog" class="form-control">Add Data Source</button>
+                    <button ng-if="active.service" class="btn" ng-click="deleteDataSource(active.service.id)" class="form-control">Delete Selected Data Source</button>
+                </div>
 			</accordion-group>
 
 <!-- 			<accordion-group style="pointer-events: auto;" is-open="isOpenConcepts"> -->
@@ -2741,18 +2978,20 @@ var dataElementStr =
 					GeoLinks
 				</accordion-heading>
 
-				<tabset>
-					<tab heading="Candidates">
-		   				<ul>
-		   					<li ng-repeat="geoPath in active.geoPaths">
-		   						<a href="" ng-click="setGeoPath(geoPath.path)">{{geoPath.name}}</a>
-		   					</li>
-		   				</ul>
-				  	</tab>
-					<tab heading="Active">
-						To be done
-					</tab>
-				</tabset>
+<!-- 				<tabset> -->
+                        <sparql-table table-service-supplier="active.tableGeoLink.tableServiceSupplier" config-supplier="active.tableGeoLink.configSupplier" table-mod="active.tableGeoLink.tableMod" context="tableContext"></sparql-table>
+				
+<!-- 					<tab heading="Candidates"> -->
+<!-- 		   				<ul> -->
+<!-- 		   					<li ng-repeat="geoPath in active.geoPaths"> -->
+<!-- 		   						<a title="{{'' + geoPath.path}}" href="" ng-click="setGeoPath(geoPath.path)">{{geoPath.name}}</a> -->
+<!-- 		   					</li> -->
+<!-- 		   				</ul> -->
+<!-- 				  	</tab> -->
+<!-- 					<tab heading="Active"> -->
+<!-- 						To be done -->
+<!-- 					</tab> -->
+<!-- 				</tabset> -->
 			</accordion-group>
 
 			<accordion-group style="pointer-events: auto;" is-open="app.facets.isOpen">
@@ -2763,7 +3002,7 @@ var dataElementStr =
 
                 <div class="panel panel-info">
                     <div class="panel-heading portlet-heading">
-                        Base concept
+                        Full Text Filter
                     </div>
                     <div class="panel-body">
                     
@@ -2773,14 +3012,14 @@ var dataElementStr =
 	<!--                                 <label>Base concept: -->
 	                                <input ng-model="app.baseConceptFilterStringTmp" type="text" class="form-control"></input>
 							        <span class="input-group-btn">
-							            <button type="submit" ng-click="setBaseConcept(app.baseConceptFilterStringTmp)" class="btn btn-default" type="button">Set base filter</button>
+							            <button type="submit" ng-click="setBaseConcept(app.baseConceptFilterStringTmp)" class="btn btn-default" type="button">Set filter</button>
 	                                </span>
 	<!--                                 </label> -->
 							    </div>
 							</form>                    
 		                </div>
 	                    <div ng-show="app.baseConceptFilterString != null">
-	                        Base concept: {{app.baseConceptFilterString}}
+	                        Filter: {{app.baseConceptFilterString}}
 	                        <a href="" ng-click="setBaseConcept(null)"><span class="glyphicon glyphicon-remove-circle"></span></a>
 	                    </div>	                
                     </div>	                
