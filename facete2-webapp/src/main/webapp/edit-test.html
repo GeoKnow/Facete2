@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html ng-app="Facete2">
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <title>Facete II</title>
+    
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.tmp) styles/main.css -->
+
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css" />
+    <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
+    <link rel="stylesheet" href="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers.css" />
+    <link rel="stylesheet" href="bower_components/ng-table/ng-table.css" />
+    <!-- endbower -->
+
+    <link rel="stylesheet" href="bower_components/ng-grid-bower/ng-grid.css" />
+    <link rel="stylesheet" href="bower_components/jquery-ui/themes/base/jquery.ui.resizable.css" />
+
+    <link rel="stylesheet" href="styles/facete-style.css" />
+
+    <!-- endbuild -->
+
+    <style>
+    </style>
+    
+    <!-- build:js scripts/scripts.js -->
+
+    <script src="bower_components/jscache/cache.js"></script>
+
+    <!-- bower:js -->
+    <script src="bower_components/jquery/jquery.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/jassa/jassa.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/ng-grid/build/ng-grid.js"></script>
+    <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
+    <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
+    <script src="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers-tpls.js"></script>
+    <script src="bower_components/ng-table/ng-table.js"></script>
+    <!-- endbower -->
+
+
+
+    <script src="scripts/lib/ng-grid-flexible-height/ng-grid-flexible-height.js"></script>
+
+    <script src="scripts/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
+    <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
+    <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
+
+    <script src="scripts/lib/snowball/Snowball.js"></script>
+
+    <!-- endbuild -->
+
+<!--    <script src="js/jassa-ui-angular-geo-openlayers-tpls.js"></script> -->
+    
+    <script type="text/javascript">
+    _.mixin(_.str.exports());
+    
+    var ns = {};
+    
+    /**
+     * Resource Centric RDF API
+     */
+    
+    ns.Graph = Class.create({
+        initialize: function() {
+            this.idToSubjects = {};
+        }
+    });
+    
+    ns.Subject = Class.create({
+        initialize: function() {
+            this.idToPredicates = {};
+        }
+    });
+
+    
+    ns.Predicate = Class.create({
+        initialize: function() {
+            this.idToObjects = {};
+        }
+    });
+    
+    ns.NodeRef = Class.create({
+        initialize: function(s, p, o) {
+            this.
+        }
+    });
+    
+    
+    
+    
+    </script>
+    
+    </head>
+    
+    <body>
+    
+    
+    </body>
+</html>
+

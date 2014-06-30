@@ -20,10 +20,12 @@
 <!--             {{column.title}} -->
 <!--         </th> -->
         <th ng-repeat="colDef in schema.colDefs">
-            <a href="" ng-click="removeColumn(colDef.field)"><span class="glyphicon glyphicon-remove-circle"></span></a>
-            <span title="{{'' + colDef.path}}">{{colDef.displayName}}</span>
-            <a href="" ng-show="getSortDir(colDef.field) !== 'asc'" ng-click="setSortCondition(colDef.field, 'asc', $event.shiftKey)"><span class="glyphicon glyphicon-chevron-up"></span></a>
-            <a href="" ng-show="getSortDir(colDef.field) !== 'desc'" ng-click="setSortCondition(colDef.field, 'desc', $event.shiftKey)"><span class="glyphicon glyphicon-chevron-down"></span></a>
+            <span style="white-space:nowrap;">
+                <a href="" ng-click="removeColumn(colDef.field)"><span class="glyphicon glyphicon-remove-circle"></span></a>
+                <span title="{{'' + colDef.path}}">{{colDef.displayName}}</span>
+                <a href="" ng-show="getSortDir(colDef.field) !== 'asc'" ng-click="setSortCondition(colDef.field, 'asc', $event.shiftKey)"><span class="glyphicon glyphicon-chevron-up"></span></a>
+                <a href="" ng-show="getSortDir(colDef.field) !== 'desc'" ng-click="setSortCondition(colDef.field, 'desc', $event.shiftKey)"><span class="glyphicon glyphicon-chevron-down"></span></a>
+            </span>
         </th>
     </tr>
     </thead>
@@ -35,7 +37,6 @@
     <tr ng-repeat="row in myData">
         <td class="show-on-hover-parent-inline" ng-repeat="colDef in schema.colDefs" ng-init="cell=row[colDef.field]"> <!-- ng-show="column.visible">  -->
             <span title="{{cell.node.toString()}}" class="">{{cell.displayLabel}} <span style="cursor: pointer;" ng-context-menu="context.menuOptions" class="show-on-hover-child glyphicon glyphicon-asterisk"></span></span>                       
-
         </td>
     </tr>
     </tbody>

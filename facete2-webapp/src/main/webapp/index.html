@@ -223,24 +223,7 @@
 	        return deferred.promise();
 	    }
 	});
-	
-	/**
-	 * Lookup Service which can filter keys. Used to e.g. get rid of invalid URIs which would
-	 * cause SPARQL queries to fail
-	 */
-	service.LookupServiceIdFilter = Class.create(service.LookupServiceDelegateBase, {
-	    initialize: function($super, delegate, predicateFn) {
-	        $super(delegate);
-	        this.predicateFn = predicateFn;
-	    },
-	    
-	    lookup: function(keys) {
-	        var newKeys = _(keys).filter(this.predicateFn);
-	        var result = this.delegate.lookup(newKeys);
-	        return result;
-	    }
-	});
-	
+
     var ConceptFactoryTableConfigFacet = Class.create(facete.ConceptFactory, {
         initialize: function(tableConfigFacet) {
             this.tableConfigFacet = tableConfigFacet;
@@ -252,64 +235,6 @@
         }
     });
 
-
-    service.LookupServicePathLabels = Class.create(service.LookupServiceBase, {
-        initialize: function(lookupServiceBase) {
-            this.lookupServiceBase = lookupServiceBase;
-        },
-        
-        lookup: function(paths) {
-            var nodes = _(paths).chain()
-                // Get all unique mentioned property names and turn them to jassa nodes
-                .map(function(path) {
-                    var r = _(path.getSteps()).map(function(step) {
-                        return step.getPropertyName();
-                    });
-                    return r;
-                })
-                .flatten()
-                .uniq()
-                .map(function(propertyName) {
-                    return rdf.NodeFactory.createUri(propertyName);
-                })
-                .value();
-
-            // Do a lookup with all the nodes
-            var result = this.lookupServiceBase.lookup(nodes).pipe(function(map) {
-                var r = new util.HashMap();
-                _(paths).each(function(path) {
-                    var label = _(path.getSteps()).reduce(function(memo, step) {
-                        var result = memo;
-                        
-                        var property = rdf.NodeFactory.createUri(step.getPropertyName());
-                        var label = map.get(property);
-                        
-                        result = result === '' ? result : result + ' ';
-                        result += label;
-                        result = !step.isInverse() ? result : result + '&sup1';
-
-                        return result;
-                    }, '');
-                    
-                    if(label === '') {
-                        label = 'Items';
-                    }
-                    
-                    r.put(path, label);
-                    /*
-                    r.put(path, {
-                        id: path,
-                        displayLabel: label);
-                    });
-                    */
-                });
-                
-                return r;
-            });
-
-            return result;
-        }
-    });
 	
 	
 	
@@ -318,30 +243,6 @@
     }); 
 
 
-    var ValueResolver = Class.create({
-        resolve: function(value) {
-            console.log('"resolve" not overridden');
-            throw '"resolve" not overridden';
-        },
-        
-        resolveAll: function(values) {
-            
-        }
-    });
-    
-    var ValueResolverSponate = Class.create({
-        initialize: function(store) {
-            this.store = store;
-        },
-        
-        resolve: function(value) {
-            //store.node(value).find().asSingle();
-        },
-        
-        resolveAll: function(values) {
-            //store.nodes.(vaues).find.asPairs();
-        }
-    });
     
     
     
@@ -354,28 +255,6 @@
 
 //  // Create a bif:contains qurey
 //  var conceptFactory
-
-    
-    util.LabelService = Class.create({
-        
-    });
-    
-    util.LabelFetcherNode = Class.create({
-        initialize: function(sponateService) { //sparqlService, labelMap) {
-            this.sponateService = sponateService;
-            //this.sparqlService = sparqlService;
-            //this.labelMap = labelMap;
-        },
-        
-        doesAccept: function(obj) {
-            var result = _(obj.isUri).isFunction() || obj.isUri();
-            return result;
-        },
-       
-        fetchLabels: function(objs) {
-            // TODO Implement
-        }
-    });
 
 
 
@@ -1557,6 +1436,8 @@ myModule.directive('jassaLabel', function() {
 		
         $scope.tableContext = {};
 		
+//         var argh = $scope;
+        
 		$scope.tableContext.menuOptions = function($scope) {
             var result = [];
 console.log('CELL SCOPE', $scope);
@@ -1595,6 +1476,12 @@ console.log('CELL SCOPE', $scope);
 
                     var constraint = new facete.ConstraintEquals(path, node);
                     facetTreeConfig.getFacetConfig().getConstraintManager().toggleConstraint(constraint);
+                    
+                    
+//                     argh.active.services.lookupServiceConstraintLabels.lookup([constraint]).pipe(function(map) {
+                        
+//                         alert(map.get(constraint));
+//                     });
                 }
             });
             
@@ -2172,6 +2059,8 @@ console.log('CELL SCOPE', $scope);
 	    		var lookupServicePathLabels = new service.LookupServicePathLabels(lookupServiceNodeLabels);
 	    		
 	    		services.lookupServicePathLabels = lookupServicePathLabels;
+
+	    		services.lookupServiceConstraintLabels = new service.LookupServiceConstraintLabels(lookupServiceNodeLabels, lookupServicePathLabels);
 	    		
 	    		
 	    		//services.tableService = new service.TableServiceFacet(services.sparqlService, tableConfigFacet, services.lookupServiceNodeLabels, services.lookupServicePathLabels, 3000, 1000);
@@ -2179,6 +2068,8 @@ console.log('CELL SCOPE', $scope);
             else {
                 console.log('Service reused: ', serviceHash);
             }            
+
+            
             
     		$scope.active.services = services;//.sparqlService;
     		//$scope.active.lookupServiceNodeLabels = lookupServiceNodeLabels;
@@ -2200,6 +2091,9 @@ console.log('CELL SCOPE', $scope);
     			conceptFactory: geoConceptFactory,
     		    quadTreeConfig: mapConfig.quadTreeConfig
     		}];
+
+            
+            updateFacetValuePath();
 
         };
 
@@ -2277,6 +2171,20 @@ console.log('CELL SCOPE', $scope);
         $scope.selectFacet = function(path) {
             $scope.active.path = path;
         };
+
+        
+        var updateFacetValuePath = function() {
+            var promise = services.lookupServicePathLabels.lookup([active.path]);
+
+            sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(map) {
+                active.pathLabel = map.get(path);
+            });
+        };
+        
+        $scope.$watch('active.path', function() {
+            updateFacetValuePath();
+        });
+
 
         $scope.selectTargetFacet = function(path) {
             $scope.active.targetPath = path;
@@ -3039,6 +2947,7 @@ var dataElementStr =
 						Facet Values
 					</div>
 					<div class="panel-body">
+                        <span>Showing values for {{active.pathLabel}}</span>
 		   				<facet-value-list sparql-service="active.services.sparqlService" facet-tree-config="active.facetTreeConfig" path="active.path"></facet-value-list>
 					</div>
 				</div>
@@ -3048,7 +2957,7 @@ var dataElementStr =
 						Constraints
 					</div>
 					<div class="panel-body">
-		   				<constraint-list sparql-service="active.services.sparqlService" facet-tree-config="active.facetTreeConfig"></constraint-list>
+		   			    <constraint-list sparql-service="active.services.sparqlService" label-service="active.services.lookupServiceConstraintLabels" facet-tree-config="active.facetTreeConfig"></constraint-list>
 					</div>
 				</div>
 			</accordion-group>
