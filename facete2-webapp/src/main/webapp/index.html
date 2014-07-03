@@ -124,33 +124,6 @@
 	var client = Jassa.client;
 
 
-	service.TableServiceDelegateBase = Class.create(service.TableService, {
-	    initialize: function(delegate) {
-	        this.delegate = delegate;
-	    },
-
-        fetchSchema: function() {
-            var result = this.delegate.fetchSchema();
-            return result;
-        },
-        
-        /**
-         * Expected to return a promise which yields an integral value for the total number of rows
-         */
-        fetchCount: function() {
-            var result = this.delegate.fetchCount();
-            return result;
-        },        
-        
-        /**
-         * Expected to return a promise which yields an array of objects (maps) from field name to field data
-         */
-        fetchData: function(limit, offset) {
-            var result = this.delegate.fetchData();
-            return result;
-        }	    	    
-	});
-
 	service.TableServiceGeoLink = Class.create(service.TableServiceDelegateBase, {
 	    initialize: function($super, delegate, lookupServicePaths, pathColId, labelColId) {
 	        $super(delegate);
@@ -754,6 +727,7 @@ myModule.directive('ngContextMenu', function ($parse) {
  * But maybe the context menu addition could be a directive on the outside???
  * e.g. <inline-context service="foo" data="bar"><object-view service="baz" data="baa"></object-view>
  */ 
+/*
 myModule.directive('jassaLabel', function() {
     return {
         restrict: 'AE',
@@ -863,7 +837,7 @@ myModule.directive('jassaLabel', function() {
         }
     };
 });
- 
+*/
  
 
     
@@ -1375,7 +1349,37 @@ myModule.directive('jassaLabel', function() {
 		
 		taggerMap.table = new facete.ItemTaggerMembership(tableConfigFacet.getPaths());
 
-		
+	
+        var essentialDataElementStr =
+            '\
+              Optional {\
+                ?instanceUri a ?typeUri .\
+                Optional {\
+                  ?typeUri2 <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?typeUri\
+                }\
+                Filter(!Bound(?typeUri2))\
+              }\
+              Optional { ?instanceUri <http://www.w3.org/2000/01/rdf-schema#label> ?instanceLabel . Filter(langMatches(lang(?instanceLabel), "de"))}\
+              Optional { ?instanceUri <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?lon }\
+              Optional { ?instanceUri <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat }\
+              Optional { ?instanceUri <http://www.w3.org/2000/01/rdf-schema#seeAlso> ?instancePage }\
+              Optional { ?typeUri <http://www.w3.org/2000/01/rdf-schema#label> ?typeLabel .Filter(langMatches(lang(?typeLabel), "en")) }\
+              Optional { ?typeUri <http://www.w3.org/2000/01/rdf-schema#seeAlso> ?typePage }\
+            ';
+
+        var essentialDataElement = sparql.ElementString.create(essentialDataElementStr);
+		var essentialDataElementFactory = new sparql.ElementFactoryConst(essentialDataElement);
+        
+        
+        var essentialTableMod = new facete.TableMod();
+
+        {
+	        var varNames = ['instanceLabel', 'typeLabel', 'instancePage', 'typePage', 'instanceUri', 'typeUri', 'lon', 'lat'];
+	        _(varNames).each(function(varName) {
+	            essentialTableMod.addColumn(varName);
+	        });
+        }
+        
 		
 		var geoConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
 
@@ -1859,6 +1863,7 @@ console.log('CELL SCOPE', $scope);
                         
                         var services = $scope.active.services;
                         
+                        // TODO We should wrap a cache here?
                         var sparqlService = conceptPathFinder.createSparqlService(config.sourceConcept, config.targetConcept)
                         
                         var tableService = new service.TableServiceQuery(sparqlService, config.query);
@@ -1873,25 +1878,20 @@ console.log('CELL SCOPE', $scope);
                     },
                     configSupplier: function() {
 
-                        //var facetTreeConfig = geoLinkfacetTreeConfig;
-                        //var facetConfig = geoLinkFacetConfig; //facetTreeConfig.getFacetConfig();
-                        //var conceptFactory = new facete.ConceptFactoryFacetConfig(facetConfig);
-                        //var facetConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
-                        //var facetConfig = facetConfigGeoLink; //facetTreeConfig.getFacetConfig();
-
                         var tableMod = tableConfig.getTableMod();
                         var conceptFactory = new ConceptFactoryTableConfigFacet(tableConfig);
                         var elementFactory = new facete.ElementFactoryConceptFactory(conceptFactory);        
                         var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
 
-                        return {
+                        var r = {
                             query: queryFactory.createQuery(),
                             tableConfig: tableConfig,
                             
                             conceptPathFinder: conceptPathFinder,
                             sourceConcept: sourceConcept,
                             targetConcept: targetConcept
-                        }                    
+                        };
+                        return r;
                     },
                     tableMod: tableConfig.getTableMod()
                 }
@@ -2078,7 +2078,7 @@ console.log('CELL SCOPE', $scope);
 
             
             refreshFacetTables(config);
-            refreshEssentialTables();
+            //refreshEssentialTables();
             
             
             
@@ -2174,7 +2174,15 @@ console.log('CELL SCOPE', $scope);
 
         
         var updateFacetValuePath = function() {
-            var promise = services.lookupServicePathLabels.lookup([active.path]);
+            var active = $scope.active;
+            var services = active ? active.services : null; 
+
+            if(!services) {
+                return;
+            }
+            
+            var path = active.path;
+            var promise = services.lookupServicePathLabels.lookup([path]);
 
             sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(map) {
                 active.pathLabel = map.get(path);
@@ -2511,7 +2519,6 @@ console.log('CELL SCOPE', $scope);
         };
         
         
-        
         var refreshFacetTables = function(config) {
             // Input: facetTreeConfig, config.tableConfigFacet,
             
@@ -2562,16 +2569,11 @@ console.log('CELL SCOPE', $scope);
                         return result;
                     },
                     configSupplier: function() {
-                        console.log('dataElement: ' + dataElementFactory.createElement());
-                        console.log('facetElement: ' + facetElementFactory.createElement());
-                        console.log('filterElement: ' + filterElementFactory.createElement());
-                        return {
+                        var r = {
                             query: queryFactory.createQuery(),
-                            tableConfigFacet: tableConfigFacet
-                        }                    
+                        };
+                        return r;
                     },
-                    //queryFactory: allQueryFactory,
-                    //facetConfig: facetConfig,
                     tableMod: tableMod                    
                 }
             };
@@ -2579,8 +2581,13 @@ console.log('CELL SCOPE', $scope);
             var allElementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, facetElementFactory]);
             var allQueryFactory = new facete.QueryFactoryTableMod(allElementFactory, tableMod);
 
+            
+            
+            
+            
+            
             $scope.active.tableFacetAll = createTableConfig(allQueryFactory, tableConfigFacet, tableMod);
-
+            
             
             // NOTE We assume the data and filter concept share the same variables
             var selectionElementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, filterElementFactory]);
@@ -2588,148 +2595,89 @@ console.log('CELL SCOPE', $scope);
 
             $scope.active.tableFacetSelection = createTableConfig(selectionQueryFactory, tableConfigFacet, tableMod);
 
-//             $scope.active.tableConfigFacet = {
-//                 queryFactory: queryFactory,
-//                 tableMod: tableMod
-//             };
             
             
-            /*
-            var getTableService = function() {
-                return function() {
-                    var conceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
-                    var concept = conceptFactory.createConcet                    
-                    
-                    var query = queryFactory.createQuery();
-                    var tableService = new service.TableServiceSparqlQuery(sparqlService, query);
-                    tableService = new service.TableServiceFacet(tableService, services.lookupServiceNodeLabels, services.lookupServicePathLabels);
-                    return tableService;
-                }
-            }*/
             
-            
+            var createEssentialTableConfig = function(dataElementFactory, filterConceptFactory, tableMod) {
+                
+                var filterElementFactory = new facete.ElementFactoryConceptFactory(filterConceptFactory);
+                
+                var elementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, filterElementFactory]);
+                var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
 
-            //var allQueryFactory = new facete.QueryFactoryTableMod(dataElementFactory, tableMod);
-
-//             $scope.active.tableFacetAll = {
-//                 tableServiceSupplier: function(config) {
-//                     var query = config.query;
-//                     var tableService = new service.TableServiceQuery(sparqlService, query);
-//                     var result = new service.TableServiceFacet(tableService, tableConfigFacet, services.lookupServiceNodeLabels, services.lookupServicePathLabels);
-
-//                     return result;
-//                 },
-//                 configSupplier: function() {
-//                     return {
-//                         query: allQueryFactory.createQuery(),
-//                         tableConfigFacet: tableConfigFacet
-//                     }                    
-//                 },
-//                 //queryFactory: allQueryFactory,
-//                 //facetConfig: facetConfig,
-//                 tableMod: tableMod
-//             };
-
-            
-            
-            /*
-            $scope.active.tableFacetSelection = {
+                
+                var result = {
                     tableServiceSupplier: function(config) {
                         var query = config.query;
                         var tableService = new service.TableServiceQuery(sparqlService, query);
-                        var result = new service.TableServiceFacet(tableService, tableConfigFacet, services.lookupServiceNodeLabels, services.lookupServicePathLabels);
+                        tableService = new service.TableServiceNodeLabels(tableService, services.lookupServiceNodeLabels);
 
-                        return result;
+                        //var result = new service.TableServiceFacet(tableService, tableConfigFacet, services.lookupServiceNodeLabels, services.lookupServicePathLabels);
+
+                        return tableService;
                     },
                     configSupplier: function() {
-                        return {
-                            query: allQueryFactory.createQuery(),
-                            tableConfigFacet: tableConfigFacet
-                        }                    
+                        var r = {
+                            query: queryFactory.createQuery(),
+                        };
+                        
+                        console.log('ESSENTIAL QUERY' + r.query);
+                        //alert('' + r.query);
+
+                        return r;
                     },
-                    //queryFactory: allQueryFactory,
-                    //facetConfig: facetConfig,
-                    tableMod: tableMod
+                    tableMod: tableMod                    
                 };
-            */
-            // HACK! because of name clash in .active
-            // For some reason, this lines makes the toggle column button in the facet tree work - but WHY??????
-            //$scope.tableConfigFacet = tableConfigFacet;
-            //$scope.allTableConfigFacet = $scope.active.allTableConfigFacet;
-            /*
-             * ->
-             */
+                
+                return result;            
+            };
+
+         var varMap = new util.HashMap();
+         var vs = rdf.NodeFactory.createVar('s');
+         var viu = rdf.NodeFactory.createVar('instanceUri');
+         varMap.put(vs, viu);
+
+         var tmpFilterConceptFactory = new facete.ConceptFactoryRename(filterConceptFactory, varMap);
+         var tmpFacetConceptFactory = new facete.ConceptFactoryRename(facetConceptFactory, varMap);
+         
+         
+         //var facetElementFactory = new facete.ElementFactoryConceptFactory(facetConceptFactory);
+            
+            $scope.active.tableEssentialAll = createEssentialTableConfig(essentialDataElementFactory, tmpFacetConceptFactory, essentialTableMod);
+            $scope.active.tableEssentialSelection = createEssentialTableConfig(essentialDataElementFactory, tmpFilterConceptFactory, essentialTableMod);
+            
+            //console.log('DAMMIT', $scope.active.tableEssentialAll);
         };
         
+
+
         
-        var refreshEssentialTables = function() {
 
-            /*
-            \
-            { Select Distinct ?instanceUri {\
-              ?instanceUri a ?typeUri\
-            } }\
-            Prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
-                Prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>\
-                Select ?instanceLabel ?typeLabel ?instancePage ?typePage ?instanceUri ?typeUri ?lon ?lat {\
-                    # Only get the most specific types (i.e. those that are not subclass of another)\
-            */
-// Filter(langMatches(lang(?instanceLabel), "de"))
-// Filter(langMatches(lang(?typeLabel), "de"))
+//                var facetTreeConfig = $scope.active.facetTreeConfig;
+//                var baseFacetConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
 
-var dataElementStr =
-'\
-  Optional {\
-    ?instanceUri a ?typeUri .\
-    Optional {\
-      ?typeUri2 <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?typeUri\
-    }\
-    Filter(!Bound(?typeUri2))\
-  }\
-  Optional { ?instanceUri <http://www.w3.org/2000/01/rdf-schema#label> ?instanceLabel . Filter(langMatches(lang(?instanceLabel), "de"))}\
-  Optional { ?instanceUri <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?lon }\
-  Optional { ?instanceUri <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat }\
-  Optional { ?instanceUri <http://www.w3.org/2000/01/rdf-schema#seeAlso> ?instancePage }\
-  Optional { ?typeUri <http://www.w3.org/2000/01/rdf-schema#label> ?typeLabel .Filter(langMatches(lang(?typeLabel), "en")) }\
-  Optional { ?typeUri <http://www.w3.org/2000/01/rdf-schema#seeAlso> ?typePage }\
-';
-
-        var dataElement = sparql.ElementString.create(dataElementStr);
+//                var facetElementFactory = new facete.ElementFactoryConceptFactory(facetConceptFactory);        
+               
         
+        
+        //var refreshEssentialTables = function(facetConceptFactory, filterConceptFactory) {
+
+        /*
         var dataConcept = new facete.Concept(dataElement, rdf.NodeFactory.createVar('instanceUri'));
         
-        var tableMod = new facete.TableMod();
         //var vs = essentialElement.getVarsMentioned();
         //var varNames = sparql.VarUtils.getVarNames(vs);
-        var varNames = ['instanceLabel', 'typeLabel', 'instancePage', 'typePage', 'instanceUri', 'typeUri', 'lon', 'lat'];
-        _(varNames).each(function(varName) {
-            tableMod.addColumn(varName);
-        });
         
-        var varMap = new util.HashMap();
-        var vs = rdf.NodeFactory.createVar('s');
-        var viu = rdf.NodeFactory.createVar('instanceUri');
-        varMap.put(vs, viu);
+//         var varMap = new util.HashMap();
+//         var vs = rdf.NodeFactory.createVar('s');
+//         var viu = rdf.NodeFactory.createVar('instanceUri');
+//         varMap.put(vs, viu);
         
-        var facetTreeConfig = $scope.active.facetTreeConfig;
-        var baseFacetConceptFactory = new facete.ConceptFactoryFacetTreeConfig(facetTreeConfig);
-        var facetConceptFactory = new facete.ConceptFactoryRename(baseFacetConceptFactory, varMap);
-        
-        var facetElementFactory = new facete.ElementFactoryConceptFactory(facetConceptFactory);        
-        
- 
-        var dataElementFactory = new sparql.ElementFactoryConst(dataConcept.getElement());
-        var renamedFilterConceptFactory = new facete.ConceptFactoryRename(filterConceptFactory, varMap);
-
-        var filterElementFactory = new facete.ElementFactoryConceptFactory(renamedFilterConceptFactory);
-
-        //debugger;
-        // NOTE We assume the data and filter concept share the same variables
         var elementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, filterElementFactory]);
                 
             
         var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
-                       
+
             
         $scope.active.essentialtableConfigFacet = {
             queryFactory: queryFactory,
@@ -2742,8 +2690,9 @@ var dataElementStr =
         $scope.active.allEssentialtableConfigFacet = {
             queryFactory: allQueryFactory,
             tableMod: tableMod
-        };
+        };        
     };
+    */
 
 
     }]);
@@ -2978,7 +2927,9 @@ var dataElementStr =
 			
 				<tabset>
 					<tab heading="All" active="app.data.tabs[0].isActive">
-						<button class="btn btn-primary" ng-click="exportAll()">Export</button>
+                        <div class="well well-sm">
+						    <button class="btn btn-primary" ng-click="exportQuery(active.tableFacetAll.configSupplier().query)">Export</button>
+						</div>
 						
 <!-- 						  <span>Some text <span style="cursor: pointer;"ng-context-menu="menuOptions">Click me!</span></span>						 -->
 						  
@@ -2992,15 +2943,28 @@ var dataElementStr =
 					</tab>
 		
 					<tab heading="Selection" active="app.data.tabs[1].isActive">
+                        <div class="well well-sm">
+                            <button class="btn btn-primary" ng-click="exportQuery(active.tableFacetSelection.configSupplier().query)">Export</button>
+                        </div>
 <!-- 						<sparql-table sparql-service="active.services.sparqlService" config="active.tableConfigFacet" disable-requests="!app.data.tabs[1].isActive"></sparql-table> -->
                         <sparql-table table-service-supplier="active.tableFacetSelection.tableServiceSupplier" config-supplier="active.tableFacetSelection.configSupplier" table-mod="active.tableFacetSelection.tableMod" context="tableContext" disable-requests="!app.data.tabs[1].isActive"></sparql-table>
 					</tab>
 
                     <tab heading="Essential (All)" active="app.data.tabs[2].isActive">
+                        <div class="well well-sm">
+                            <button class="btn btn-primary" ng-click="exportQuery(active.tableEssentialAll.configSupplier().query)">Export</button>
+                        </div>
+
+                        <sparql-table table-service-supplier="active.tableEssentialAll.tableServiceSupplier" config-supplier="active.tableEssentialAll.configSupplier" table-mod="active.tableEssentialAll.tableMod" context="tableContext" disable-requests="!app.data.tabs[2].isActive"></sparql-table>
 <!--                         <sparql-table sparql-service="active.services.sparqlService" config="active.allEssentialtableConfigFacet" disable-requests="!app.data.tabs[2].isActive"></sparql-table> -->
                     </tab>
 
                     <tab heading="Essential (Selection)" active="app.data.tabs[3].isActive">
+                        <div class="well well-sm">
+                            <button class="btn btn-primary" ng-click="exportQuery(active.tableEssentialSelection.configSupplier().query)">Export</button>
+                        </div>
+
+                        <sparql-table table-service-supplier="active.tableEssentialSelection.tableServiceSupplier" config-supplier="active.tableEssentialSelection.configSupplier" table-mod="active.tableEssentialSelection.tableMod" context="tableContext" disable-requests="!app.data.tabs[3].isActive"></sparql-table>
 <!--                         <sparql-table sparql-service="active.services.sparqlService" config="active.essentialtableConfigFacet" disable-requests="!app.data.tabs[3].isActive"></sparql-table> -->
                     </tab>
 
