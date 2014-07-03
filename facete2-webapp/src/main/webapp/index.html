@@ -2915,7 +2915,7 @@ console.log('CELL SCOPE', $scope);
 						Facet Values
 					</div>
 					<div class="panel-body">
-                        <span>Showing values for {{active.pathLabel}}</span>
+                        <span>Showing values for <span class="label label-primary" ng-bind-html="active.pathLabel"></span></span>
 		   				<facet-value-list sparql-service="active.services.sparqlService" facet-tree-config="active.facetTreeConfig" path="active.path"></facet-value-list>
 					</div>
 				</div>

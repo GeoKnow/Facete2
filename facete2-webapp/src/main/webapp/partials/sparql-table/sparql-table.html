@@ -22,7 +22,7 @@
         <th ng-repeat="colDef in schema.colDefs">
             <span class="visible-on-hover-parent" style="white-space:nowrap;">
                 <a href="" ng-click="removeColumn(colDef.field)"><span class="visible-on-hover-child glyphicon glyphicon-remove-circle"></span></a>
-                <span title="{{'' + colDef.path}}">{{colDef.displayName}}</span>
+                <span title="{{'' + colDef.path}}" ng-bind-html="colDef.displayName"></span>
                 <span ng-class="{'visible-on-hover-child': !getSortDir(colDef.field)}"><a href="" ng-hide="getSortDir(colDef.field) === 'asc'" ng-click="setSortCondition(colDef.field, 'asc', $event.shiftKey)"><span class="glyphicon glyphicon-chevron-up"></span></a></span>
                 <span ng-class="{'visible-on-hover-child': !getSortDir(colDef.field)}"><a href="" ng-hide="getSortDir(colDef.field) === 'desc'" ng-click="setSortCondition(colDef.field, 'desc', $event.shiftKey)"><span class="glyphicon glyphicon-chevron-down"></span></a></span>
 <!-- ng-class="{visible-on-hover-child: !!getSortDir(colDef.field)}"             class="visible-on-hover-child"-->
@@ -37,7 +37,8 @@
 
     <tr ng-repeat="row in myData">
         <td class="show-on-hover-parent-inline" ng-repeat="colDef in schema.colDefs" ng-init="cell=row[colDef.field]"> <!-- ng-show="column.visible">  -->
-            <span title="{{cell.node.toString()}}" class="">{{cell.displayLabel}} <span style="cursor: pointer;" ng-context-menu="context.menuOptions" class="show-on-hover-child glyphicon glyphicon-asterisk"></span></span>                       
+            <span title="{{cell.node.toString()}}" ng-bind-html="cell.displayLabel"></span>
+            <span style="cursor: pointer;" ng-context-menu="context.menuOptions" class="show-on-hover-child glyphicon glyphicon-asterisk"></span>                       
         </td>
     </tr>
     </tbody>
