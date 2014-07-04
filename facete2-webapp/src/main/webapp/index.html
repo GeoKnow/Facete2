@@ -168,7 +168,7 @@
 	        var tmp = this.delegate.fetchData(limit, offset);
 	        
 	        var self = this;
-	        tmp.pipe(function(rows) {
+	        tmp.done(function(rows) {
 	            
 	            // Collect all paths
 	            var paths = _(rows).map(function(row) {
@@ -179,14 +179,14 @@
 	                var r = facete.Path.parse(pathStr);
 	                
 	                // Add the path object to the row
-	                row[self.labelColId].path = r;
+	                row[self.pathColId].path = r;
 	                
 	                return r;
 	            });
 	            
 	            var p = self.lookupServicePaths.lookup(paths).done(function(map) {
 	                _(rows).map(function(row) {
-	                    var path = row[self.labelColId].path;
+	                    var path = row[self.pathColId].path;
 	                    var doc = map.get(path);
 	                    if(doc) {
 	                        row[self.pathColId].displayLabel = doc;// displayLabel;
@@ -566,7 +566,7 @@ myModule.directive('sparqlTable', [function() {
             // Some config object that upon change will be passed to the tableServiceSupplier
 
             configSupplier: '=',
-
+            cellRendererSupplier: '=',
             // Hash function used to detect changes in the config object
 //            configHasher: '=',
 //            tableService: '=',
@@ -584,6 +584,30 @@ myModule.directive('sparqlTable', [function() {
 //             }
         }
     }
+}]);
+
+
+// Source http://stackoverflow.com/questions/17417607/angular-ng-bind-html-unsafe-and-directive-within-it
+myModule.directive('compile', ['$compile', function ($compile) {
+    return function(scope, element, attrs) {
+        scope.$watch(
+          function(scope) {
+             // watch the 'compile' expression for changes
+            return scope.$eval(attrs.compile);
+          },
+          function(value) {
+            // when the 'compile' expression changes
+            // assign it into the current DOM
+            element.html(value);
+
+            // compile the new DOM and link it to the current
+            // scope.
+            // NOTE: we only compile .childNodes so that
+            // we don't get into infinite loop compiling ourselves
+            $compile(element.contents())(scope);
+          }
+      );
+  };
 }]);
 
 /*
@@ -1451,10 +1475,17 @@ myModule.directive('jassaLabel', function() {
         $scope.tableContext = {};
 		
 //         var argh = $scope;
+
+        // TODO This method should go to a different tableContext
+        $scope.tableContext.setGeoPath = function(path) {
+            $scope.active.geoConceptFactory.setPath(path);
+        };
+        
+        
         
 		$scope.tableContext.menuOptions = function($scope) {
             var result = [];
-console.log('CELL SCOPE', $scope);
+
             var item = $scope.cell;
             var node = item ? item.node : null;
             if(node && node.isUri && node.isUri()) {
@@ -1487,15 +1518,8 @@ console.log('CELL SCOPE', $scope);
             result.push({
                 text: 'Toggle constraint from this value',
                 callback: function($itemScope) {
-
                     var constraint = new facete.ConstraintEquals(path, node);
                     facetTreeConfig.getFacetConfig().getConstraintManager().toggleConstraint(constraint);
-                    
-                    
-//                     argh.active.services.lookupServiceConstraintLabels.lookup([constraint]).pipe(function(map) {
-                        
-//                         alert(map.get(constraint));
-//                     });
                 }
             });
             
@@ -1903,7 +1927,19 @@ console.log('CELL SCOPE', $scope);
                         };
                         return r;
                     },
-                    tableMod: tableConfig.getTableMod()
+                    tableMod: tableConfig.getTableMod(),
+                    cellRendererSupplier: function() {
+                        var html;
+
+                        if(this.cell.path) {
+                            html = '<a href="" ng-click="context.setGeoPath(cell.path)" title="{{cell.node.toString()}}" ng-bind-html="cell.displayLabel"></a>';
+                        }
+                        else {
+                            html = '<span ng-bind-html="cell.displayLabel"></span>';
+                        }
+
+                        return html;
+                    }
                 }
             };		
 			
@@ -2174,9 +2210,6 @@ console.log('CELL SCOPE', $scope);
 
 
 		
-		$scope.setGeoPath = function(path) {
-		    $scope.active.geoConceptFactory.setPath(path);
-		};
 
         $scope.selectFacet = function(path) {
             $scope.active.path = path;
@@ -2585,7 +2618,16 @@ console.log('CELL SCOPE', $scope);
                         };
                         return r;
                     },
-                    tableMod: tableMod                    
+                    tableMod: tableMod,
+                    cellRendererSupplier: function() {                        
+                        console.log('ARGH', this);
+                        
+                        var html =
+                            '<span title="{{cell.node.toString()}}" ng-bind-html="cell.displayLabel"></span>' +
+                            '<span style="cursor: pointer;" ng-context-menu="context.menuOptions" class="show-on-hover-child glyphicon glyphicon-asterisk"></span>';                       
+
+                        return html;
+                    }                    
                 }
             };
 
@@ -2637,7 +2679,15 @@ console.log('CELL SCOPE', $scope);
 
                         return r;
                     },
-                    tableMod: tableMod                    
+                    tableMod: tableMod,
+                    cellRendererSupplier: function() {                        
+
+                        var html =
+                            '<span title="{{cell.node.toString()}}" ng-bind-html="cell.displayLabel"></span>' +
+                            '<span style="cursor: pointer;" ng-context-menu="context.menuOptions" class="show-on-hover-child glyphicon glyphicon-asterisk"></span>';                       
+
+                        return html;
+                    }
                 };
                 
                 return result;            
@@ -2855,7 +2905,7 @@ console.log('CELL SCOPE', $scope);
 				</accordion-heading>
 
 <!-- 				<tabset> -->
-                        <sparql-table table-service-supplier="active.tableGeoLink.tableServiceSupplier" config-supplier="active.tableGeoLink.configSupplier" table-mod="active.tableGeoLink.tableMod" context="tableContext"></sparql-table>
+                        <sparql-table table-service-supplier="active.tableGeoLink.tableServiceSupplier" config-supplier="active.tableGeoLink.configSupplier" table-mod="active.tableGeoLink.tableMod" context="tableContext" cell-renderer-supplier="active.tableGeoLink.cellRendererSupplier"></sparql-table>
 				
 <!-- 					<tab heading="Candidates"> -->
 <!-- 		   				<ul> -->
@@ -2957,7 +3007,7 @@ console.log('CELL SCOPE', $scope);
 <!-- 						<sparql-grid sparql-service="active.services.sparqlService" config="active.allTableConfigFacet" disable-requests="!app.data.tabs[0].isActive"></sparql-grid> -->
 <!--                         <sparql-table sparql-service="active.services.sparqlService" config="active.allTableConfigFacet" disable-requests="!app.data.tabs[0].isActive"></sparql-table> -->
 <!--                         <sparql-table table-service="active.services.tableService" table-mod="active.allTableConfigFacet" disable-requests="!app.data.tabs[0].isActive"></sparql-table> -->
-                        <sparql-table table-service-supplier="active.tableFacetAll.tableServiceSupplier" config-supplier="active.tableFacetAll.configSupplier" table-mod="active.tableFacetAll.tableMod" context="tableContext" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
+                        <sparql-table table-service-supplier="active.tableFacetAll.tableServiceSupplier" config-supplier="active.tableFacetAll.configSupplier" table-mod="active.tableFacetAll.tableMod" cell-renderer-supplier="active.tableFacetAll.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
 <!--                         </div> -->
 					</tab>
 		
@@ -2966,7 +3016,7 @@ console.log('CELL SCOPE', $scope);
                             <button class="btn btn-primary" ng-click="exportQuery(active.tableFacetSelection.configSupplier().query)">Export</button>
                         </div>
 <!-- 						<sparql-table sparql-service="active.services.sparqlService" config="active.tableConfigFacet" disable-requests="!app.data.tabs[1].isActive"></sparql-table> -->
-                        <sparql-table table-service-supplier="active.tableFacetSelection.tableServiceSupplier" config-supplier="active.tableFacetSelection.configSupplier" table-mod="active.tableFacetSelection.tableMod" context="tableContext" disable-requests="!app.data.tabs[1].isActive"></sparql-table>
+                        <sparql-table table-service-supplier="active.tableFacetSelection.tableServiceSupplier" config-supplier="active.tableFacetSelection.configSupplier" table-mod="active.tableFacetSelection.tableMod" cell-renderer-supplier="active.tableFacetSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[1].isActive"></sparql-table>
 					</tab>
 
                     <tab heading="Essential (All)" active="app.data.tabs[2].isActive">
@@ -2974,7 +3024,7 @@ console.log('CELL SCOPE', $scope);
                             <button class="btn btn-primary" ng-click="exportQuery(active.tableEssentialAll.configSupplier().query)">Export</button>
                         </div>
 
-                        <sparql-table table-service-supplier="active.tableEssentialAll.tableServiceSupplier" config-supplier="active.tableEssentialAll.configSupplier" table-mod="active.tableEssentialAll.tableMod" context="tableContext" disable-requests="!app.data.tabs[2].isActive"></sparql-table>
+                        <sparql-table table-service-supplier="active.tableEssentialAll.tableServiceSupplier" config-supplier="active.tableEssentialAll.configSupplier" table-mod="active.tableEssentialAll.tableMod" cell-renderer-supplier="active.tableEssentialAll.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[2].isActive"></sparql-table>
 <!--                         <sparql-table sparql-service="active.services.sparqlService" config="active.allEssentialtableConfigFacet" disable-requests="!app.data.tabs[2].isActive"></sparql-table> -->
                     </tab>
 
@@ -2983,7 +3033,7 @@ console.log('CELL SCOPE', $scope);
                             <button class="btn btn-primary" ng-click="exportQuery(active.tableEssentialSelection.configSupplier().query)">Export</button>
                         </div>
 
-                        <sparql-table table-service-supplier="active.tableEssentialSelection.tableServiceSupplier" config-supplier="active.tableEssentialSelection.configSupplier" table-mod="active.tableEssentialSelection.tableMod" context="tableContext" disable-requests="!app.data.tabs[3].isActive"></sparql-table>
+                        <sparql-table table-service-supplier="active.tableEssentialSelection.tableServiceSupplier" config-supplier="active.tableEssentialSelection.configSupplier" table-mod="active.tableEssentialSelection.tableMod" cell-renderer-supplier="active.tableEssentialSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[3].isActive"></sparql-table>
 <!--                         <sparql-table sparql-service="active.services.sparqlService" config="active.essentialtableConfigFacet" disable-requests="!app.data.tabs[3].isActive"></sparql-table> -->
                     </tab>
 

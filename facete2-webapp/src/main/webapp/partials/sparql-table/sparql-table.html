@@ -37,8 +37,9 @@
 
     <tr ng-repeat="row in myData">
         <td class="show-on-hover-parent-inline" ng-repeat="colDef in schema.colDefs" ng-init="cell=row[colDef.field]"> <!-- ng-show="column.visible">  -->
-            <span title="{{cell.node.toString()}}" ng-bind-html="cell.displayLabel"></span>
-            <span style="cursor: pointer;" ng-context-menu="context.menuOptions" class="show-on-hover-child glyphicon glyphicon-asterisk"></span>                       
+            <div compile="cellRendererSupplier()"></div>
+<!--             <span title="{{cell.node.toString()}}" ng-bind-html="cell.displayLabel"></span> -->
+<!--             <span style="cursor: pointer;" ng-context-menu="context.menuOptions" class="show-on-hover-child glyphicon glyphicon-asterisk"></span>                        -->
         </td>
     </tr>
     </tbody>
@@ -51,7 +52,7 @@
 </table>
 </div>
 <!-- <pagination class="pagination-small" total-items="totalServerItems" page="pagingOptions.currentPage" max-size="pagingOptions.pageSize" boundary-links="true" rotate="false" num-pages="Math.ceil(totalServerItems / pageOptions.pageSize)"></pagination> -->
-<pagination class="pagination-small" page="pagingOptions.currentPage" total-items="totalServerItems" items-per-page="pagingOptions.pageSize" max-Size="maxSize" boundary-links="true" rotate="false"></pagination>
+<pagination class="pagination-small" page="pagingOptions.currentPage" total-items="totalServerItems" items-per-page="pagingOptions.pageSize" max-Size="maxSize" boundary-links="true" rotate="false" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
 <br />
 <!-- <span>{{totalServerItems}} items in the table.</span> -->
 <span>Showing {{myData.length || 0}} entries in the positions {{myData.length ? (pagingOptions.currentPage - 1) * pagingOptions.pageSize + 1 : 0}} - {{(pagingOptions.currentPage - 1) * pagingOptions.pageSize + myData.length}} out of {{totalServerItems || 0}} items in total.</span>
