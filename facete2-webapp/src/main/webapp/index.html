@@ -299,6 +299,10 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
         
         //return $scope.tableService;
         
+        if(!$scope.configSupplier || !$scope.tableServiceSupplier) {
+            return null;
+        }
+        
         var config = $scope.configSupplier();
         $scope.tableService = $scope.tableServiceSupplier(config);
         
@@ -366,7 +370,7 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
     $scope.refresh = function() {
         var tableService = createTableService();
 
-        if($scope.disableRequests) {
+        if($scope.disableRequests || !tableService) {
             util.ArrayUtils.clear($scope.myData);
             return;
         }
@@ -380,6 +384,11 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
     $scope.refreshSchema = function(tableService) {
         tableService = tableService || createTableService();
 
+        if(!tableService) {
+            $scope.loading.schema = false;
+            $scope.schema = {};
+        }
+        
         var oldSchema = $scope.schema;
         var promise = tableService.fetchSchema();
         
@@ -399,6 +408,12 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
     $scope.refreshPageCount = function(tableService) {
         tableService = tableService || createTableService();
         
+        if(!tableService) {
+            $scope.totalServerItems = 0;            
+            $scope.loading.pageCount = false;
+            return;
+        }
+        
         var promise = tableService.fetchCount();
 
         $scope.loading.pageCount = true;
@@ -414,6 +429,12 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
     $scope.refreshData = function(tableService) {
         tableService = tableService || createTableService();
 
+        if(!tableService) {
+            $scope.loading.data = false;
+            $scope.myData = [];
+            return;
+        }
+        
         var page = $scope.pagingOptions.currentPage;
         var pageSize = $scope.pagingOptions.pageSize;
         
@@ -1806,6 +1827,50 @@ myModule.directive('jassaLabel', function() {
 //             }
         ];
 
+        // TODO: Whenever the facet selection changes, we need to recreate the map data source service for the modified concept
+        var createMapDataSource = function(sparqlService, geoMapFactory, concept, fillColor) {
+
+            // The 'core' service from which to retrieve the initial data
+            var bboxListService = new service.ListServiceBbox(sparqlService, geoMapFactory, concept);
+
+            // Wrap this service for augmenting (enriching) it with labels
+            var lookupServiceLabels = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService);
+            lookupServiceLabels = new service.LookupServiceTransform(lookupServiceLabels, function(doc, id) {
+                var result = {
+                    shortLabel: doc
+                };                    
+                return result;
+            });
+                
+            var augmenterLabels = new service.AugmenterLookup(lookupServiceLabels);
+            bboxListService = new service.ListServiceAugmenter(bboxListService, augmenterLabels);
+            
+            // Also add style information
+            var lookupServiceStyle = new service.LookupServiceConst({
+                fillColor: fillColor,
+                fontColor: fillColor,
+                   strokeColor: fillColor,
+
+                stroke: true,
+                strokeLinecap: 'round',
+                strokeWidth: 100,
+                pointRadius: 12,
+                labelAlign: 'cm',
+                
+                config: {
+                    conceptFactory: geoConceptFactory
+                }
+            });
+    
+            var augmenterStyle = new service.AugmenterLookup(lookupServiceStyle);
+            bboxListService = new service.ListServiceAugmenter(bboxListService, augmenterStyle);
+            
+            // Wrap the list service with clustering support
+            var result = new service.DataServiceBboxCache(bboxListService, 1500, 500, 2);
+            
+            return result;
+        };            
+        
         
         /**
          * Init of derived attributes
@@ -1837,8 +1902,13 @@ myModule.directive('jassaLabel', function() {
         $scope.active.targetPath = facete.Path.parse(vocab.rdf.type.getUri());
 
 
-        $scope.findConceptPaths = function(sourceConcept, targetConcept) {
+        var findConceptPaths = function(sourceConcept, targetConcept) {
             var conceptPathFinder = $scope.active.conceptPathFinder;
+            if(!conceptPathFinder) {
+                var deferred = jQuery.Deferred();
+                deferred.resolve([]);
+                return deferred.promise();
+            }
 
             var promise = conceptPathFinder.findPaths(sourceConcept, targetConcept);
             var result = sponate.angular.bridgePromise(promise, $q.defer(), $rootScope, function(paths) {
@@ -2129,14 +2199,19 @@ myModule.directive('jassaLabel', function() {
             
             
     		var mapConfig = config.mapConfig;
-            var mapFactory = config.mapFactory;
-    		
-            $scope.active.dataSources = [{
-    			sparqlService: sparqlService,
-    			mapFactory: mapConfig.mapFactory,
-    			conceptFactory: geoConceptFactory,
-    		    quadTreeConfig: mapConfig.quadTreeConfig
-    		}];
+            //var mapFactory = config.mapFactory;
+
+
+             
+            $scope.active.dataSources = [
+                createMapDataSource(sparqlService, mapConfig.mapFactory, geoConceptFactory.createConcept(), '#CC0020')
+            ];            
+//             $scope.active.dataSources = [{
+//     			sparqlService: sparqlService,
+//     			mapFactory: mapConfig.mapFactory,
+//     			conceptFactory: geoConceptFactory,
+//     		    quadTreeConfig: mapConfig.quadTreeConfig
+//     		}];
 
             
             updateFacetValuePath();
@@ -2144,6 +2219,26 @@ myModule.directive('jassaLabel', function() {
         };
 
         $scope.active.dataSources = [];
+        
+        $scope.$watch('ObjectUtils.hashCode(active.geoConceptFactory.createConcept())', function() {
+            var geoConcept = $scope.active.geoConceptFactory.createConcept();
+            //alert('' + geoConcept);
+            var mapFactory = $scope.active.service.mapConfig.mapFactory; //$scope.active.mapFactory;
+            var sparqlService = $scope.active.services.sparqlService;
+            
+            console.log('GEO CONCEPT: ', geoConcept, mapFactory, sparqlService);
+            
+            var dataSources = [];
+            
+            if(sparqlService && mapFactory && geoConcept) {
+                var dataSource = createMapDataSource(sparqlService, mapFactory, geoConcept, '#CC0020')
+                dataSources.push(dataSource);
+                
+                console.log('MapDataSource updated');
+            }
+            
+            $scope.active.dataSources = dataSources;
+        });
         
         
         $scope.setDataSource = function(item) {
@@ -2180,7 +2275,7 @@ myModule.directive('jassaLabel', function() {
             var targetConceptFactory = new facete.ConceptFactoryFacetTreeConfig(targetFacetTreeConfig);
             var targetConcept = targetConceptFactory.createConcept();     
             
-		    $scope.findConceptPaths(sourceConcept, targetConcept).then(function(tmp) {
+		    findConceptPaths(sourceConcept, targetConcept).then(function(tmp) {
                 $scope.active.targetGeoPaths = tmp;
             });
 		    
@@ -2220,11 +2315,13 @@ myModule.directive('jassaLabel', function() {
             var active = $scope.active;
             var services = active ? active.services : null; 
 
-            if(!services) {
+            var path = active.path;
+
+            if(!path || !services || !services.lookupServicePathLabels) {
                 return;
             }
             
-            var path = active.path;
+            
             var promise = services.lookupServicePathLabels.lookup([path]);
 
             sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(map) {
@@ -3126,7 +3223,8 @@ myModule.directive('jassaLabel', function() {
 	</div>
 
 
-    <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.mapConfig" sources="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>
+<!--     <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.mapConfig" sources="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div> -->
+     <div jassa-map-olli="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.mapConfig" sources="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>
 
 
 
