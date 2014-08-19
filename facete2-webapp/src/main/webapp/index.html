@@ -25,63 +25,6 @@
 
     <!-- endbuild -->
 
-    <style>
-    /* possible HACK - Move resize handles into the div, so that overflow divs don't show scrollbars because of the handle */
-    /* FIXME Should not modify global css classes */
-    .ui-resizable-n {
-        top: 0px;
-    }
-
-    .ui-resizable-e {
-        right: 0px;
-    }
-    
-    .ui-resizable-ne {
-        right: 0px;
-        top: 0px;
-    }
-
-    .ui-resizable-handle:hover {
-        background-color: #ddddff;
-    }
-
-    .panel-body {
-        overflow: auto;
-    }
-    
-    .show-on-hover-child {
-        display: none;    
-    }
-    
-    .show-on-hover-parent-inline:hover .show-on-hover-child {
-        display: inline;  
-    }
-
-    .visible-on-hover-child {
-        visibility: hidden;  
-    }
-
-    .visible-on-hover-parent:hover .visible-on-hover-child {
-        visibility: visible;    
-    }
-    
-
-    
-/*     .panel-group { */
-/*         max-height: 100%; */
-/*         max-width: 100%; */
-/*         overflow: auto; */
-/*         position: relative;     */
-/*     } */
-
-    /*
-    .tab-content {
-        max-height: 100%;
-        max-width: 100%;
-        overflow: auto;
-    }
-    */
-    </style>
 	
     <!-- build:js scripts/scripts.js -->
 
@@ -100,10 +43,6 @@
     <script src="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers-tpls.js"></script>
     <script src="bower_components/ng-table/ng-table.js"></script>
     <!-- endbower -->
-
-
-
-	<script src="scripts/lib/ng-grid-flexible-height/ng-grid-flexible-height.js"></script>
 
     <script src="scripts/lib/angular-ui/0.10.0/ui-bootstrap-tpls-0.10.0.js"></script>
     <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
@@ -132,6 +71,10 @@
 	var util = jassa.util;
 	
 	var client = Jassa.client;
+
+	
+	var ns = service;
+
 
 
 	service.TableServiceGeoLink = Class.create(service.TableServiceDelegateBase, {
@@ -249,10 +192,35 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
     var service = jassa.service;
     var util = jassa.util;
     var facete = jassa.facete;    
-    var sponate = jassa.sponate;
+    var sponate = jassa.sponate;    
     
     
     // TODO Watch the tableMod object
+    $scope.$watchCollection('tableMod.getSortConditions()', function() {
+        var tableMod = $scope.tableMod;
+        if(tableMod != null) {
+            syncFromTableMod($scope.tableMod, $scope.gridOptions.sortInfo);
+        }
+    });
+    
+    var syncFromTableMod = function(tableMod, sortInfo) {
+        var scs = tableMod.getSortConditions();
+        
+        var newFields = [];
+        var newDirs = [];
+        _(scs).each(function(sc) {
+            newFields.push(sc.getColumnId());
+            
+            var d = sc.getSortDir();
+            var dirName = d > 0 ? 'asc' : (d < 0 ? 'desc' : '');
+            
+            newDirs.push(dirName);
+        });
+
+        util.ArrayUtils.replace(sortInfo.fields, newFields);
+        util.ArrayUtils.replace(sortInfo.directions, newDirs);        
+    };
+    
     
     var syncTableMod = function(sortInfo, tableMod) {
         
@@ -261,13 +229,7 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
             var columnId = sortInfo.fields[i];
             var dir = sortInfo.directions[i];
             
-            var d = 0;
-            if(dir === 'asc') {
-                d = 1;
-            }
-            else if(dir === 'desc') {
-                d = -1;
-            }
+            var d = dir === 'asc' ? 1 : (dir === 'desc' ? -1 : 0);  
             
             if(d !== 0) {
                 var sortCondition = new facete.SortCondition(columnId, d);
@@ -277,10 +239,10 @@ myModule.controller('SparqlTableCtrl', ['$scope', '$rootScope', '$q', function($
 
         var oldSortConditions = tableMod.getSortConditions();
         
-        var isTheSame = _(newSortConditions).isEqual(oldSortConditions);
-        if(!isTheSame) {
+        //var isTheSame = _(newSortConditions).isEqual(oldSortConditions);
+        //if(!isTheSame) {
             util.ArrayUtils.replace(oldSortConditions, newSortConditions);
-        }
+        //}
 
     };
 
@@ -1360,7 +1322,7 @@ myModule.directive('jassaLabel', function() {
         tableConfigGeoLink.togglePath(facete.Path.parse('http://ns.aksw.org/jassa/ontology/pathLength'));
 		var pathLengthColId = tableConfigGeoLink.getColIdForPath(facete.Path.parse('http://ns.aksw.org/jassa/ontology/pathLength'));
 
-		//tableConfigGeoLink.getTableMod().getSortConditions().push(new facete.SortCondition(pathLengthColId, -1));
+		tableConfigGeoLink.getTableMod().getSortConditions().push(new facete.SortCondition(pathLengthColId, 1));
 
 		
 
@@ -2120,6 +2082,7 @@ myModule.directive('jassaLabel', function() {
 	    		sparqlService = new service.SparqlServiceCache(sparqlService);
 	            sparqlService = new service.SparqlServiceVirtFix(sparqlService);
 	    		sparqlService = new service.SparqlServicePaginate(sparqlService, 1000);
+	    		sparqlService = new service.SparqlServicePageExpand(sparqlService, 100);
 	    		
 	    		services.sparqlService = sparqlService;
 	    		
@@ -3097,22 +3060,14 @@ myModule.directive('jassaLabel', function() {
 						    <button class="btn btn-primary" ng-click="exportQuery(active.tableFacetAll.configSupplier().query)">Export</button>
 						</div>
 						
-<!-- 						  <span>Some text <span style="cursor: pointer;"ng-context-menu="menuOptions">Click me!</span></span>						 -->
-						  
-						
-						
-<!-- 						<sparql-grid sparql-service="active.services.sparqlService" config="active.allTableConfigFacet" disable-requests="!app.data.tabs[0].isActive"></sparql-grid> -->
-<!--                         <sparql-table sparql-service="active.services.sparqlService" config="active.allTableConfigFacet" disable-requests="!app.data.tabs[0].isActive"></sparql-table> -->
-<!--                         <sparql-table table-service="active.services.tableService" table-mod="active.allTableConfigFacet" disable-requests="!app.data.tabs[0].isActive"></sparql-table> -->
                         <sparql-table table-service-supplier="active.tableFacetAll.tableServiceSupplier" config-supplier="active.tableFacetAll.configSupplier" table-mod="active.tableFacetAll.tableMod" cell-renderer-supplier="active.tableFacetAll.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
-<!--                         </div> -->
 					</tab>
 		
 					<tab heading="Selection" active="app.data.tabs[1].isActive">
                         <div class="well well-sm">
                             <button class="btn btn-primary" ng-click="exportQuery(active.tableFacetSelection.configSupplier().query)">Export</button>
                         </div>
-<!-- 						<sparql-table sparql-service="active.services.sparqlService" config="active.tableConfigFacet" disable-requests="!app.data.tabs[1].isActive"></sparql-table> -->
+
                         <sparql-table table-service-supplier="active.tableFacetSelection.tableServiceSupplier" config-supplier="active.tableFacetSelection.configSupplier" table-mod="active.tableFacetSelection.tableMod" cell-renderer-supplier="active.tableFacetSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[1].isActive"></sparql-table>
 					</tab>
 
@@ -3122,7 +3077,6 @@ myModule.directive('jassaLabel', function() {
                         </div>
 
                         <sparql-table table-service-supplier="active.tableEssentialAll.tableServiceSupplier" config-supplier="active.tableEssentialAll.configSupplier" table-mod="active.tableEssentialAll.tableMod" cell-renderer-supplier="active.tableEssentialAll.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[2].isActive"></sparql-table>
-<!--                         <sparql-table sparql-service="active.services.sparqlService" config="active.allEssentialtableConfigFacet" disable-requests="!app.data.tabs[2].isActive"></sparql-table> -->
                     </tab>
 
                     <tab heading="Essential (Selection)" active="app.data.tabs[3].isActive">
@@ -3131,7 +3085,6 @@ myModule.directive('jassaLabel', function() {
                         </div>
 
                         <sparql-table table-service-supplier="active.tableEssentialSelection.tableServiceSupplier" config-supplier="active.tableEssentialSelection.configSupplier" table-mod="active.tableEssentialSelection.tableMod" cell-renderer-supplier="active.tableEssentialSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[3].isActive"></sparql-table>
-<!--                         <sparql-table sparql-service="active.services.sparqlService" config="active.essentialtableConfigFacet" disable-requests="!app.data.tabs[3].isActive"></sparql-table> -->
                     </tab>
 
 <!-- 					<tab heading="Interlinking"> -->
@@ -3224,7 +3177,7 @@ myModule.directive('jassaLabel', function() {
 
 
 <!--     <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.mapConfig" sources="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div> -->
-     <div jassa-map-olli="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.mapConfig" sources="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>
+     <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.mapConfig" sources="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>
 
 
 

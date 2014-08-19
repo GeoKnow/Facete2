@@ -1,3 +1,28 @@
+
+.panel-body {
+    overflow: auto;
+}
+
+.show-on-hover-child {
+    display: none;    
+}
+
+.show-on-hover-parent-inline:hover .show-on-hover-child {
+    display: inline;  
+}
+
+.visible-on-hover-child {
+    visibility: hidden;  
+}
+
+.visible-on-hover-parent:hover .visible-on-hover-child {
+    visibility: visible;    
+}
+
+
+/* TODO The section below should only contain overrides of bootstrap, but not our own definitions */
+
+
 .form-group label {
 	width: 100%;
 }
@@ -179,3 +204,24 @@ a {
    	padding: 5px;
 }
 
+
+/* jQuery UI resizable */
+
+/* possible HACK - Move resize handles into the div, so that overflow divs don't show scrollbars because of the handle */
+/* FIXME Should not modify global css classes */
+.ui-resizable-n {
+    top: 0px;
+}
+
+.ui-resizable-e {
+    right: 0px;
+}
+
+.ui-resizable-ne {
+    right: 0px;
+    top: 0px;
+}
+
+.ui-resizable-handle:hover {
+    background-color: #ddddff;
+}
