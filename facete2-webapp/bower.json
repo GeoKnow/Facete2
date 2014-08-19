@@ -4,7 +4,8 @@
   "dependencies": {
     "jassa-ui-angular": "0.0.4-SNAPSHOT",
     "jassa-ui-angular-openlayers": "0.0.4-SNAPSHOT",
-    "ng-table": "0.3.2"
+    "ng-table": "0.3.2",
+    "angular-ui-router": "0.2.10"
   },
   "devDependencies": {
   }

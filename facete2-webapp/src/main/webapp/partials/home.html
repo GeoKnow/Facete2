@@ -1,0 +1,279 @@
+
+    <div style="position: absolute; top: 50px; left: 0px; width: 500px; bottom: 0px; overflow: auto; padding: 5px; pointer-events:none" pointer-events-scroll-fix>
+
+
+        <accordion close-others="false">
+
+            <accordion-group style="pointer-events: auto;" ng-if="app.search.show" is-open="app.search.isOpen">
+                <accordion-heading>
+                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.search.isOpen, 'glyphicon-chevron-right': !app.search.isOpen}"></i>
+                    Search Results
+                    <a href="" ng-click="app.search.show = false"><span class="glyphicon glyphicon-remove-circle"></span></a>
+                </accordion-heading>
+                
+                <ul>
+                <li ng-show="!(searchResults.length > 0)">(this list is empty)</li>
+                <li ng-repeat="item in searchResults">
+                    <a href="" ng-click="selectSearchResult(item)"><b>{{item.primaryName}}</b></a>
+                    <span>{{item.description}}</span>
+                </li>
+                </ul>
+            </accordion-group>
+        
+            <accordion-group style="pointer-events: auto;" is-open="app.dataSources.isOpen">
+                <accordion-heading>
+                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.dataSources.isOpen, 'glyphicon-chevron-right': !app.dataSources.isOpen}"></i>
+                    Data Sources {{active.service ? '[' + active.service.name + ']': ''}}
+                </accordion-heading>
+
+
+                <div class="form-group">
+                    <label>Available Data Sources:<select ng-model="active.service" ng-options="item.name for item in active.serviceConfigs" class="form-control"></select></label>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary" ng-class="{'active': app.dataSources.showAddDialog}" ng-click="app.dataSources.showAddDialog=!app.dataSources.showAddDialog" class="form-control">Add Data Source</button>
+                    <button ng-if="active.service" class="btn" ng-click="deleteDataSource(active.service.id)" class="form-control">Delete Selected Data Source</button>
+                </div>
+            </accordion-group>
+
+<!--            <accordion-group style="pointer-events: auto;" is-open="isOpenConcepts"> -->
+<!--                <accordion-heading> -->
+<!--                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': isOpenConcepts, 'glyphicon-chevron-right': !isOpenConcepts}"></i> -->
+<!--                    Concepts {{active.service ? '[' + active.service.name + ']': ''}} -->
+<!--                </accordion-heading> -->
+                
+<!--                <ul> -->
+<!--                    <li ng-show="conceptSpaces.length == 0" class="inactive">(there are no concepts yet)</li> -->
+<!--                    <li ng-repeat="conceptSpace in conceptSpaces" ng-class="{'highlite': conceptSpace.active}"> -->
+<!--                        <a href="" ng-click="removeConceptSpace($index)"><span class="glyphicon glyphicon-remove-circle"></span></a> -->
+<!--                        <a href="" ng-click="selectConceptSpace($index)">{{conceptSpace.name}}</a> -->
+<!--                    </li> -->
+<!--                </ul> -->
+                
+<!--                <button class="btn btn-primary" ng-click="addConceptSpace()">Create a new Concept</button> -->
+<!--            </accordion-group> -->
+
+            <accordion-group class="portlet" style="pointer-events: auto;" is-open="app.geoLinks.isOpen">
+                <accordion-heading>
+                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.geoLinks.isOpen, 'glyphicon-chevron-right': !app.geoLinks.isOpen}"></i>
+                    GeoLinks
+                </accordion-heading>
+
+<!--                <tabset> -->
+                        <sparql-table table-service-supplier="active.tableGeoLink.tableServiceSupplier" config-supplier="active.tableGeoLink.configSupplier" table-mod="active.tableGeoLink.tableMod" context="tableContext" cell-renderer-supplier="active.tableGeoLink.cellRendererSupplier"></sparql-table>
+                
+<!--                    <tab heading="Candidates"> -->
+<!--                        <ul> -->
+<!--                            <li ng-repeat="geoPath in active.geoPaths"> -->
+<!--                                <a title="{{'' + geoPath.path}}" href="" ng-click="setGeoPath(geoPath.path)">{{geoPath.name}}</a> -->
+<!--                            </li> -->
+<!--                        </ul> -->
+<!--                    </tab> -->
+<!--                    <tab heading="Active"> -->
+<!--                        To be done -->
+<!--                    </tab> -->
+<!--                </tabset> -->
+            </accordion-group>
+
+            <accordion-group style="pointer-events: auto;" is-open="app.facets.isOpen">
+                <accordion-heading>
+                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.facets.isOpen, 'glyphicon-chevron-right': !app.facets.isOpen}"></i>
+                    Facets
+                </accordion-heading>
+
+                <div class="panel panel-info">
+                    <div class="panel-heading portlet-heading">
+                        Full Text Filter
+                    </div>
+                    <div class="panel-body">
+                    
+                        <div ng-show="app.baseConceptFilterString == null">
+                            <form>
+                                <div class="input-group">
+    <!--                                 <label>Base concept: -->
+                                    <input ng-model="app.baseConceptFilterStringTmp" type="text" class="form-control"></input>
+                                    <span class="input-group-btn">
+                                        <button type="submit" ng-click="setBaseConcept(app.baseConceptFilterStringTmp)" class="btn btn-default" type="button">Set filter</button>
+                                    </span>
+    <!--                                 </label> -->
+                                </div>
+                            </form>                    
+                        </div>
+                        <div ng-show="app.baseConceptFilterString != null">
+                            Filter: {{app.baseConceptFilterString}}
+                            <a href="" ng-click="setBaseConcept(null)"><span class="glyphicon glyphicon-remove-circle"></span></a>
+                        </div>                  
+                    </div>                  
+                </div>
+
+                <div class="panel panel-info"> 
+                    <div class="panel-heading portlet-heading">
+                        Facet Tree
+                    </div>
+                    <div class="panel-body">
+                       <facet-tree sparql-service="active.services.sparqlService" facet-tree-config="active.facetTreeConfig" select="selectFacet(path)" plugins="facetTreePlugins" plugin-context="facetTreePluginContext"></facet-tree>
+                    </div>
+                </div>
+        
+                <div class="panel panel-info"> 
+                    <div class="panel-heading portlet-heading">
+                        Facet Values
+                    </div>
+                    <div class="panel-body">
+                        <span>Showing values for <span class="label label-primary" ng-bind-html="active.pathLabel"></span></span>
+                        <facet-value-list sparql-service="active.services.sparqlService" facet-tree-config="active.facetTreeConfig" path="active.path"></facet-value-list>
+                    </div>
+                </div>
+        
+                <div class="panel panel-info"> 
+                    <div class="panel-heading portlet-heading">
+                        Constraints
+                    </div>
+                    <div class="panel-body">
+                        <constraint-list sparql-service="active.services.sparqlService" label-service="active.services.lookupServiceConstraintLabels" facet-tree-config="active.facetTreeConfig"></constraint-list>
+                    </div>
+                </div>
+            </accordion-group>
+        </accordion>
+
+    </div>
+
+
+    <!-- Note: This div has overflow auto set, but actually it should never be needed -->
+    <div style="position: absolute; margin: 0px; bottom: 20px; left: 530px; top: 50px; right: 5px; pointer-events: none;">
+
+        <accordion style="background-color: white; position: absolute; overflow: auto; bottom: 0px; left: 0px; max-height: 100%; min-height: 50px; min-width: 50px; max-width: 100%; pointer-events: auto;" resizable="resizableConfig" bounds="app.data.bounds" ng-style="!app.data.isOpen && {width: '', height: ''}">
+            <accordion-group is-open="app.data.isOpen">
+                <accordion-heading>
+                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.data.isOpen, 'glyphicon-chevron-right': !app.data.isOpen}"></i>
+                    Data
+                </accordion-heading>
+            
+                <tabset>
+                    <tab heading="All" active="app.data.tabs[0].isActive">
+                        <div class="well well-sm">
+                            <button class="btn btn-primary" ng-click="exportQuery(active.tableFacetAll.configSupplier().query)">Export</button>
+                        </div>
+                        
+                        <sparql-table table-service-supplier="active.tableFacetAll.tableServiceSupplier" config-supplier="active.tableFacetAll.configSupplier" table-mod="active.tableFacetAll.tableMod" cell-renderer-supplier="active.tableFacetAll.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
+                    </tab>
+        
+                    <tab heading="Selection" active="app.data.tabs[1].isActive">
+                        <div class="well well-sm">
+                            <button class="btn btn-primary" ng-click="exportQuery(active.tableFacetSelection.configSupplier().query)">Export</button>
+                        </div>
+
+                        <sparql-table table-service-supplier="active.tableFacetSelection.tableServiceSupplier" config-supplier="active.tableFacetSelection.configSupplier" table-mod="active.tableFacetSelection.tableMod" cell-renderer-supplier="active.tableFacetSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[1].isActive"></sparql-table>
+                    </tab>
+
+                    <tab heading="Essential (All)" active="app.data.tabs[2].isActive">
+                        <div class="well well-sm">
+                            <button class="btn btn-primary" ng-click="exportQuery(active.tableEssentialAll.configSupplier().query)">Export</button>
+                        </div>
+
+                        <sparql-table table-service-supplier="active.tableEssentialAll.tableServiceSupplier" config-supplier="active.tableEssentialAll.configSupplier" table-mod="active.tableEssentialAll.tableMod" cell-renderer-supplier="active.tableEssentialAll.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[2].isActive"></sparql-table>
+                    </tab>
+
+                    <tab heading="Essential (Selection)" active="app.data.tabs[3].isActive">
+                        <div class="well well-sm">
+                            <button class="btn btn-primary" ng-click="exportQuery(active.tableEssentialSelection.configSupplier().query)">Export</button>
+                        </div>
+
+                        <sparql-table table-service-supplier="active.tableEssentialSelection.tableServiceSupplier" config-supplier="active.tableEssentialSelection.configSupplier" table-mod="active.tableEssentialSelection.tableMod" cell-renderer-supplier="active.tableEssentialSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[3].isActive"></sparql-table>
+                    </tab>
+
+<!--                    <tab heading="Interlinking"> -->
+<!--                        <form class="well form-horizontal"> -->
+<!--                            <div class="form-group"> -->
+<!--                                <label>Source Concept: <input ng-model="edit.name" type="text" class="form-control"></input></label> -->
+<!--                            </div> -->
+<!--                            <div class="form-group">                     -->
+<!--                                <label>Target Concept: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label> -->
+<!--                            </div> -->
+<!--                            <button class="btn btn-primary" ng-click="hideCreateDataSource=true">Cancel</button> -->
+<!--                            <button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>          -->
+<!--                        </form> -->
+<!--                    </tab> -->
+                    <tab heading="Find Relations" active="app.data.tabs[4].isActive">
+                        <table>
+                        <tr><td>
+                            <div class="panel panel-info"> 
+                                <div class="panel-heading portlet-heading">
+                                    Facet Tree
+                                </div>
+                                <div class="panel-body">
+                                   <facet-tree sparql-service="active.services.sparqlService" facet-tree-config="active.targetFacetTreeConfig" select="selectTargetFacet(path)"></facet-tree>
+                                </div>
+                            </div>
+                    
+                            <div class="panel panel-info"> 
+                                <div class="panel-heading portlet-heading">
+                                    Facet Values
+                                </div>
+                                <div class="panel-body">
+                                    <facet-value-list sparql-service="active.services.sparqlService" facet-tree-config="active.targetFacetTreeConfig" path="active.targetPath"></facet-value-list>
+                                </div>
+                            </div>
+                    
+                            <div class="panel panel-info"> 
+                                <div class="panel-heading portlet-heading">
+                                    Constraints
+                                </div>
+                                <div class="panel-body">
+                                    <constraint-list sparql-service="active.services.sparqlService" facet-tree-config="active.targetFacetTreeConfig"></constraint-list>
+                                </div>
+                            </div>
+                        </td><td>
+                             Candidates
+                             <ul>
+                            <li ng-repeat="geoPath in active.targetGeoPaths">
+                                <a href="">{{geoPath.name}}</a>
+                            </li>
+                             </ul>
+                        </td></tr>
+                        </table>
+                    </tab>
+
+                </tabset>
+            </accordion-group>
+        </accordion>
+    </div>
+
+    <div style="position: absolute; margin: 0px; top: 50px; left: 530px; top: 50px; overflow: auto; pointer-events: none;">
+        <tabset style="pointer-events: auto;">      
+            <tab ng-if="app.dataSources.showAddDialog" heading="Data Source" style="width: 500px;">
+
+                <div style="border-style:solid; background-color:#ffffff; #eeeeee; border-width: 1px; margin: 5px; padding: 5px;">
+
+                    <form class="well form-horizontal">
+                        <div class="form-group">
+                            <label>Title: <input ng-model="edit.name" type="text" class="form-control"></input></label>
+                        </div>
+                        <div class="form-group">                    
+                            <label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label>
+                        </div>
+                        <div class="form-group">                    
+                            <label>Named Graphs (Separate entries with white space): <input ng-model="edit.dataGraphIris" type="text" class="form-control"></input></label>
+                        </div>
+                        <div class="form-group">                                        
+                            <label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>
+                        </div>
+                        <div class="form-group">                                        
+                            <label>Join Summary Graphs (Separate entries with white space): <input ng-model="edit.jsGraphIris" type="text" class="form-control"></input></label>
+                        </div>
+        
+                        <button class="btn btn-primary" ng-click="app.dataSources.showAddDialog=false">Cancel</button>
+                        <button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>         
+                    </form>
+                </div>
+            </tab>
+        </tabset>   
+    </div>
+
+
+<!--     <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.mapConfig" sources="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div> -->
+     <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.mapConfig" sources="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>
+
+
+
+<!--    <a href="https://github.com/GeoKnow/Facete2" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" src="images/forkme_right_green_007200.png" alt="Fork me on GitHub"></a> -->
