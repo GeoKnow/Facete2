@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
     <title>Facete II</title>
-	
+
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     <!-- build:css(.tmp) styles/main.css -->
 
@@ -18,14 +18,14 @@
     <link rel="stylesheet" href="bower_components/ng-table/ng-table.css" />
     <!-- endbower -->
 
-	<link rel="stylesheet" href="bower_components/ng-grid-bower/ng-grid.css" />
+  <link rel="stylesheet" href="bower_components/ng-grid-bower/ng-grid.css" />
     <link rel="stylesheet" href="bower_components/jquery-ui/themes/base/jquery.ui.resizable.css" />
 
     <link rel="stylesheet" href="styles/facete-style.css" />
 
     <!-- endbuild -->
 
-	
+
     <!-- build:js scripts/scripts.js -->
 
     <script src="bower_components/jscache/cache.js"></script>
@@ -51,29 +51,32 @@
 
     <script src="scripts/js/app.js"></script>
 
-    <script src="directives/compile.js"></script> 
-    <script src="directives/ng-context-menu.js"></script> 
-    <script src="directives/sparql-table.js"></script> 
+    <script src="directives/compile.js"></script>
+    <script src="directives/ng-context-menu.js"></script>
+    <script src="directives/sparql-table.js"></script>
 
 
     <script src="scripts/js/home.js"></script>
-    
-    
+    <script src="scripts/js/TableServiceGeoLink.js"></script>
+    <script src="scripts/js/SparqlServiceDummy.js"></script>
+    <script src="scripts/js/QueryExecutionDummy.js"></script>
+
+
     <!--     <script src="scripts/lib/snowball/Snowball.js"></script> -->
 
     <!-- endbuild -->
-	
-	<script type="text/javascript">
+
+    <script type="text/javascript">
     _.mixin(_.str.exports());
     </script>
-    
+
 
 </head>
 
 <body ng-controller="FaceteAppCtrl">
     <ng-include src="'partials/header.html'"></ng-include>
 
-    <div class="container"> 
+    <div class="container">
         <div ui-view></div>
     </div>
 </body>

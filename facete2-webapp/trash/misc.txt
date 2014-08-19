@@ -1,0 +1,74 @@
+        // Quick test of the the .nodes() parameter
+        if(false) {
+            var sparqlService = new service.SparqlServiceHttp('http://dbpedia.org/sparql', ['http://dbpedia.org']);
+
+            var nodes = [rdf.NodeFactory.createUri('http://dbpedia.org/resource/London'), rdf.NodeFactory.createUri('http://dbpedia.org/resource/Leipzig')];
+            var store = new sponate.StoreFacade(sparqlService);
+
+            var labelMap = sponate.SponateUtils.createDefaultLabelMap();
+            store.addMap(labelMap, 'labels');
+            var labelsStore = store.labels;
+
+            var labelService = new service.LookupServiceSponate(labelsStore);
+            labelService = new service.LookupServiceIdFilter(labelService, function(node) {
+                // TODO Using a proper URI validator would increase quality
+                var r = node && node.isUri();
+                if(r) {
+                    var uri = node.getUri();
+                    r = r && !uri.contains(' ');
+                    r = r && !uri.contains('<');
+                    r = r && !uri.contains('>');
+                }
+                return r;
+            });
+            labelService = new service.LookupServiceTimeout(labelService, 20);
+            labelService = new service.LookupServiceTransform(labelService, function(doc, id) {
+                var result = doc ? doc.displayLabel : null;
+
+                if(!result) {
+                    if(id.isUri()) {
+                        result = sponate.extractLabelFromUri(id.getUri());
+                    } else {
+                        result = '' + id;
+                    }
+                }
+
+                return result;
+            });
+            labelService = new service.LookupServiceCache(labelService);
+
+            var ls = new service.LookupServicePathLabels(labelService);
+            var paths = [
+                facete.Path.parse('http://www.w3.org/1999/02/22-rdf-syntax-ns#type http://www.w3.org/2000/01/rdf-schema#label')
+            ];
+            ls.lookup(paths).pipe(function(map) {
+                console.log('PATH LABELS', map);
+            });
+
+
+            for(var i = 0; i < 10; ++i) {
+                (function(i) {
+                    labelService.lookup(nodes).done(function(result) {
+                        console.log('lookup result [' + i + ']: ' + JSON.stringify(result.entries()));
+                    });
+                    labelService.lookup([nodes[0]]).done(function(result) {
+                        console.log('lookup result [' + i + ']: ' + JSON.stringify(result.entries()));
+                    });
+                    labelService.lookup([nodes[1]]).done(function(result) {
+                        console.log('lookup result [' + i + ']: ' + JSON.stringify(result.entries()));
+                    });
+                })(i);
+            }
+
+            /*
+            store.labels.find().nodes(nodes).asList().done(function(result) {
+                alert(JSON.stringify(result));
+            });
+            */
+
+        }
+
+        
+        
+        
+        

@@ -18,78 +18,7 @@
 
 
 
-    service.TableServiceGeoLink = Class.create(service.TableServiceDelegateBase, {
-        initialize: function($super, delegate, lookupServicePaths, pathColId, labelColId) {
-            $super(delegate);
-            this.lookupServicePaths = lookupServicePaths;
-            this.pathColId = pathColId;
-            this.labelColId = labelColId;
-        },
 
-        fetchSchema: function() {
-            var self = this;
-
-            var result = this.delegate.fetchSchema().pipe(function(schema) {
-                console.log('SCHEMA', schema);
-
-                // Hide the label column in the schema
-                schema.colDefs = _(schema.colDefs).chain()
-                   .filter(function(colDef) {
-                       return colDef.field != self.labelColId;
-                   })
-                   .compact()
-                   .value();
-
-                return schema;
-            });
-
-            return result;
-        },
-
-        fetchData: function(limit, offset) {
-            var deferred = jQuery.Deferred();
-
-            var tmp = this.delegate.fetchData(limit, offset);
-
-            var self = this;
-            tmp.done(function(rows) {
-
-                // Collect all paths
-                var paths = _(rows).map(function(row) {
-                    var col = row[self.pathColId];
-
-                    var labelField = row[self.labelColId];
-                    var pathStr = labelField.node.getLiteralValue();
-                    var r = facete.Path.parse(pathStr);
-
-                    // Add the path object to the row
-                    row[self.pathColId].path = r;
-
-                    return r;
-                });
-
-                var p = self.lookupServicePaths.lookup(paths).done(function(map) {
-                    _(rows).map(function(row) {
-                        var path = row[self.pathColId].path;
-                        var doc = map.get(path);
-                        if(doc) {
-                            row[self.pathColId].displayLabel = doc;// displayLabel;
-                        }
-                    });
-
-                    deferred.resolve(rows);
-                }).fail(function() {
-                    deferred.fail();
-                });
-
-
-            }).fail(function() {
-                deferred.fail();
-            });
-
-            return deferred.promise();
-        }
-    });
 
     var ConceptFactoryTableConfigFacet = Class.create(facete.ConceptFactory, {
         initialize: function(tableConfigFacet) {
@@ -144,58 +73,9 @@
     });
 
 
-    myModule.filter('reverse', function() {
-        return function(items) {
-            return items.slice().reverse();
-        };
-    });
 
 
-    (function() {
-        var ns = service;
 
-        ns.QueryExecutionDummy = Class.create(ns.QueryExecution, {
-            createPromise: function(val) {
-                var deferred = jQuery.Deferred();
-                deferred.resolve(val);
-                return deferred.promise();
-            },
-
-            execAsk: function() {
-                var result = this.createPromise(false);
-                return result;
-            },
-
-            execSelect: function() {
-                var rs = new ns.ResultSetArrayIteratorBinding(new util.IteratorArray([]));
-                var result = this.createPromise(rs);
-                return result;
-            },
-
-            setTimeout: function(timeoutInMillis) {
-
-            }
-        });
-
-        ns.SparqlServiceDummy = Class.create(ns.SparqlService, {
-
-            createQueryExecution: function(query) {
-                return new ns.QueryExecutionDummy();
-            },
-
-            getStateId: function() {
-                return 'dummyId';
-            },
-
-            getStateHash: function() {
-                return 'dummyHash';
-            },
-
-            hashCode: function() {
-                return 'dummy-sparql-service';
-            }
-        });
-    })();
 
     (function() {
         var ns = facete;
@@ -213,78 +93,6 @@
 
 
     myModule.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
-
-
-
-        // Quick test of the the .nodes() parameter
-        if(false) {
-            var sparqlService = new service.SparqlServiceHttp('http://dbpedia.org/sparql', ['http://dbpedia.org']);
-
-            var nodes = [rdf.NodeFactory.createUri('http://dbpedia.org/resource/London'), rdf.NodeFactory.createUri('http://dbpedia.org/resource/Leipzig')];
-            var store = new sponate.StoreFacade(sparqlService);
-
-            var labelMap = sponate.SponateUtils.createDefaultLabelMap();
-            store.addMap(labelMap, 'labels');
-            var labelsStore = store.labels;
-
-            var labelService = new service.LookupServiceSponate(labelsStore);
-            labelService = new service.LookupServiceIdFilter(labelService, function(node) {
-                // TODO Using a proper URI validator would increase quality
-                var r = node && node.isUri();
-                if(r) {
-                    var uri = node.getUri();
-                    r = r && !uri.contains(' ');
-                    r = r && !uri.contains('<');
-                    r = r && !uri.contains('>');
-                }
-                return r;
-            });
-            labelService = new service.LookupServiceTimeout(labelService, 20);
-            labelService = new service.LookupServiceTransform(labelService, function(doc, id) {
-                var result = doc ? doc.displayLabel : null;
-
-                if(!result) {
-                    if(id.isUri()) {
-                        result = sponate.extractLabelFromUri(id.getUri());
-                    } else {
-                        result = '' + id;
-                    }
-                }
-
-                return result;
-            });
-            labelService = new service.LookupServiceCache(labelService);
-
-            var ls = new service.LookupServicePathLabels(labelService);
-            var paths = [
-                facete.Path.parse('http://www.w3.org/1999/02/22-rdf-syntax-ns#type http://www.w3.org/2000/01/rdf-schema#label')
-            ];
-            ls.lookup(paths).pipe(function(map) {
-                console.log('PATH LABELS', map);
-            });
-
-
-            for(var i = 0; i < 10; ++i) {
-                (function(i) {
-                    labelService.lookup(nodes).done(function(result) {
-                        console.log('lookup result [' + i + ']: ' + JSON.stringify(result.entries()));
-                    });
-                    labelService.lookup([nodes[0]]).done(function(result) {
-                        console.log('lookup result [' + i + ']: ' + JSON.stringify(result.entries()));
-                    });
-                    labelService.lookup([nodes[1]]).done(function(result) {
-                        console.log('lookup result [' + i + ']: ' + JSON.stringify(result.entries()));
-                    });
-                })(i);
-            }
-
-            /*
-            store.labels.find().nodes(nodes).asList().done(function(result) {
-                alert(JSON.stringify(result));
-            });
-            */
-
-        }
 
 
 
@@ -1641,8 +1449,6 @@
             $scope.active.tableEssentialSelection = createEssentialTableConfig(essentialDataElementFactory, tmpFilterConceptFactory, essentialTableMod);
 
         };
-
-
 
 
     }]);
