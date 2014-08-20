@@ -1,5 +1,3 @@
-
-
     var jassa = jassa || Jassa;
 
     var rdf = jassa.rdf;
@@ -14,82 +12,8 @@
     var client = Jassa.client;
 
 
-    var ns = service;
-
-
-
-
-
-    var ConceptFactoryTableConfigFacet = Class.create(facete.ConceptFactory, {
-        initialize: function(tableConfigFacet) {
-            this.tableConfigFacet = tableConfigFacet;
-        },
-
-        createConcept: function() {
-            var result = this.tableConfigFacet.createDataConcept();
-            return result;
-        }
-    });
-
 
     var myModule = angular.module('Facete2');
-
-
-
-    sparql.ElementFactoryTransform = Class.create(sparql.ElementFactory, {
-        initialize: function(baseElementFactory, fn) {
-            this.baseElementFactory = baseElementFactory;
-            this.fn = fn;
-        },
-
-        createElement: function() {
-            var element = this.baseElementFactory.createElement();
-            var result = this.fn(element);
-            return result;
-        }
-    });
-
-    facete.ConceptFactoryRename = Class.create(facete.ConceptFactory, {
-        initialize: function(baseConceptFactory, varMap) {
-            this.baseConceptFactory = baseConceptFactory;
-            this.varMap = varMap;
-        },
-
-        createConcept: function() {
-            var baseConcept = this.baseConceptFactory.createConcept();
-            var v = baseConcept.getVar();
-            var e = baseConcept.getElement();
-
-            var ne = sparql.ElementUtils.createRenamedElement(e, this.varMap);
-
-            var nv = this.varMap.get(v);
-            if(!nv) {
-                nv = v;
-            }
-
-            var result = new facete.Concept(ne, nv);
-            return result;
-        }
-    });
-
-
-
-
-
-
-    (function() {
-        var ns = facete;
-        ns.QueryFactoryConst = Class.create(ns.QueryFactory, {
-            initialize: function(query) {
-                this.query = query;
-            },
-
-            createQuery: function() {
-                return this.query;
-            }
-        });
-    })();
-
 
 
     myModule.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', function($scope, $q, $rootScope) {
@@ -135,47 +59,11 @@
         };
 
 
-        var resizableConfigEnabled = {
-            handles: 'n, e, ne',
-            containment: 'parent',
-
-            create: function(event, ui) {
-                jQuery(event.target).on('resize', function (e, ui) {
-                    // Prevent the top attribute from getting set
-                    jQuery(event.target).css('top', '');
-                });
-            },
-
-            // Resize might not working properly, if there are parent elements with pointer-events: none involved
-            start: function(event, ui) {
-                var el = jQuery(event.target);
-
-                this.pointerEventsResets = el.parents().filter(function() {
-                    var attrVal = jQuery(this).css('pointer-events');
-                    var r = attrVal === 'none';
-                    //console.log('resize', this, attrVal, r)
-                    return r;
-                });
-
-                this.pointerEventsResets.css('pointer-events', 'auto');
-            },
-            stop: function(event, ui) {
-                this.pointerEventsResets.css('pointer-events', 'none');
-            }
-        };
-
-        var resizableConfigDisabled = {handles: 'none', disabled: true};
-
-        $scope.resizableConfig = resizableConfigDisabled;
-
-
         $scope.$watch('app.data.isOpen', function(state) {
-            $scope.resizableConfig = state ? resizableConfigEnabled : resizableConfigDisabled;
+            $scope.resizableConfig = state ?
+                AppConfig.resizableConfig.enabled :
+                AppConfig.resizableConfig.disabled;
         });
-
-
-
-
 
         $scope.edit = {
             id: null,
@@ -185,13 +73,17 @@
             jsGraphIris: ''
         };
 
-
-        var storeApiUrl = 'api/store';
-
-
-
         var tableConfigFacet; // Initialized later - TODO Fix the order
 
+        var applyScope = function() {
+            if(!$scope.$$phase) {
+                $scope.$apply();
+            }
+        };
+
+        /* Data Sources */
+
+        var dataSourceManager = new DataSourceManager(AppConfig.storeApiUrl);
         var createDefaultWorkspaceConfig = function() {
             var result = {
                 name: 'Unnamed Data Source',
@@ -204,6 +96,7 @@
                     defaultGraphIris: []
                 },
                 conceptPathFinderApiUrl: 'api/path-finding',
+
                 facetTreeConfig: facetTreeConfig,
                 mapConfig: {
                     mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
@@ -219,115 +112,51 @@
             return result;
         };
 
-
-        var applyScope = function() {
-            if(!$scope.$$phase) {
-                $scope.$apply();
-            }
-        };
-
-        refreshDataSources = function() {
-            var spec = {
-                url: storeApiUrl + '/loadState',
-                traditional: true,
-                data: {
-                    type: 'dataSource'
-                },
-                dataType: 'json'
-            };
-
-            jQuery.ajax(spec).done(function(response) {
-
-                var configs = _(response).map(function(record) {
-                    var item = record.data;
-                    item.id = record.id;
-
-                    var spec = createDefaultWorkspaceConfig();
-                    console.log('ITEM', item);
-                    spec.id = item.id;
-                    spec.name = item.name;
-                    spec.dataService.serviceIri = item.dataServiceIri;
-                    spec.dataService.defaultGraphIris = item.dataGraphIris;
-                    spec.joinSummaryService.serviceIri = item.jsServiceIri;
-                    spec.joinSummaryService. defaultGraphIris = item.jsGraphIris;
-
-                    return spec;
+        var refreshDataSources = function() {
+            dataSourceManager.loadDataSources().then(function(configs) {
+                _(configs).each(function(config) {
+                    var defaults = createDefaultWorkspaceConfig();
+                    console.log('Config', config);
+                    _(config).defaults(defaults);
                 });
-                console.log('CONFIGS', configs);
-
                 $scope.active.serviceConfigs = configs;
-
                 applyScope();
-                //alert('yay' + JSON.stringify(response));
             }).fail(function() {
                 alert('Failed to retrieve data sources');
             });
         };
 
-
         $scope.deleteDataSource = function(id) {
-
             var c = confirm('Delete dataset with id ' + id + '?');
             if(!c) {
                 return;
             }
 
-            var spec = {
-                    url: storeApiUrl + '/deleteState',
-                    type: 'POST',
-                    traditional: true,
-                    data: {
-                        type: 'dataSource',
-                        id: id
-                    },
-                    dataType: 'json'
-            };
-
-            jQuery.ajax(spec).done(function(response) {
-                // FIXME Verify the response for success
-            }).fail(function() {
-                alert('Failed to delete data source with id ' + id);
-                //$scope.active.service = serviceConfigs.length === 0 ? null : serviceConfigs[0];
-
-            }).then(function() {
-                refreshDataSources();
-            });
-
-        }
-
-        $scope.addDataSource = function() {
-            var raw = _($scope.edit).clone();
-
-
-            raw.dataGraphIris = raw.dataGraphIris.match(/\S+/g);
-            raw.jsGraphIris = raw.jsGraphIris.match(/\S+/g);
-
-            var data = JSON.stringify(raw);
-
-            var spec = {
-                url: storeApiUrl + '/saveState',
-                type: 'POST',
-                traditional: true,
-                data: {
-                    type: 'dataSource',
-                    data: data
-                },
-                dataType: 'json'
-            };
-
-            jQuery.ajax(spec).done(function(response) {
-                // Hide data source creation dialog
-                //$scope.app.dataSources.isOpen = false;
-                $scope.app.dataSources.showAddDialog=false
-
-                refreshDataSources();
-                //alert('yay' + JSON.stringify(response));
-            }).fail(function() {
-                alert('Failed to store data');
-            });
-
+            dataSourceManager.deleteDataSource(id)
+                .then(function() {
+                    refreshDataSources();
+                })
+                .fail(function() {
+                    alert('Failed to delete data source with id ' + id);
+                });
         };
 
+        $scope.addDataSource = function() {
+            var spec = _($scope.edit).clone();
+
+            // Fix the spec by post processing the attributes
+            spec.dataGraphIris = spec.dataGraphIris.match(/\S+/g);
+            spec.jsGraphIris = spec.jsGraphIris.match(/\S+/g);
+
+            dataSourceManager.addDataSource(spec)
+                .then(function() {
+                    // Hide data source creation dialog
+                    $scope.app.dataSources.showAddDialog=false
+                    refreshDataSources();
+                }).fail(function() {
+                    alert('Failed to store data');
+                });
+        };
 
 
         var vs = rdf.NodeFactory.createVar('s');
@@ -358,10 +187,6 @@
 
         var tmpTableMod = new facete.TableMod();
         tmpTableMod.addColumn('s');
-//         $scope.active.tableConfigFacet = {
-//             queryFactory: new facete.QueryFactoryConst(dummyQuery),
-//             tableMod: tmpTableMod
-//         };
 
 
         var facetTreeConfig = new facete.FacetTreeConfig();
