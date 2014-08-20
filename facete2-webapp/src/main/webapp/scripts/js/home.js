@@ -346,10 +346,14 @@ myModule.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', function($sc
 
 
     $scope.facetTreePlugins = [
-        '<a style="margin-left: 5px; margin-right: 5px;" ng-show="data.isExpanded && (data.isHovered || data.item.getTags().controls.isContained)" href="" ng-click="context.toggleControls(data.item.getPath())"><span class="glyphicon glyphicon-cog"></span></a>',
-        '<a style="margin-left: 5px; margin-right: 5px;" ng-show="data.isHovered || data.item.getTags().table.isContained" href="" ng-click="context.toggleTableLink(data.item.getPath())"><span class="glyphicon glyphicon-list-alt"></span></a>'
+        '<a style="margin-left: 5px; margin-right: 5px;" ng-class="!data.isExpanded ? \'hide\' : { \'show-on-hover-child\': !data.item.getTags().controls.isContained }" href="" ng-click="context.toggleControls(data.item.getPath())"><span class="glyphicon glyphicon-cog"></span></a>',
+        '<a style="margin-left: 5px; margin-right: 5px;" ng-class="{ \'show-on-hover-child\': !data.item.getTags().table.isContained }" href="" ng-click="context.toggleTableLink(data.item.getPath())"><span class="glyphicon glyphicon-list-alt"></span></a>'
     ];
 
+//    $scope.facetTreePlugins = [
+//                               '<a style="margin-left: 5px; margin-right: 5px;" ng-show="data.isExpanded && (data.isHovered || data.item.getTags().controls.isContained)" href="" ng-click="context.toggleControls(data.item.getPath())"><span class="glyphicon glyphicon-cog"></span></a>',
+//                               '<a style="margin-left: 5px; margin-right: 5px;" ng-show="data.isHovered || data.item.getTags().table.isContained" href="" ng-click="context.toggleTableLink(data.item.getPath())"><span class="glyphicon glyphicon-list-alt"></span></a>'
+//                           ];
 
 
 

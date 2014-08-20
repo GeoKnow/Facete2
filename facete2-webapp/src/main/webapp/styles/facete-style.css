@@ -3,6 +3,7 @@
     overflow: auto;
 }
 
+
 .show-on-hover-child {
     display: none;
 }
@@ -10,6 +11,11 @@
 .show-on-hover-parent-inline:hover .show-on-hover-child {
     display: inline;
 }
+
+.facet-row:hover .show-on-hover-child {
+    display: inline;
+}
+
 
 .visible-on-hover-child {
     visibility: hidden;
