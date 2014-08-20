@@ -68,7 +68,48 @@
 
         }
 
-        
-        
-        
-        
+
+
+       $scope.nextConceptSpaceId = 1;
+        $scope.conceptSpaces = [];
+
+
+        $scope.addConceptSpace = function() {
+            var conceptSpaceId = '' + ($scope.nextConceptSpaceId++);
+
+            var conceptSpaceName = 'concept-' + conceptSpaceId;
+
+            if(conceptSpaceId === '1') {
+                conceptSpaceName = 'Hotels @ DBpedia';
+            }
+
+            if(conceptSpaceId === '2') {
+                conceptSpaceName = 'Hotels @ Wikimapia';
+            }
+
+            if(conceptSpaceId === '3') {
+                conceptSpaceName = 'Airports @ Freebase';
+            }
+
+            var config = {
+                id: conceptSpaceId,
+                name: conceptSpaceName
+            };
+
+            $scope.conceptSpaces.push(config);
+        };
+
+        $scope.selectConceptSpace = function(index) {
+            _($scope.conceptSpaces).each(function(conceptSpace) {
+                conceptSpace.active = false;
+            });
+
+            $scope.conceptSpaces[index].active = true;
+        };
+
+        $scope.removeConceptSpace = function(index) {
+            $scope.conceptSpaces.splice(index, 1);
+        };
+
+
+

@@ -1,6 +1,7 @@
 var AppConfig = {
 
     storeApiUrl: 'api/store',
+    exportApiUrl: 'api/export/start',
 
     resizableConfig: {
         enabled: {

@@ -4,19 +4,19 @@
 }
 
 .show-on-hover-child {
-    display: none;    
+    display: none;
 }
 
 .show-on-hover-parent-inline:hover .show-on-hover-child {
-    display: inline;  
+    display: inline;
 }
 
 .visible-on-hover-child {
-    visibility: hidden;  
+    visibility: hidden;
 }
 
 .visible-on-hover-parent:hover .visible-on-hover-child {
-    visibility: visible;    
+    visibility: visible;
 }
 
 
@@ -24,7 +24,7 @@
 
 
 .form-group label {
-	width: 100%;
+    width: 100%;
 }
 
 .pagination {
@@ -33,13 +33,9 @@
 }
 
 .image {
-	    max-width: 144px;
-	    max-height: 144px;
+        max-width: 144px;
+        max-height: 144px;
     vertical-align: middle;
-}
-
-.facet-row:hover {
-    background-color: #bbccff;
 }
 
 .highlite {
@@ -52,31 +48,31 @@ input[type=text] .btn-xs, input[type=password] .btn-xs {
    }
 
 .portlet-frame {
-	border: 1px;
-	border-collapse: true;
-	border-style: solid;
-	border-color: #cccccc;
-	padding-right: 0px;
-	margin: 3px;
-	padding: 3px;	
-}	
+    border: 1px;
+    border-collapse: true;
+    border-style: solid;
+    border-color: #cccccc;
+    padding-right: 0px;
+    margin: 3px;
+    padding: 3px;
+}
 
 .frame {
-	border: 1px;
-	border-collapse: true;
-	border-style: solid;
-	border-color: #cccccc;
-	padding-right: 0px;
+    border: 1px;
+    border-collapse: true;
+    border-style: solid;
+    border-color: #cccccc;
+    padding-right: 0px;
 /* 		padding-bottom: 16px; */
-		margin-top: 3px;
-		margin-bottom: 3px;
+        margin-top: 3px;
+        margin-bottom: 3px;
 /*  		background-color: #eeeeee; */
 /* 		background-color: #EEEEEE; */
 }
 
 .portlet {
-	font-family: Verdana,Helvetica,Arial,"DejaVu Sans",sans-serif;
-	
+    font-family: Verdana,Helvetica,Arial,"DejaVu Sans",sans-serif;
+
 /* 		border: 1px; */
 /* 		border-collapse: true; */
 /* 		border-style: solid; */
@@ -89,7 +85,7 @@ input[type=text] .btn-xs, input[type=password] .btn-xs {
 /*  		margin-bottom: 3px; */
 /*  		background-color: #EFEFEF; */
 /* 		background-color: rgba(239, 239, 239, 0.7); */
-		
+
 /*  		background : url("resources/images/facete-ui/background.png") repeat scroll 0 0 rgba(0, 0, 0, 0); */
 /*  		background-color: #eeeeee; */
 /* 		background-color: #EEEEEE; */
@@ -101,55 +97,55 @@ a {
 }
 
 .image-frame {
-	display: table;
+    display: table;
 
     width: 150px;
-    height: 150px;	
-	line-height: 150px; /* should match height */
-	text-align: center;
- 
-	border: 1px;
-	border-collapse: true;
-	border-style: solid;
-	border-color: #CCCCCC;
-	background-color: #EEEEEE;
+    height: 150px;
+    line-height: 150px; /* should match height */
+    text-align: center;
+
+    border: 1px;
+    border-collapse: true;
+    border-style: solid;
+    border-color: #CCCCCC;
+    background-color: #EEEEEE;
 }
 
 .portlet-heading {
-	background-color: #CCCCFA;
-	background-image: linear-gradient(to bottom, #CCCCFF, #EEEEFF);
-	min-height: 20px;
-	height: 20px;
-	position: relative;
-	padding: 0px 20px;
+    background-color: #CCCCFA;
+    background-image: linear-gradient(to bottom, #CCCCFF, #EEEEFF);
+    min-height: 20px;
+    height: 20px;
+    position: relative;
+    padding: 0px 20px;
 /* 	font-size: 14px; */
 }
 
 .portlet-body {
-	font-size: 11px;
-	line-height: 15px;
-	padding: 5px;
+    font-size: 11px;
+    line-height: 15px;
+    padding: 5px;
 }
 
 .portlet-body ul {
-	padding-left: 15px;
+    padding-left: 15px;
 }
 
 .portlet-body .badge {
-	font-size: 8px;
+    font-size: 8px;
 }
 
 
 .nav-tabs {
-	background-color: #eeeeff;
+    background-color: #eeeeff;
    }
-   
+
    .modal {
-   	display: block;
-   	height: 0;
-   	overflow: visible;
+       display: block;
+       height: 0;
+       overflow: visible;
    }
-   
+
    .modal-header {
        background-color: #FFFFFF !important;
    }
@@ -157,19 +153,19 @@ a {
    .modal-body {
        background-color: #FFFFFF !important;
    }
-   
+
    .layout-table {
-	width: 100%;
-	min-height: 100%;
-	border:none;
-	border-collapse: collapse;
+    width: 100%;
+    min-height: 100%;
+    border:none;
+    border-collapse: collapse;
 }
 
 .layout-table > tbody > tr > td {
-	padding: 0px;
-	border-left: 5px solid #1c3048;
-	border-right: 5px solid #1c3048;
-	vertical-align: top;
+    padding: 0px;
+    border-left: 5px solid #1c3048;
+    border-right: 5px solid #1c3048;
+    vertical-align: top;
 }
 
 .visible-on-hover {
@@ -179,29 +175,29 @@ a {
 .visible-on-hover:hover {
     visibility: visible;
 }
-   
-   
+
+
    /* Not working yet, as openlayers positions the element programmatically */
 .olControlPanZoomBar {
-	right: 10px;
+    right: 10px;
 /* 		position: absolute; */
 /* 		top: 10px; */
 /* 		left: 10px; */
 }
 
 .inactive {
-	color: #aaaaaa;
+    color: #aaaaaa;
 }
 
 .tabset-small > .nav > li > a {
-   	display: block;
-   	padding: 3px 15px;
-   	position: relative;
+       display: block;
+       padding: 3px 15px;
+       position: relative;
 }
 
 .pagination-tiny > li > a, .pagination-tiny > li > span {
-   	font-size: 10px;
-   	padding: 5px;
+       font-size: 10px;
+       padding: 5px;
 }
 
 
