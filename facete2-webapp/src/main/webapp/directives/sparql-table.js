@@ -270,7 +270,7 @@ angular.module('Facete2')
 
         var result = map[field];
         return result;
-    }
+    };
 
     $scope.setSortCondition = function(field, dir, append) {
         var fields = $scope.gridOptions.sortInfo.fields;
