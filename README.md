@@ -1,11 +1,18 @@
-# Facete2
+# Facete2 - A faceted browser for (spatial) RDF data
 
-The next version of Facete
+![Screenshot](facete2-dissemination/images/screenshots/2014-09-24-facete2.png)
+
+
 
 ## Quick Setup
 
-#### The Bleeding Edge Debian Package (Note: Not recommended for production)
-For the latest development version (built on every commit) perform the following steps
+### Debian Packages
+
+#### Stable Versions
+Stable versions will soon be uploaded to the  [Linked Data Stack Repository](http://stack.linkeddata.org/](Linked Data Stack Repository). Instructions will follow.
+
+#### Development Versions
+For the latest development version (built on every commit to master) perform the following steps
 
 Create the file
 
@@ -33,7 +40,7 @@ Point your browser to
 
 ## Dataset requirements
 
-* All properties must be declared with `?x a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property>`
+* All properties must be declared with `?x a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property>
 * Geo-Vocabulary is by default configured to wgs84; GeoSPARQL and Virtuoso are supported in the API, however at present there is no switch in the UI
 * Full text functionality currently requires bif:contains (Virtuoso-specific) to work on `rdfs:label`'s. In order to create the index, open Virtuoso's isql client and run `DB.DBA.RDF_OBJ_FT_RULE_ADD(null, null, 'All');`
 
@@ -42,10 +49,8 @@ Point your browser to
 
 This project is built on these of our other projects:
 
-* [JAvaScript Suite for Sparql Access](https://github.com/GeoKnow/Jassa)
+* [JAvaScript Suite for Sparql Access (Jassa)](https://github.com/GeoKnow/Jassa)
 * [Jassa User Interface Components](https://github.com/GeoKnow/Jassa-UI-Angular)
 * [jena-sparql-api](https://github.com/AKSW/jena-sparql-api)
-
-
-
+* [Sparqlify](https://github.com/AKSW/Sparqlify)
 
