@@ -24,6 +24,10 @@ angular.module('Facete2', ['ui.router', 'ui.bootstrap', 'ui.jassa', 'ngGrid', 'n
             templateUrl: 'partials/home.html',
            // controller: 'SearchCtrl'
         })
+        .state('config', {
+            url: "/config",
+            templateUrl: "partials/config.html",
+        })
         ;
 
 }]);

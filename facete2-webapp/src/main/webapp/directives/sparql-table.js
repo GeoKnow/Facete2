@@ -226,7 +226,7 @@ angular.module('Facete2')
             if(!isTheSame) {
                 $scope.myData = data;
             }
-            console.log('GEOLINK DATA', data);
+            //console.log('GEOLINK DATA', data);
             $scope.loading.data = false;
             //util.ArrayUtils.replace($scope.myData, data);
 
