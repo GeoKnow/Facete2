@@ -9,7 +9,7 @@
 ### Debian Packages
 
 #### Stable Versions
-Stable versions will soon be uploaded to the  [Linked Data Stack Repository](http://stack.linkeddata.org/](Linked Data Stack Repository). Instructions will follow.
+Stable versions will soon be uploaded to the  [Linked Data Stack Repository](http://stack.linkeddata.org/). Instructions will follow.
 
 #### Development Versions
 For the latest development version (built on every commit to master) perform the following steps
