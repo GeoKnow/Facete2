@@ -10,7 +10,7 @@
                     Search Results
                     <a href="" ng-click="app.search.show = false"><span class="glyphicon glyphicon-remove-circle"></span></a>
                 </accordion-heading>
-                
+
                 <ul>
                 <li ng-show="!(searchResults.length > 0)">(this list is empty)</li>
                 <li ng-repeat="item in searchResults">
@@ -19,7 +19,7 @@
                 </li>
                 </ul>
             </accordion-group>
-        
+
             <accordion-group style="pointer-events: auto;" is-open="app.dataSources.isOpen">
                 <accordion-heading>
                     <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.dataSources.isOpen, 'glyphicon-chevron-right': !app.dataSources.isOpen}"></i>
@@ -41,7 +41,7 @@
 <!--                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': isOpenConcepts, 'glyphicon-chevron-right': !isOpenConcepts}"></i> -->
 <!--                    Concepts {{active.service ? '[' + active.service.name + ']': ''}} -->
 <!--                </accordion-heading> -->
-                
+
 <!--                <ul> -->
 <!--                    <li ng-show="conceptSpaces.length == 0" class="inactive">(there are no concepts yet)</li> -->
 <!--                    <li ng-repeat="conceptSpace in conceptSpaces" ng-class="{'highlite': conceptSpace.active}"> -->
@@ -49,7 +49,7 @@
 <!--                        <a href="" ng-click="selectConceptSpace($index)">{{conceptSpace.name}}</a> -->
 <!--                    </li> -->
 <!--                </ul> -->
-                
+
 <!--                <button class="btn btn-primary" ng-click="addConceptSpace()">Create a new Concept</button> -->
 <!--            </accordion-group> -->
 
@@ -61,7 +61,7 @@
 
 <!--                <tabset> -->
                         <sparql-table table-service-supplier="active.tableGeoLink.tableServiceSupplier" config-supplier="active.tableGeoLink.configSupplier" table-mod="active.tableGeoLink.tableMod" context="tableContext" cell-renderer-supplier="active.tableGeoLink.cellRendererSupplier"></sparql-table>
-                
+
 <!--                    <tab heading="Candidates"> -->
 <!--                        <ul> -->
 <!--                            <li ng-repeat="geoPath in active.geoPaths"> -->
@@ -86,7 +86,7 @@
                         Full Text Filter
                     </div>
                     <div class="panel-body">
-                    
+
                         <div ng-show="app.baseConceptFilterString == null">
                             <form>
                                 <div class="input-group">
@@ -97,16 +97,16 @@
                                     </span>
     <!--                                 </label> -->
                                 </div>
-                            </form>                    
+                            </form>
                         </div>
                         <div ng-show="app.baseConceptFilterString != null">
                             Filter: {{app.baseConceptFilterString}}
                             <a href="" ng-click="setBaseConcept(null)"><span class="glyphicon glyphicon-remove-circle"></span></a>
-                        </div>                  
-                    </div>                  
+                        </div>
+                    </div>
                 </div>
 
-                <div class="panel panel-info"> 
+                <div class="panel panel-info">
                     <div class="panel-heading portlet-heading">
                         Facet Tree
                     </div>
@@ -114,8 +114,8 @@
                        <facet-tree sparql-service="active.services.sparqlService" facet-tree-config="active.facetTreeConfig" select="selectFacet(path)" plugins="facetTreePlugins" plugin-context="facetTreePluginContext"></facet-tree>
                     </div>
                 </div>
-        
-                <div class="panel panel-info"> 
+
+                <div class="panel panel-info">
                     <div class="panel-heading portlet-heading">
                         Facet Values
                     </div>
@@ -124,8 +124,8 @@
                         <facet-value-list sparql-service="active.services.sparqlService" facet-tree-config="active.facetTreeConfig" path="active.path"></facet-value-list>
                     </div>
                 </div>
-        
-                <div class="panel panel-info"> 
+
+                <div class="panel panel-info">
                     <div class="panel-heading portlet-heading">
                         Constraints
                     </div>
@@ -148,16 +148,16 @@
                     <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.data.isOpen, 'glyphicon-chevron-right': !app.data.isOpen}"></i>
                     Data
                 </accordion-heading>
-            
+
                 <tabset>
                     <tab heading="All" active="app.data.tabs[0].isActive">
                         <div class="well well-sm">
                             <button class="btn btn-primary" ng-click="exportQuery(active.tableFacetAll.configSupplier().query)">Export</button>
                         </div>
-                        
+
                         <sparql-table table-service-supplier="active.tableFacetAll.tableServiceSupplier" config-supplier="active.tableFacetAll.configSupplier" table-mod="active.tableFacetAll.tableMod" cell-renderer-supplier="active.tableFacetAll.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
                     </tab>
-        
+
                     <tab heading="Selection" active="app.data.tabs[1].isActive">
                         <div class="well well-sm">
                             <button class="btn btn-primary" ng-click="exportQuery(active.tableFacetSelection.configSupplier().query)">Export</button>
@@ -194,45 +194,46 @@
 <!--                            <button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>          -->
 <!--                        </form> -->
 <!--                    </tab> -->
-                    <tab heading="Find Relations" active="app.data.tabs[4].isActive">
-                        <table>
-                        <tr><td>
-                            <div class="panel panel-info"> 
-                                <div class="panel-heading portlet-heading">
-                                    Facet Tree
-                                </div>
-                                <div class="panel-body">
-                                   <facet-tree sparql-service="active.services.sparqlService" facet-tree-config="active.targetFacetTreeConfig" select="selectTargetFacet(path)"></facet-tree>
-                                </div>
-                            </div>
-                    
-                            <div class="panel panel-info"> 
-                                <div class="panel-heading portlet-heading">
-                                    Facet Values
-                                </div>
-                                <div class="panel-body">
-                                    <facet-value-list sparql-service="active.services.sparqlService" facet-tree-config="active.targetFacetTreeConfig" path="active.targetPath"></facet-value-list>
-                                </div>
-                            </div>
-                    
-                            <div class="panel panel-info"> 
-                                <div class="panel-heading portlet-heading">
-                                    Constraints
-                                </div>
-                                <div class="panel-body">
-                                    <constraint-list sparql-service="active.services.sparqlService" facet-tree-config="active.targetFacetTreeConfig"></constraint-list>
-                                </div>
-                            </div>
-                        </td><td>
-                             Candidates
-                             <ul>
-                            <li ng-repeat="geoPath in active.targetGeoPaths">
-                                <a href="">{{geoPath.name}}</a>
-                            </li>
-                             </ul>
-                        </td></tr>
-                        </table>
-                    </tab>
+
+<!--                     <tab heading="Find Relations" active="app.data.tabs[4].isActive"> -->
+<!--                         <table> -->
+<!--                         <tr><td> -->
+<!--                             <div class="panel panel-info">  -->
+<!--                                 <div class="panel-heading portlet-heading"> -->
+<!--                                     Facet Tree -->
+<!--                                 </div> -->
+<!--                                 <div class="panel-body"> -->
+<!--                                    <facet-tree sparql-service="active.services.sparqlService" facet-tree-config="active.targetFacetTreeConfig" select="selectTargetFacet(path)"></facet-tree> -->
+<!--                                 </div> -->
+<!--                             </div> -->
+
+<!--                             <div class="panel panel-info">  -->
+<!--                                 <div class="panel-heading portlet-heading"> -->
+<!--                                     Facet Values -->
+<!--                                 </div> -->
+<!--                                 <div class="panel-body"> -->
+<!--                                     <facet-value-list sparql-service="active.services.sparqlService" facet-tree-config="active.targetFacetTreeConfig" path="active.targetPath"></facet-value-list> -->
+<!--                                 </div> -->
+<!--                             </div> -->
+
+<!--                             <div class="panel panel-info">  -->
+<!--                                 <div class="panel-heading portlet-heading"> -->
+<!--                                     Constraints -->
+<!--                                 </div> -->
+<!--                                 <div class="panel-body"> -->
+<!--                                     <constraint-list sparql-service="active.services.sparqlService" facet-tree-config="active.targetFacetTreeConfig"></constraint-list> -->
+<!--                                 </div> -->
+<!--                             </div> -->
+<!--                         </td><td> -->
+<!--                              Candidates -->
+<!--                              <ul> -->
+<!--                             <li ng-repeat="geoPath in active.targetGeoPaths"> -->
+<!--                                 <a href="">{{geoPath.name}}</a> -->
+<!--                             </li> -->
+<!--                              </ul> -->
+<!--                         </td></tr> -->
+<!--                         </table> -->
+<!--                     </tab> -->
 
                 </tabset>
             </accordion-group>
@@ -240,7 +241,7 @@
     </div>
 
     <div style="position: absolute; margin: 0px; top: 50px; left: 530px; top: 50px; overflow: auto; pointer-events: none;">
-        <tabset style="pointer-events: auto;">      
+        <tabset style="pointer-events: auto;">
             <tab ng-if="app.dataSources.showAddDialog" heading="Data Source" style="width: 500px;">
 
                 <div style="border-style:solid; background-color:#ffffff; #eeeeee; border-width: 1px; margin: 5px; padding: 5px;">
@@ -249,25 +250,25 @@
                         <div class="form-group">
                             <label>Title: <input ng-model="edit.name" type="text" class="form-control"></input></label>
                         </div>
-                        <div class="form-group">                    
+                        <div class="form-group">
                             <label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label>
                         </div>
-                        <div class="form-group">                    
+                        <div class="form-group">
                             <label>Named Graphs (Separate entries with white space): <input ng-model="edit.dataGraphIris" type="text" class="form-control"></input></label>
                         </div>
-                        <div class="form-group">                                        
+                        <div class="form-group">
                             <label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>
                         </div>
-                        <div class="form-group">                                        
+                        <div class="form-group">
                             <label>Join Summary Graphs (Separate entries with white space): <input ng-model="edit.jsGraphIris" type="text" class="form-control"></input></label>
                         </div>
-        
+
                         <button class="btn btn-primary" ng-click="app.dataSources.showAddDialog=false">Cancel</button>
-                        <button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>         
+                        <button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>
                     </form>
                 </div>
             </tab>
-        </tabset>   
+        </tabset>
     </div>
 
 
