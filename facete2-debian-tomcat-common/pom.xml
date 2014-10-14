@@ -16,7 +16,7 @@
 
 
 	<properties>
-		<deb.tomcatCommon.packageName>facete2-tomcat-common</deb.tomcatCommon.packageName>
+		<deb.packageName>facete2-tomcat-common</deb.packageName>
 		<tomcat.context.name>facete2</tomcat.context.name>
 	</properties>
 
@@ -62,7 +62,7 @@
 			<plugin>
 				<artifactId>jdeb</artifactId>
 				<groupId>org.vafer</groupId>
-				<version>1.0</version>
+				<version>1.3</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -70,8 +70,19 @@
 							<goal>jdeb</goal>
 						</goals>
 						<configuration>
-							<deb>${project.build.directory}/${deb.tomcatCommon.packageName}_[[version]]_all.deb</deb>
-							<timestamped>true</timestamped>
+							<deb>${project.build.directory}/${deb.packageName}_[[version]]_all.deb</deb>
+                                                        <changesOut>${project.build.directory}/${deb.packageName}_[[version]]_all.changes</changesOut>
+
+                                                        <snapshotExpand>true</snapshotExpand>
+                                                        <snapshotEnv></snapshotEnv>
+
+                                                        <signPackage>${jdeb.signPackage}</signPackage>
+                                                        <signMethod>dpkg-sig</signMethod>
+                                                        <signRole>builder</signRole>
+                                                        <keyring>${jdeb.keyring}</keyring>
+                                                        <key>${jdeb.key}</key>
+                                                        <passphrase>${jdeb.passphrase}</passphrase>
+
 							<dataSet>
 			
 								<data>
@@ -84,7 +95,7 @@
 									<src>${project.build.directory}/${project.build.finalName}.war</src>
 									<mapper>
 										<type>perm</type>
-										<prefix>/usr/share/lib/${deb.tomcatCommon.packageName}</prefix>
+										<prefix>/usr/share/lib/${deb.packageName}</prefix>
 <!-- 										<user>loader</user> -->
 <!-- 										<group>loader</group> -->
 									</mapper>
@@ -93,8 +104,8 @@
 								<data>
 									<type>link</type>
 									<symlink>true</symlink>
-									<linkName>/usr/share/lib/${deb.tomcatCommon.packageName}/${deb.tomcatCommon.packageName}.war</linkName>
-									<linkTarget>/usr/share/lib/${deb.tomcatCommon.packageName}/${project.build.finalName}.war</linkTarget>
+									<linkName>/usr/share/lib/${deb.packageName}/${deb.packageName}.war</linkName>
+									<linkTarget>/usr/share/lib/${deb.packageName}/${project.build.finalName}.war</linkTarget>
 								</data>
 
 							</dataSet>
