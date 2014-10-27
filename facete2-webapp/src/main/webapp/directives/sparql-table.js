@@ -215,6 +215,7 @@ angular.module('Facete2')
         var page = $scope.pagingOptions.currentPage;
         var pageSize = $scope.pagingOptions.pageSize;
 
+
         var offset = (page - 1) * pageSize;
 
         var promise = tableService.fetchData(pageSize, offset);

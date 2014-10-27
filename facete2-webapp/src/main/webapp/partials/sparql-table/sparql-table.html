@@ -2,7 +2,7 @@
 <div style="max-width: 100%; overflow: auto;">
 
 <span ng-show="loading.schema || loading.data || loading.pageCount">
-    <img src="images/ajax-loader.gif" /> Loading... 
+    <img src="images/ajax-loader.gif" /> Loading...
     <span ng-show="loading.schema">(schema)</span>
     <span ng-show="loading.data">(data)</span>
     <span ng-show="loading.pageCount">(page count)</span>
@@ -54,8 +54,11 @@
 <!-- <pagination class="pagination-small" total-items="totalServerItems" page="pagingOptions.currentPage" max-size="pagingOptions.pageSize" boundary-links="true" rotate="false" num-pages="Math.ceil(totalServerItems / pageOptions.pageSize)"></pagination> -->
 <pagination class="pagination-small" page="pagingOptions.currentPage" total-items="totalServerItems" items-per-page="pagingOptions.pageSize" max-Size="maxSize" boundary-links="true" rotate="false" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
 <br />
+
+<span>Showing {{myData.length || 0}} entries in the positions {{pagingOptions.currentPage ? (pagingOptions.currentPage - 1) * pagingOptions.pageSize + 1 : 0}} - {{(pagingOptions.currentPage - 1) * pagingOptions.pageSize + myData.length}} out of {{totalServerItems || 0}} items in total.</span>
+
 <!-- <span>{{totalServerItems}} items in the table.</span> -->
-<span>Showing {{myData.length || 0}} entries in the positions {{myData.length ? (pagingOptions.currentPage - 1) * pagingOptions.pageSize + 1 : 0}} - {{(pagingOptions.currentPage - 1) * pagingOptions.pageSize + myData.length}} out of {{totalServerItems || 0}} items in total.</span>
+<!-- <span>Showing {{myData.length || 0}} entries in the positions {{myData.length ? (pagingOptions.currentPage - 1) * pagingOptions.pageSize + 1 : 0}} - {{(pagingOptions.currentPage - 1) * pagingOptions.pageSize + myData.length}} out of {{totalServerItems || 0}} items in total.</span> -->
 <!-- Num pages is {{numPages}} -->
 </div>
 

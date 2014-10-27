@@ -6,4 +6,4 @@ Architecture: all
 Depends: facete2-tomcat-common, xsltproc, tomcat7
 Maintainer: Claus Stadler <cstadler@informatik.uni-leipzig.de>
 Description: Facete2 Tomcat7
-Distribution: development
+Distribution: ldstack-nightly
