@@ -1,6 +1,5 @@
 package org.aksw.facete2.web.api;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

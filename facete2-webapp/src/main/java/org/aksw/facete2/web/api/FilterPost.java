@@ -31,7 +31,9 @@ public class FilterPost
         // to getParameterMap()
 
         // If we don't do it here, jersey will consume the data and we won't be able to access it here anymore
-        req.getParameterMap();
+        if(req.getMethod().equals("POST")) {
+            req.getParameterMap();
+        }
 
         chain.doFilter(req, res);
     }

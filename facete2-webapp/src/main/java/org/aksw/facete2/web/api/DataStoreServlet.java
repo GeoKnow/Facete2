@@ -44,9 +44,9 @@ public class DataStoreServlet {
 
 
     /**
-     * 
-     * 
-     * 
+     *
+     *
+     *
      * @param json
      * @return An ID for successive lookups of the stored object
      * @throws ClassNotFoundException
@@ -63,7 +63,7 @@ public class DataStoreServlet {
             @Context HttpServletRequest req) throws SQLException
     {
         String ipAddr = req.getRemoteAddr();
-        
+
         // Normalize the json
         Gson gson = new Gson();
         Map<String, Object> map = gson.fromJson(rawJson, mapType);
@@ -78,11 +78,11 @@ public class DataStoreServlet {
         //if(i)
         JdbcTemplate t = new JdbcTemplate(dataSource);
 
-        
+
         if(nextId == null) {
             // Check if the JSON object provides an ID
             //Object idObj = map.get("id");
-            //if(idObj == null) {            
+            //if(idObj == null) {
                 String maxIdSql = "SELECT MAX(\"instance_id\") FROM \"data_store\" WHERE \"type\" = ?";
                 Integer maxId = t.queryForObject(maxIdSql, Integer.class, type);
                 nextId = maxId == null ? 1 : maxId + 1;
@@ -92,8 +92,8 @@ public class DataStoreServlet {
 //                nextId = number.intValue();
 //            }
         }
-        
-        
+
+
         Inserter inserter = new Inserter(new ColumnsReference("data_store", "type", "instance_id", "data", "ip_addr"), schema);
         inserter.add(type, nextId, json, ipAddr);
 
@@ -108,16 +108,16 @@ public class DataStoreServlet {
         return result;
     }
 
-    
+
     @Path("/deleteState")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public String load(@FormParam("type") String type, @FormParam("id") Long id)
-    {    
+    {
         if(type == null || id == null) {
             throw new RuntimeException("Type and id must be given");
         }
-        
+
         String sql = "DELETE FROM \"data_store\" WHERE \"type\" = ? AND \"instance_id\" = ?";
         JdbcTemplate t = new JdbcTemplate(dataSource);
 
@@ -131,7 +131,7 @@ public class DataStoreServlet {
         String result = gson.toJson(map);
         return result;
     }
-    
+
 
     @Path("/loadState")
     @GET
@@ -144,7 +144,7 @@ public class DataStoreServlet {
         if(id != null) {
             sql += " AND \"instance_id\" = ?";
         }
-        
+
         Gson gson = new Gson();
 
         JdbcTemplate t = new JdbcTemplate(dataSource);
@@ -159,7 +159,7 @@ public class DataStoreServlet {
         for(Map<String, Object> row : rows) {
             String rawJson = (String)row.get("data");
             Map<String, Object> data = gson.fromJson(rawJson, mapType);
-            row.put("data", data);            
+            row.put("data", data);
         }
 
         String result = gson.toJson(rows);

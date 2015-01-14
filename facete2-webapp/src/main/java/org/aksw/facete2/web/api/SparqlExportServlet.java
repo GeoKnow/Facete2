@@ -37,6 +37,7 @@ import org.aksw.sparqlify.core.cast.SqlValue;
 import org.aksw.sparqlify.inverse.SparqlSqlInverseMap;
 import org.aksw.sparqlify.inverse.SparqlSqlInverseMapper;
 import org.apache.commons.lang.StringUtils;
+import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -62,7 +63,6 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.vocabulary.RDF;
-import com.sun.jersey.core.header.ContentDisposition;
 
 
 @Service

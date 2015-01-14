@@ -7,14 +7,13 @@ import javax.servlet.ServletRegistration;
 
 import org.aksw.facete2.web.api.FilterPost;
 import org.aksw.jena_sparql_api.web.filters.CorsFilter;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.tuckey.web.filters.urlrewrite.UrlRewriteFilter;
-
-import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
 
 
 public class WebAppInitializer
@@ -56,15 +55,15 @@ public class WebAppInitializer
         AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
         dispatcherContext.register(WebMvcConfig.class);
 
-        ServletRegistration.Dynamic jassaServlet = servletContext.addServlet("jassa-servlet", new SpringServlet());
-        jassaServlet.setInitParameter("com.sun.jersey.config.property.packages", "org.aksw.jena_sparql_api.web.servlets"); //"org.aksw.jassa.web.api");
+        ServletRegistration.Dynamic jassaServlet = servletContext.addServlet("jassa-servlet", new ServletContainer());
+        jassaServlet.setInitParameter("jersey.config.server.provider.packages", "org.aksw.jena_sparql_api.web.servlets org.aksw.facete2.web.api"); //"org.aksw.jassa.web.api");
         //ServletRegistration.Dynamic jassaServlet = servletContext.addServlet("jassa-servlet", new DispatcherServlet(dispatcherContext));
         jassaServlet.addMapping("/api/*");
         jassaServlet.setLoadOnStartup(1);
 
-        ServletRegistration.Dynamic facete2Servlet = servletContext.addServlet("facete2-servlet", new SpringServlet());
+        ServletRegistration.Dynamic facete2Servlet = servletContext.addServlet("facete2-servlet", new ServletContainer());
         //ServletRegistration.Dynamic facete2Servlet = servletContext.addServlet("facete2-servlet", new DispatcherServlet(dispatcherContext));
-        facete2Servlet.setInitParameter("com.sun.jersey.config.property.packages", "org.aksw.facete2.web.api");
+        facete2Servlet.setInitParameter("jersey.config.server.provider.packages", "org.aksw.facete2.web.api");
         facete2Servlet.addMapping("/cache/*");
         facete2Servlet.setLoadOnStartup(1);
 
