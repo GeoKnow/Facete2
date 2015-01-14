@@ -3,6 +3,14 @@ jassa.sparql.ConceptFactoryConst = Class.create(/* ns.ConceptFactory, */ {
         this.concept = concept;
     },
 
+    setConcept: function(concept) {
+        this.concept = concept;
+    },
+
+    getConcept: function() {
+        return this.concept;
+    },
+
     createConcept: function() {
         return this.concept;
     },

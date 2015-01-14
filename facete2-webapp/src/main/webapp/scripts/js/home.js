@@ -492,7 +492,7 @@ angular.module('Facete2')
             return lookupServiceLabels.lookup(keys).then(function(map) {
                 entries.forEach(function(entry) {
                     var labelInfo = map.get(entry.key);
-                    entry.val.shortLabel = labelInfo ? labelInfo.shortLabel : '(no label)';
+                    entry.val.shortLabel = labelInfo ? labelInfo.displayLabel : '(no label)';
                 });
 
                 return entries;
