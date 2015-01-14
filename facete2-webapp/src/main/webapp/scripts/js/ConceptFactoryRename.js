@@ -1,4 +1,4 @@
-jassa.facete.ConceptFactoryRename = Class.create(jassa.facete.ConceptFactory, {
+jassa.sparql.ConceptFactoryRename = Class.create(jassa.sparql.ConceptFactory, {
     initialize: function(baseConceptFactory, varMap) {
         this.baseConceptFactory = baseConceptFactory;
         this.varMap = varMap;
@@ -16,7 +16,7 @@ jassa.facete.ConceptFactoryRename = Class.create(jassa.facete.ConceptFactory, {
             nv = v;
         }
 
-        var result = new facete.Concept(ne, nv);
+        var result = new sparql.Concept(ne, nv);
         return result;
     }
 });

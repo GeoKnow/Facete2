@@ -171,7 +171,7 @@ angular.module('Facete2')
 
         $scope.loading.schema = true;
 
-        jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(newSchema) {
+        $q.when(promise).then(function(newSchema) {//jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(newSchema) {
             var isTheSame = _(newSchema).isEqual(oldSchema);
             if(!isTheSame) {
 
@@ -179,6 +179,8 @@ angular.module('Facete2')
             }
 
             $scope.loading.schema = false;
+        }, function(e) {
+            throw e;
         });
     };
 
@@ -195,11 +197,13 @@ angular.module('Facete2')
 
         $scope.loading.pageCount = true;
 
-        jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(countInfo) {
+        $q.when(promise).then(function(countInfo) {//jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(countInfo) {
             // Note: There is also countInfo.hasMoreItems and countInfo.limit (limit where the count was cut off)
             $scope.totalServerItems = countInfo.count;
 
             $scope.loading.pageCount = false;
+        }, function(e) {
+            throw e;
         });
     };
 
@@ -222,7 +226,7 @@ angular.module('Facete2')
 
         $scope.loading.data = true;
 
-        jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(data) {
+        $q.when(promise).then(function(data) {//jassa.sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(data) {
             var isTheSame = _(data).isEqual($scope.myData);
             if(!isTheSame) {
                 $scope.myData = data;
@@ -233,6 +237,8 @@ angular.module('Facete2')
 
             // Using equals gives digest iterations exceeded errors; could be https://github.com/angular-ui/ng-grid/issues/873
             //$scope.myData = data;
+        }, function(e) {
+            throw e;
         });
     };
 

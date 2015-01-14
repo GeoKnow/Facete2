@@ -284,8 +284,8 @@
 	//var conceptPathFinderApiUrl = 'http://localhost/jassa/api/path-finding';
 
 	
-	var conceptWgs84 = new facete.Concept(sparql.ElementString.create('?s <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?x ;  <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?y'), rdf.NodeFactory.createVar('s'));
-	var conceptGeoVocab = new facete.Concept(sparql.ElementString.create('?s <http://www.opengis.net/ont/geosparql#asWKT> ?w'), rdf.NodeFactory.createVar('s'));
+	var conceptWgs84 = new sparql.Concept(sparql.ElementString.create('?s <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?x ;  <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?y'), rdf.NodeFactory.createVar('s'));
+	var conceptGeoVocab = new sparql.Concept(sparql.ElementString.create('?s <http://www.opengis.net/ont/geosparql#asWKT> ?w'), rdf.NodeFactory.createVar('s'));
 	
 	var geoConcepts = [conceptWgs84, conceptGeoVocab];
 	
@@ -720,7 +720,7 @@
 	        var facetService = conceptSpaceProvider.getFacetService();
 	        
 		    var concept = fctService.createConceptFacetValues(new facete.Path());			
-			var query = facete.ConceptUtils.createQueryList(concept);			
+			var query = sparql.ConceptUtils.createQueryList(concept);			
 
 			$scope.queryString = query.toString();	        
 	    };
@@ -1181,8 +1181,8 @@
 		    var sourceConcept = fctService.createConceptFacetValues(new facete.Path());			
 
 			var targetVar = rdf.NodeFactory.createVar('s');
-			//var targetConcept = new facete.Concept(sparql.ElementString.create('?s ?p ?o . Filter(regex(str(?p), "' + newValue + '", "i"))'), targetVar);
-			var targetConcept = new facete.Concept(sparql.ElementString.create('?s <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?x ;  <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?y'), targetVar);
+			//var targetConcept = new sparql.Concept(sparql.ElementString.create('?s ?p ?o . Filter(regex(str(?p), "' + newValue + '", "i"))'), targetVar);
+			var targetConcept = new sparql.Concept(sparql.ElementString.create('?s <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?x ;  <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?y'), targetVar);
 
 		    var promise = conceptPathFinder.findPaths(sourceConcept, targetConcept);
 			var result = sponate.angular.bridgePromise(promise, $q.defer(), $rootScope);
@@ -1414,7 +1414,7 @@
 			    var targetVar = rdf.NodeFactory.createVar('s');
 				var element = mapLinkFactory.createMapForGlobal().getElementFactory().createElement();
 				
-				var targetConcept = new facete.Concept(element, targetVar);
+				var targetConcept = new sparql.Concept(element, targetVar);
 
 				console.log('[DEBUG] ConceptPathFinder: Search paths between ' + sourceConcept + ' and ' + targetConcept);
 				

@@ -10,7 +10,7 @@ jassa.service.TableServiceGeoLink = Class.create(service.TableServiceDelegateBas
     fetchSchema: function() {
         var self = this;
 
-        var result = this.delegate.fetchSchema().pipe(function(schema) {
+        var result = this.delegate.fetchSchema().then(function(schema) {
             console.log('SCHEMA', schema);
 
             // Hide the label column in the schema
@@ -28,19 +28,22 @@ jassa.service.TableServiceGeoLink = Class.create(service.TableServiceDelegateBas
     },
 
     fetchData: function(limit, offset) {
-        var deferred = jQuery.Deferred();
-
-        var tmp = this.delegate.fetchData(limit, offset);
+        //var deferred = jQuery.Deferred();
 
         var self = this;
-        tmp.done(function(rows) {
+        var result = this.delegate.fetchData(limit, offset).then(function(rows) {
 
             // Collect all paths
             var paths = _(rows).map(function(row) {
                 var col = row[self.pathColId];
 
                 var labelField = row[self.labelColId];
-                var pathStr = labelField.node.getLiteralValue();
+
+                var node = labelField.node;
+                if(node == null) {
+                    console.log('should not happen');
+                }
+                var pathStr = node.getLiteralValue();
                 var r = facete.Path.parse(pathStr);
 
                 // Add the path object to the row
@@ -49,7 +52,7 @@ jassa.service.TableServiceGeoLink = Class.create(service.TableServiceDelegateBas
                 return r;
             });
 
-            var p = self.lookupServicePaths.lookup(paths).done(function(map) {
+            var p = self.lookupServicePaths.lookup(paths).then(function(map) {
                 _(rows).map(function(row) {
                     var path = row[self.pathColId].path;
                     var doc = map.get(path);
@@ -58,16 +61,12 @@ jassa.service.TableServiceGeoLink = Class.create(service.TableServiceDelegateBas
                     }
                 });
 
-                deferred.resolve(rows);
-            }).fail(function() {
-                deferred.fail();
+                return rows;
             });
 
-
-        }).fail(function() {
-            deferred.fail();
+            return p;
         });
 
-        return deferred.promise();
+        return result;
     }
 });

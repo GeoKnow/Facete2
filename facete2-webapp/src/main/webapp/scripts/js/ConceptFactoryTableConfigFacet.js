@@ -1,4 +1,4 @@
-var ConceptFactoryTableConfigFacet = Class.create(jassa.facete.ConceptFactory, {
+var ConceptFactoryTableConfigFacet = Class.create(jassa.sparql.ConceptFactory, {
     initialize: function(tableConfigFacet) {
         this.tableConfigFacet = tableConfigFacet;
     },

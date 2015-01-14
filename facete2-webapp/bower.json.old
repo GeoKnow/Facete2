@@ -1,0 +1,12 @@
+{
+  "name": "facete2",
+  "version": "0.0.1",
+  "dependencies": {
+    "jassa-ui-angular": "0.8.1",
+    "jassa-ui-angular-openlayers": "0.8.1",
+    "ng-table": "0.3.2",
+    "angular-ui-router": "0.2.10"
+  },
+  "devDependencies": {
+  }
+}

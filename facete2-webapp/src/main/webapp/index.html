@@ -12,13 +12,12 @@
 
     <!-- bower:css -->
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
-    <link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css" />
     <link rel="stylesheet" href="bower_components/jassa-ui-angular/jassa-ui-angular.css" />
     <link rel="stylesheet" href="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers.css" />
     <link rel="stylesheet" href="bower_components/ng-table/ng-table.css" />
     <!-- endbower -->
 
-  <link rel="stylesheet" href="bower_components/ng-grid-bower/ng-grid.css" />
+<!--     <link rel="stylesheet" href="bower_components/ng-grid-bower/ng-grid.css" /> -->
     <link rel="stylesheet" href="bower_components/jquery-ui/themes/base/jquery.ui.resizable.css" />
 
     <link rel="stylesheet" href="styles/facete-style.css" />
@@ -31,18 +30,19 @@
     <script src="bower_components/jscache/cache.js"></script>
 
     <!-- bower:js -->
-    <script src="bower_components/jquery/jquery.js"></script>
-    <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/jassa/jassa.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="bower_components/ng-grid/build/ng-grid.js"></script>
+    <script src="bower_components/angular-ui-bootstrap-bower/ui-bootstrap-tpls.js"></script>
     <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
     <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
     <script src="bower_components/angular-ui-sortable/sortable.js"></script>
     <script src="bower_components/angular-ui-utils/ui-utils.js"></script>
     <script src="bower_components/jassa-ui-angular/jassa-ui-angular-tpls.js"></script>
     <script src="bower_components/jassa-ui-angular-openlayers/jassa-ui-angular-openlayers-tpls.js"></script>
+    <script src="bower_components/bluebird/js/browser/bluebird.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/ng-table/ng-table.js"></script>
     <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
     <!-- endbower -->
@@ -51,6 +51,34 @@
     <script src="bower_components/underscore.string/lib/underscore.string.js"></script>
     <script src="bower_components/openlayers/lib/OpenLayers.js"></script>
 
+
+    <script type="text/javascript">
+    _.mixin(_.str.exports());
+
+    Class = Jassa.ext.Class;
+
+    jassa = new Jassa(Promise, function() {
+        var jqXHR = $.ajax.apply(this, arguments);
+        var r = Promise.resolve(jqXHR)
+            .cancellable()
+            .catch(Promise.TimeoutError, Promise.CancellationError, function(e) {
+                //console.log('CANCELLED REQUEST');
+                jqXHR.abort();
+                throw e;
+            });
+        return r;
+    });
+
+    jassa.sparql.ConceptFactory = Class.create({
+        createConcept: function() {
+            throw new Error('Not overridden');
+        }
+    });
+
+    </script>
+
+
+    <script src="scripts/js/legacy.js"></script>
 
 
     <script src="scripts/js/app.js"></script>
@@ -78,13 +106,11 @@
     <script src="scripts/js/CannedQueries.js"></script>
 
 
+
     <!--     <script src="scripts/lib/snowball/Snowball.js"></script> -->
 
     <!-- endbuild -->
 
-    <script type="text/javascript">
-    _.mixin(_.str.exports());
-    </script>
 
 
 </head>

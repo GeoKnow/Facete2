@@ -1,6 +1,6 @@
-angular.module('Facete2', ['ui.router', 'ui.bootstrap', 'ui.jassa', 'ngGrid', 'ngTable', 'ui.jassa.openlayers', 'ngSanitize'], function($rootScopeProvider) {
+angular.module('Facete2', ['ui.router', 'ui.bootstrap', 'ui.jassa', 'ngTable', 'ui.jassa.openlayers', 'ngSanitize'], ['$rootScopeProvider', function($rootScopeProvider) {
     $rootScopeProvider.digestTtl(10);
-})
+}])
 
 .config([function() {
     // Setup drop down menu

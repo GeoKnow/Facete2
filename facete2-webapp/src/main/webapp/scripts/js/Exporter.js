@@ -5,15 +5,17 @@ var Exporter = Class.create({
         this.defaultGraphIris = defaultGraphIris;
     },
 
-    exportQuery: function(query) {
+    exportQuery: function(query) {//, varNameToHeading) {
 
         var result = jQuery.ajax({
             url: this.apiUrl,
+            type: 'POST',
             traditional: true,
             data: {
                 'service-uri': this.sparqlServiceIri,
                 'default-graph-uri': this.defaultGraphIris,
                 query: '' + query
+                //varNameToHeading: varNameToHeading
             }
         });
 

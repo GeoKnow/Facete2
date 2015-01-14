@@ -254,13 +254,13 @@
                             <label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label>
                         </div>
                         <div class="form-group">
-                            <label>Named Graphs (Separate entries with white space): <input ng-model="edit.dataGraphIris" type="text" class="form-control"></input></label>
+                            <label>Named Graphs (Separate entries with white space): <input ng-model="edit.dataGraphIris" ng-list=" " ng-trim="false" type="text" class="form-control"></input></label>
                         </div>
                         <div class="form-group">
                             <label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>
                         </div>
                         <div class="form-group">
-                            <label>Join Summary Graphs (Separate entries with white space): <input ng-model="edit.jsGraphIris" type="text" class="form-control"></input></label>
+                            <label>Join Summary Graphs (Separate entries with white space): <input ng-model="edit.jsGraphIris" ng-list=" " ng-trim="false" type="text" class="form-control"></input></label>
                         </div>
 
                         <button class="btn btn-primary" ng-click="app.dataSources.showAddDialog=false">Cancel</button>

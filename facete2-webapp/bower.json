@@ -2,11 +2,17 @@
   "name": "facete2",
   "version": "0.0.1",
   "dependencies": {
-    "jassa-ui-angular": "0.8.1",
-    "jassa-ui-angular-openlayers": "0.8.1",
+    "jassa-ui-angular": "0.9.0-SNAPSHOT",
+    "jassa-ui-angular-openlayers": "0.9.0-SNAPSHOT",
+    "bluebird": "2.3.5",
+    "underscore": "1.6.0",
+    "underscore.string": "2.3.2",
+    "jscache": "",
     "ng-table": "0.3.2",
     "angular-ui-router": "0.2.10"
   },
-  "devDependencies": {
+  "devDependencies": {},
+  "resolutions": {
+    "angular": "1.3.5-build.3630+sha.30694c8"
   }
 }

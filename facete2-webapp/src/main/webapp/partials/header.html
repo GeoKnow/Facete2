@@ -57,7 +57,7 @@
                                    <tr>
                                 </table>
                                 <progressbar class="active" ng-class="{'progress-striped': item.jobStatus.isRunning}" animate="true" value="item.jobStatus.progress.percentage" type="{{(item.jobStatus.isRunning || item.jobStatus.isSucceeded) ? 'success' : 'danger'}}"><b>{{item.jobStatus.progress.percentage}}%</b></progressbar>
-                                <span>Processed {{item.jobStatus.progress.current || '0'}} / {{item.jobStatus.progress.max || '?'}} items.</span>
+                                <span>Processed {{item.jobStatus.progress.current || '0'}} / {{item.jobStatus.progress.max != null ? item.jobStatus.progress.max : '?'}} items.</span>
 <!--                                <progressbar class="active progress-striped" ng-class="{'': item.jobStatus.isRunning}" animate="true" value="50" max="100" type="success"><b>50%</b></progressbar> -->
 
                             </div>

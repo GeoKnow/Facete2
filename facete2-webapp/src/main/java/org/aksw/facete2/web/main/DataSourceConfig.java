@@ -27,7 +27,7 @@ public class DataSourceConfig {
 
     private static final Logger logger = LoggerFactory
             .getLogger(DataSourceConfig.class);
-    
+
     private static final String JDBC_DRIVER = "jdbc.driver";
     private static final String JDBC_PASSWORD = "jdbc.password";
     private static final String JDBC_URL = "jdbc.url";
@@ -59,22 +59,22 @@ public class DataSourceConfig {
             String jndiName = "java:comp/env/jdbc/facete2/dataSource";
             Context ctx = new InitialContext();
             dsBean = (DataSource) ctx.lookup(jndiName);
-            
+
             /*
             if(jdbcUrl.isEmpty()) {
-                cpConfig.setDatasourceBean(dataSourceBean);         
+                cpConfig.setDatasourceBean(dataSourceBean);
             } else {
                 cpConfig.setJdbcUrl(jdbcUrl);
                 cpConfig.setUsername(userName);
                 cpConfig.setPassword(passWord);
             }
-            
+
             /*
             cpConfig.setJdbcUrl(dbconf.getDbConnString()); // jdbc url specific to your database, eg jdbc:mysql://127.0.0.1/yourdb
-            cpConfig.setUsername(dbconf.getUsername()); 
+            cpConfig.setUsername(dbconf.getUsername());
             cpConfig.setPassword(dbconf.getPassword());
             */
-            
+
         } catch (NamingException e) {
             logger.info("Exception on retrieving initial JNDI context - trying a different method", e);
         }
@@ -88,25 +88,25 @@ public class DataSourceConfig {
             dataSource.setPassword(env.getRequiredProperty(JDBC_PASSWORD));
 
             dsBean = dataSource;
-            
+
 //            BoneCPConfig cpConfig = new BoneCPConfig();
 //            cpConfig.setDatasourceBean(dsBean);
-//            
+//
 //            //cpConfig.sesetDriverClassName(env.getRequiredProperty(JDBC_DRIVER));
 //            cpConfig.setJdbcUrl(env.getRequiredProperty(JDBC_URL));
 //            cpConfig.setUsername(env.getRequiredProperty(JDBC_USERNAME));
 //            cpConfig.setPassword(env.getRequiredProperty(JDBC_PASSWORD));
-//            
+//
 //            cpConfig.setMinConnectionsPerPartition(1);
 //            cpConfig.setMaxConnectionsPerPartition(10);
 //            cpConfig.setPartitionCount(2);
 //            //cpConfig.setConnectionTimeoutInMs(30000);
 //            //cpConfig.setStatisticsEnabled(true);
 //            cpConfig.setCloseConnectionWatch(true);
-            
-            //BoneCP connectionPool = new BoneCP(cpConfig); // setup the connection pool    
+
+            //BoneCP connectionPool = new BoneCP(cpConfig); // setup the connection pool
         }
-        
+
         //DataSource result = dsBean;
 
         BoneCPConfig cpConfig = new BoneCPConfig();
@@ -116,13 +116,18 @@ public class DataSourceConfig {
         cpConfig.setMaxConnectionsPerPartition(10);
         cpConfig.setPartitionCount(2);
         //cpConfig.setCloseConnectionWatch(true);
-        
-        DataSource result = new BoneCPDataSource(cpConfig);
+
+        DataSource result;
+        try {
+            result = new BoneCPDataSource(cpConfig);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
 
         return result;
     }
 
-    
+
     @Bean
     @Autowired
     public Schema schema(DataSource dataSource) throws SQLException {
