@@ -108,6 +108,16 @@
 
                 <div class="panel panel-info">
                     <div class="panel-heading portlet-heading">
+                        Facets
+                    </div>
+                    <div class="panel-body">
+                       <facet-list sparql-service="active.services.sparqlService" facet-tree-config="active.facetTreeConfig" select="selectFacet(path)" plugins="facetTreePlugins" plugin-context="facetTreePluginContext"></facet-list>
+                    </div>
+                </div>
+
+<!--
+                <div class="panel panel-info">
+                    <div class="panel-heading portlet-heading">
                         Facet Tree
                     </div>
                     <div class="panel-body">
@@ -133,6 +143,7 @@
                         <constraint-list sparql-service="active.services.sparqlService" label-service="active.services.lookupServiceConstraintLabels" facet-tree-config="active.facetTreeConfig"></constraint-list>
                     </div>
                 </div>
+-->
             </accordion-group>
         </accordion>
 

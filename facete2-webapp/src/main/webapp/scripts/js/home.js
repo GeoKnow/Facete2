@@ -473,6 +473,10 @@ angular.module('Facete2')
     // TODO: Whenever the facet selection changes, we need to recreate the map data source service for the modified concept
     var createMapDataSource = function(sparqlService, geoMapFactory, concept, fillColor) {
 
+
+        //Factory = geo.GeoMapFactoryUtils.createWktMapFactory('http://www.w3.org/2003/01/geo/wgs84_pos#Geometry', '<bif:st_intersects>', '<bif:st_geomFromText>');
+
+
         // The 'core' service from which to retrieve the initial data
         var bboxListService = new geo.ListServiceBbox(sparqlService, geoMapFactory, concept);
 
@@ -536,7 +540,8 @@ angular.module('Facete2')
         //bboxListService = new service.ListServiceAugmenter(bboxListService, augmenterStyle);
 
         // Wrap the list service with clustering support
-        var result = new geo.DataServiceBboxCache(bboxListService, 1500, 500, 2);
+        //var result = new geo.DataServiceBboxCache(bboxListService, 1500, 500, 2);
+        var result = new geo.DataServiceBboxCache(bboxListService, 100, 100, 2);
 
         return result;
     };

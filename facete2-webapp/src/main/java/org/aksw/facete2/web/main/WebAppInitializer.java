@@ -24,31 +24,34 @@ public class WebAppInitializer
         throws ServletException
     {
         // Create the 'root' Spring application context
-        AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
-        rootContext.register(AppConfig.class);
-
-        // Manage the lifecycle of the root application context
-        servletContext.addListener(new ContextLoaderListener(rootContext));
-        servletContext.addListener(new RequestContextListener());
+//        AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
+//        rootContext.register(AppConfig.class);
+//
+//        // Manage the lifecycle of the root application context
+//        servletContext.addListener(new ContextLoaderListener(rootContext));
+//        servletContext.addListener(new RequestContextListener());
 
         {
             FilterRegistration.Dynamic fr = servletContext.addFilter("CorsFilter", new CorsFilter());
             fr.addMappingForUrlPatterns(null, true, "/*");
+            fr.setAsyncSupported(true);
         //  fr.setInitParameter("dispatcher", "REQUEST");
         }
 
         {
             FilterRegistration.Dynamic fr = servletContext.addFilter("FilterPost", new FilterPost());
             fr.addMappingForUrlPatterns(null, true, "/*");
+            fr.setAsyncSupported(true);
         //  fr.setInitParameter("dispatcher", "REQUEST");
         }
 
-        {
+//        {
             FilterRegistration.Dynamic fr = servletContext.addFilter("UrlRewriteFilter", new UrlRewriteFilter());
             fr.setInitParameter("dispatcher", "REQUEST");
             fr.setInitParameter("dispatcher", "FORWARD");
             fr.addMappingForUrlPatterns(null, true, "/*");
-        }
+            fr.setAsyncSupported(true);
+//        }
 
 
         // Create the dispatcher servlet's Spring application context
@@ -59,12 +62,14 @@ public class WebAppInitializer
         jassaServlet.setInitParameter("jersey.config.server.provider.packages", "org.aksw.jena_sparql_api.web.servlets org.aksw.facete2.web.api"); //"org.aksw.jassa.web.api");
         //ServletRegistration.Dynamic jassaServlet = servletContext.addServlet("jassa-servlet", new DispatcherServlet(dispatcherContext));
         jassaServlet.addMapping("/api/*");
+        jassaServlet.setAsyncSupported(true);
         jassaServlet.setLoadOnStartup(1);
 
         ServletRegistration.Dynamic facete2Servlet = servletContext.addServlet("facete2-servlet", new ServletContainer());
         //ServletRegistration.Dynamic facete2Servlet = servletContext.addServlet("facete2-servlet", new DispatcherServlet(dispatcherContext));
         facete2Servlet.setInitParameter("jersey.config.server.provider.packages", "org.aksw.facete2.web.api");
         facete2Servlet.addMapping("/cache/*");
+        facete2Servlet.setAsyncSupported(true);
         facete2Servlet.setLoadOnStartup(1);
 
 

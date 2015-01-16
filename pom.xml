@@ -188,6 +188,10 @@
                                     <groupId>commons-logging</groupId>
                                     <artifactId>commons-logging</artifactId>
                             </exclusion>
+                            <exclusion>
+                                <groupId>aopalliance</groupId>
+                                <artifactId>aopalliance</artifactId>
+                            </exclusion>
                     </exclusions>
             </dependency>
 

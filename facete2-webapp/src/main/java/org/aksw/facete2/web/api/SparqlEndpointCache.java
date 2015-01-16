@@ -73,7 +73,6 @@ public class SparqlEndpointCache
             throw new RuntimeException("Cannot serve request because sparqlServiceFactory is null");
         }
 
-        String sigh = req.getParameter("service-uri");
         Map<String, String[]> paramMap = req.getParameterMap();
         // TODO does not work for POST requests
         //Multimap<String, String> qs = UriUtils.parseQueryString(req.getQueryString());
