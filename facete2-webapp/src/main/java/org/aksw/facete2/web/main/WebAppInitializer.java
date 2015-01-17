@@ -24,12 +24,12 @@ public class WebAppInitializer
         throws ServletException
     {
         // Create the 'root' Spring application context
-//        AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
-//        rootContext.register(AppConfig.class);
+        AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
+        rootContext.register(AppConfig.class);
 //
 //        // Manage the lifecycle of the root application context
-//        servletContext.addListener(new ContextLoaderListener(rootContext));
-//        servletContext.addListener(new RequestContextListener());
+        servletContext.addListener(new ContextLoaderListener(rootContext));
+        servletContext.addListener(new RequestContextListener());
 
         {
             FilterRegistration.Dynamic fr = servletContext.addFilter("CorsFilter", new CorsFilter());

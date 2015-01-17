@@ -13,6 +13,8 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandler.Context;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.component.AbstractLifeCycle.AbstractLifeCycleListener;
@@ -133,22 +135,25 @@ public class MainFacete2Server {
 
         final WebAppContext webAppContext = new WebAppContext();
 
-        AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
-        rootContext.register(AppConfig.class);
-
-        // Manage the lifecycle of the root application context
-        webAppContext.addEventListener(new ContextLoaderListener(rootContext));
-        webAppContext.addEventListener(new RequestContextListener());
+//        AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
+//        rootContext.register(AppConfig.class);
+//
+//        // Manage the lifecycle of the root application context
+//        webAppContext.addEventListener(new ContextLoaderListener(rootContext));
+//        webAppContext.addEventListener(new RequestContextListener());
 
         //webAppContext.addEventListener(new ContextLoaderListener(context);
         //Context servletContext = webAppContext.getServletContext();
+
 
         webAppContext.addLifeCycleListener(new AbstractLifeCycleListener() {
             @Override
             public void lifeCycleStarting(LifeCycle arg0) {
                 WebAppInitializer initializer = new WebAppInitializer();
                 try {
-                    initializer.onStartup(webAppContext.getServletContext());
+                    Context servletContext = webAppContext.getServletContext();
+                    servletContext.setExtendedListenerTypes(true);
+                    initializer.onStartup(servletContext);
                 } catch (ServletException e) {
                     throw new RuntimeException(e);
                 }

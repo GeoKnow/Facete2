@@ -30,7 +30,7 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
 @EnableWebMvc
 @ComponentScan(basePackages = {"org.aksw.facete2.web.api", "org.aksw.jena_sparql_api.web.servlets"})
 public class WebMvcConfig
-	extends WebMvcConfigurerAdapter
+    extends WebMvcConfigurerAdapter
 {
     @Autowired
     private ServletContext servletContext;
@@ -55,16 +55,16 @@ public class WebMvcConfig
 //        registry.addViewController("/").setViewName("index-sparqlify-web-manager");
         registry.addViewController("/index.do").setViewName("index");
     }
-    
+
 
 //    @Bean
 //    public ServletForwardingController endpointsFwdCtrl() {
 //      ServletForwardingController result = new ServletForwardingController();
 //      result.setServletName("sparqlify-endpoints");
-//      
+//
 //      return result;
 //    }
-    
+
 //    @Bean
 //    public SimpleUrlHandlerMapping urlMapping() {
 //      SimpleUrlHandlerMapping result = new SimpleUrlHandlerMapping();
@@ -80,7 +80,7 @@ public class WebMvcConfig
 //
 //      Properties mappings = new Properties();
 //      mappings.put("/endpoints/*", "endpointsFwdCtrl");
-//      
+//
 //      result.setMappings(mappings);
 //
 //      return result;
@@ -90,13 +90,13 @@ public class WebMvcConfig
     //http://spring.io/blog/2013/05/11/content-negotiation-using-spring-mvc/
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-        
+
         Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
         mediaTypes.put("htm", MediaType.TEXT_HTML);
         mediaTypes.put("html", MediaType.TEXT_HTML);
         mediaTypes.put("json", MediaType.APPLICATION_JSON);
-        
-        
+
+
         configurer.favorPathExtension(true);
         configurer.favorParameter(true);
         configurer.parameterName("mediaType");
@@ -105,7 +105,7 @@ public class WebMvcConfig
         configurer.defaultContentType(MediaType.TEXT_HTML);
         configurer.mediaTypes(mediaTypes);
     }
-    
+
     @Bean
     public ViewResolver contentNegotiatingViewResolver(ContentNegotiationManager manager) {
         // Define the view resolvers
@@ -114,15 +114,15 @@ public class WebMvcConfig
         //resolvers.add(internalResourceViewResolverJsp());
         //resolvers.add(urlBasedViewResolver());
         resolvers.add(internalResourceViewResolverHtml());
-        
+
         // Create the CNVR plugging in the resolvers and the content-negotiation manager
         ContentNegotiatingViewResolver resolver = new ContentNegotiatingViewResolver();
         resolver.setViewResolvers(resolvers);
         resolver.setContentNegotiationManager(manager);
         return resolver;
     }
-    
-    
+
+
     public ViewResolver urlBasedViewResolver() {
         UrlBasedViewResolver result = new InternalResourceViewResolver();
 //      result.setPrefix("/WEB-INF/jsp/");
@@ -131,7 +131,7 @@ public class WebMvcConfig
         return result;
     }
 
-    
+
     //@Bean(name="viewResolverJsp")
     public InternalResourceViewResolver internalResourceViewResolverJsp() {
         InternalResourceViewResolver result = new InternalResourceViewResolver();

@@ -43,8 +43,8 @@
         <jena-sparql-api.version>2.11.2-60-SNAPSHOT</jena-sparql-api.version>
 <!--		<jassa.version>0.0.4</jassa.version> -->
 
-        <spring.version>3.2.4.RELEASE</spring.version>
-        <spring.batch.version>2.2.5.RELEASE</spring.batch.version>
+        <spring.version>4.1.4.RELEASE</spring.version>
+        <spring.batch.version>3.0.3.RELEASE</spring.batch.version>
 
 
         <slf4j.version>1.6.0</slf4j.version>
@@ -89,7 +89,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
-            <version>3.2.4.RELEASE</version>
+            <version>${spring.version}</version>
         </dependency>
 
         <dependency>
@@ -376,9 +376,8 @@
                         it won't be analyzed -->
                     <excludes>
                         <exclude>postgresql-</exclude>
-
                         <exclude>commons-beanutils-</exclude>
-                        <exclude>commons-beanutils-</exclude>
+			<exclude>xmlpull-</exclude>
 
                         <!-- TODO These conflicts should be resolved -->
                         <!-- <exclude>stax-api-</exclude> -->
