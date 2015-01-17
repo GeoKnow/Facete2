@@ -150,7 +150,7 @@
                 <groupId>org.aksw.sparqlify</groupId>
                 <artifactId>sparqlify-core</artifactId>
 <!--                 <version>0.6.12</version> -->
-                <version>0.6.13-SNAPSHOT</version>
+                <version>0.6.14-SNAPSHOT</version>
             </dependency>
 
 
@@ -231,6 +231,12 @@
                     <groupId>org.springframework.batch</groupId>
                     <artifactId>spring-batch-core</artifactId>
                     <version>${spring.batch.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>aopalliance</groupId>
+                        <artifactId>aopalliance</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                     <groupId>org.springframework.batch</groupId>
@@ -371,6 +377,7 @@
                     <excludes>
                         <exclude>postgresql-</exclude>
 
+                        <exclude>commons-beanutils-</exclude>
                         <exclude>commons-beanutils-</exclude>
 
                         <!-- TODO These conflicts should be resolved -->
