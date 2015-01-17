@@ -35,7 +35,7 @@ public class AppConfig {
 
     @javax.annotation.Resource
     private Environment env;
-    
+
     /*
     @Bean
     public StreamSink sparqlExportSink() {
@@ -43,78 +43,83 @@ public class AppConfig {
         return result;
     }
     */
-    
+
+    @Bean
+    public String contextConfigLocation() {
+        return "foobar";
+    }
+
     @Bean
     public File sparqlExportPath() {
         String exportPathName = env.getRequiredProperty("fs.exportPath");
-        
+
         File result = new File(exportPathName);
-        
+
         if(!result.exists()) {
-                        
+
             boolean isCreated = result.mkdirs();
             if(!isCreated) {
                 String msg = "Failed to create export path [" + exportPathName + "]. Export feature will NOT be available!";
                 throw new RuntimeException(msg);
-            }            
+            }
         }
-        
+
         if(result.isFile()) {
             String msg = "Export path [" + exportPathName + "] is a file instead of a directory. Export feature will NOT be available!";
-            throw new RuntimeException(msg);                
+            throw new RuntimeException(msg);
         }
 
         if(!result.canWrite()) {
             String msg = "Cannot write to export path [" + exportPathName + "]; check file system permissions. Export feature will NOT be available!";
-            throw new RuntimeException(msg);            
+            throw new RuntimeException(msg);
         }
 
-        
+
         return result;
     }
-    
-    
+
+
     @Bean
     @Autowired
     public QueryExecutionFactoryEx batchSparqlService(DataSource dataSource)
         throws Exception
     {
-        
+
         Resource springBatchSml = new ClassPathResource("org/springframework/batch/rdb2rdf/rdf-mapping-h2.sml");
         Config config = SparqlifyUtils.parseSmlConfig(springBatchSml.getInputStream(), logger);
-        
+
         QueryExecutionFactoryEx qef = SparqlifyUtils.createDefaultSparqlifyEngine(dataSource, config, 1000l, 30);
-        
+
         return qef;
     }
-    
+
     @Bean
     public SparqlSqlInverseMapper sparqlSqlInverseMapper(QueryExecutionFactoryEx sparqlService) {
         SparqlSqlOpRewriterImpl opRewriter = SparqlifyUtils.unwrapOpRewriter(sparqlService);
         CandidateViewSelectorImpl candidateViewSelector = SparqlifyUtils.unwrapCandidateViewSelector(opRewriter);
         SqlTranslator sqlTranslator = SparqlifyUtils.unwrapSqlTransformer(opRewriter);
-        
+
         SparqlSqlInverseMapper result = new SparqlSqlInverseMapperImpl(candidateViewSelector, sqlTranslator);
-        
+
         return result;
     }
 
-    
+
     /*
-     * JPA Layer config 
+     * JPA Layer config
      */
-//    
+//
 //    private Properties getHibernateProperties() {
 //        Properties properties = new Properties();
 //        properties.put(HIBERNATE_DIALECT, env.getRequiredProperty(HIBERNATE_DIALECT));
 //        properties.put(HIBERNATE_SHOW_SQL, env.getRequiredProperty(HIBERNATE_SHOW_SQL));
 //        properties.put(HIBERNATE_HBM2DDL_AUTO, env.getRequiredProperty(HIBERNATE_HBM2DDL_AUTO));
-//        
+//
 //        properties.put("hibernate.current_session_context_class", "thread");
-//        
+//
 //        return properties;
 //    }
-//    
+//
 //    @Bean
 //    public EntityManagerFactory entityManagerFactory(DataSource dataSource) {
 //        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
@@ -123,7 +128,7 @@ public class AppConfig {
 //        //vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQL5InnoDBDialect");
 //        vendorAdapter.setDatabasePlatform("org.hibernate.dialect.PostgreSQLDialect");
 //        vendorAdapter.setDatabase(Database.POSTGRESQL);
-// 
+//
 //        LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
 //        factory.setJpaVendorAdapter(vendorAdapter);
 //        factory.setPackagesToScan("org.aksw.service_framework.jpa.model", "org.aksw.sparqlify.admin.model");
@@ -135,14 +140,14 @@ public class AppConfig {
 ////        properties.setProperty("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
 ////        properties.setProperty("hibernate.cache.use_query_cache", "true");
 ////        properties.setProperty("hibernate.generate_statistics", "true");
-// 
+//
 //        factory.setJpaProperties(properties);
-// 
+//
 //        factory.afterPropertiesSet();
-// 
+//
 //        return factory.getObject();
 //    }
-// 
+//
 //    @Bean
 //    public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 //        JpaTransactionManager txManager = new JpaTransactionManager();
@@ -152,15 +157,15 @@ public class AppConfig {
 //        return txManager;
 //    }
 //
-//    
-//    
+//
+//
 //    @Bean
 //    public SparqlSqlInverseMapper sparqlSqlInverseMapper(CandidateViewSelectorImpl candidateViewSelector, SqlTranslator sqlTranslator) {
 //        SparqlSqlInverseMapper result = new SparqlSqlInverseMapperImpl(candidateViewSelector, sqlTranslator);
-//        
+//
 //        return result;
 //    }
-//    
+//
 //    @Bean
 //    public EntityInverseMapper entityInverseMapper(SessionFactory sessionFactory, SparqlSqlInverseMapper inverseMapper) {
 //        EntityInverseMapperImplHibernate result = EntityInverseMapperImplHibernate.create(inverseMapper, sessionFactory);
@@ -174,10 +179,10 @@ public class AppConfig {
 //        return result;
 //    }
 //
-//    
+//
 //    // TODO Possibly replace this ugly unwrapping by creating the Sparqlify Query Execution
 //    // in spring bean style
-//    
+//
 //    @Bean
 //    public SparqlSqlOpRewriterImpl sparqlSqlOpRewriter(QueryExecutionFactory qef) {
 //        SparqlSqlOpRewriterImpl result = SparqlifyUtils.unwrapOpRewriter(qef);
@@ -195,5 +200,5 @@ public class AppConfig {
 //        CandidateViewSelectorImpl result = SparqlifyUtils.unwrapCandidateViewSelector(opRewriter);
 //        return result;
 //    }
-//        
+//
 }

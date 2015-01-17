@@ -109,19 +109,26 @@ public class DataSourceConfig {
 
         //DataSource result = dsBean;
 
-        BoneCPConfig cpConfig = new BoneCPConfig();
-        cpConfig.setDatasourceBean(dsBean);
-
-        cpConfig.setMinConnectionsPerPartition(1);
-        cpConfig.setMaxConnectionsPerPartition(10);
-        cpConfig.setPartitionCount(2);
-        //cpConfig.setCloseConnectionWatch(true);
-
         DataSource result;
-        try {
-            result = new BoneCPDataSource(cpConfig);
-        } catch(Exception e) {
-            throw new RuntimeException(e);
+
+        boolean useBoneCpWrapper = false;
+        if(useBoneCpWrapper) {
+
+            BoneCPConfig cpConfig = new BoneCPConfig();
+            cpConfig.setDatasourceBean(dsBean);
+
+            cpConfig.setMinConnectionsPerPartition(1);
+            cpConfig.setMaxConnectionsPerPartition(10);
+            cpConfig.setPartitionCount(2);
+            //cpConfig.setCloseConnectionWatch(true);
+
+            try {
+                result = new BoneCPDataSource(cpConfig);
+            } catch(Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            result = dsBean;
         }
 
         return result;

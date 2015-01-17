@@ -1,6 +1,5 @@
 package org.aksw.facete2.web.main;
 
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.ProtectionDomain;
@@ -13,21 +12,12 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandler.Context;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.component.AbstractLifeCycle.AbstractLifeCycleListener;
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.web.context.ContextLoaderListener;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.RequestContextListener;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.servlet.DispatcherServlet;
 
 
 /**
@@ -152,7 +142,7 @@ public class MainFacete2Server {
                 WebAppInitializer initializer = new WebAppInitializer();
                 try {
                     Context servletContext = webAppContext.getServletContext();
-                    servletContext.setExtendedListenerTypes(true);
+                    //servletContext.setExtendedListenerTypes(true);
                     initializer.onStartup(servletContext);
                 } catch (ServletException e) {
                     throw new RuntimeException(e);
@@ -177,4 +167,16 @@ public class MainFacete2Server {
             System.exit(1);
         }
     }
+
+//    public void mainGrizzly() {
+//        HttpServer server = new HttpServer();
+//
+//        final NetworkListener listener = new NetworkListener("grizzly", NetworkListener.DEFAULT_NETWORK_HOST, PACS.RESTPort);
+//        server.addListener(listener);
+//
+//        ResourceConfig rc = new ResourceConfig();
+//        rc.packages("org.aksw.facete2.web");
+//        HttpHandler processor = ContainerFactory.createContainer(GrizzlyHttpContainer.class, rc);
+//        server.getServerConfiguration().addHttpHandler(processor, "");
+//    }
 }

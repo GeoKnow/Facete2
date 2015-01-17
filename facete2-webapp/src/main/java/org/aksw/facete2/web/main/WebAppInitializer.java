@@ -31,6 +31,7 @@ public class WebAppInitializer
         servletContext.addListener(new ContextLoaderListener(rootContext));
         servletContext.addListener(new RequestContextListener());
 
+
         {
             FilterRegistration.Dynamic fr = servletContext.addFilter("CorsFilter", new CorsFilter());
             fr.addMappingForUrlPatterns(null, true, "/*");
