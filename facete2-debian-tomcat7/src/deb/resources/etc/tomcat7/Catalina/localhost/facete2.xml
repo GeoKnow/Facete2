@@ -31,6 +31,13 @@
     type="java.lang.String"
   />
 
+  <Environment
+    name="contextConfigLocation"
+    value="workaround-for-JERSEY-2038"
+    type="java.lang.String"
+  />
+
+
   <!--
       factory="com.jolbox.bonecp.BoneCPDataSource"
       idleConnectionTestPeriod="60"
