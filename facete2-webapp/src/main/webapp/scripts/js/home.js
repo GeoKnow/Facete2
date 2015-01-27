@@ -19,7 +19,7 @@ angular.module('Facete2')
 //        .hashPrefix('!');
 }])
 
-.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$location', function($scope, $q, $rootScope, $location) {
+.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', function($scope, $q, $rootScope, $timeout, $location) {
 
 
     // query string arguments
@@ -1050,8 +1050,9 @@ angular.module('Facete2')
 
     /**
      * Index the map of a spring batch object
+     * this is for spring batch ~2.2
      */
-    var indexBatchMap = function(map) {
+    var indexBatchMapOld = function(map) {
         var result;
         var entry = map ? map.entry : null;
 
@@ -1068,7 +1069,17 @@ angular.module('Facete2')
         }
 
         return result;
-    }
+    };
+
+
+    var indexBatchMap = function(entries) {
+        var result = {};
+        entries.forEach(function(entry) {
+            var tmp = indexBatchMapOld(entry);
+            _(result).extend(tmp);
+        });
+        return result;
+    };
 
 
     var processJobStatus = function(item) {
@@ -1100,7 +1111,7 @@ angular.module('Facete2')
             : (maxItemCount === 0 ? 100 : Math.floor(itemCount / maxItemCount * 100));
 
         var result = {
-            id: item.id.slice(1, -1),
+            id: item.id, //.slice(1, -1),
             isRunning: isRunning,
             isCounting: isRunning && maxItemCount == null,
             isRetrieving: isRunning && maxItemCount != null,

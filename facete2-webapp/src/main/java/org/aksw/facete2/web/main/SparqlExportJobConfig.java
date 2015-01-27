@@ -19,6 +19,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.ListableJobLocator;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.explore.JobExplorer;
@@ -180,6 +181,32 @@ public class SparqlExportJobConfig {
     }
 
     @Bean
+    @JobScope
+    //@StepScope
+    public Query query(@Value("#{jobParameters[queryString]}") String queryString) {
+        Query query = QueryFactory.create(queryString, Syntax.syntaxSPARQL_11);
+        return query;
+    }
+
+
+    @Bean
+    @JobScope
+    //@StepScope
+    public QueryExecutionFactory sparqlService(
+            @Value("#{jobParameters[serviceUri]}") String serviceUri,
+            @Value("#{jobParameters[defaultGraphUris]}") String defaultGraphUris)
+    {
+        String[] tmp = defaultGraphUris.split(" ");
+        Collection<String> dgus = Arrays.asList(tmp);
+
+        QueryExecutionFactory sparqlService = sparqlServiceFactory.createSparqlService(serviceUri, dgus);
+
+        return sparqlService;
+    }
+
+    @Bean
+    //@StepScope
+    @JobScope
     @Autowired
     public Step dataCountStep(Query query, QueryExecutionFactory sparqlService) {
         Tasklet tasklet = new DataCountTasklet(query, sparqlService);
@@ -200,27 +227,6 @@ public class SparqlExportJobConfig {
                 .build();
     }
 
-    @Bean
-    @StepScope
-    public Query query(@Value("#{jobParameters[queryString]}") String queryString) {
-        Query query = QueryFactory.create(queryString, Syntax.syntaxSPARQL_11);
-        return query;
-    }
-
-
-    @Bean
-    @StepScope
-    public QueryExecutionFactory sparqlService(
-            @Value("#{jobParameters[serviceUri]}") String serviceUri,
-            @Value("#{jobParameters[defaultGraphUris]}") String defaultGraphUris)
-    {
-        String[] tmp = defaultGraphUris.split(" ");
-        Collection<String> dgus = Arrays.asList(tmp);
-
-        QueryExecutionFactory sparqlService = sparqlServiceFactory.createSparqlService(serviceUri, dgus);
-
-        return sparqlService;
-    }
 
     @Bean
     @StepScope

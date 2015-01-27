@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -148,7 +149,7 @@ public class SparqlExportServlet {
     }
 
 
-    public String startExportCore(String serviceUri, List<String> defaultGraphUris, String queryString, String id) throws Exception {
+    public String startExportCore(@NotNull String serviceUri, List<String> defaultGraphUris, String queryString, String id) throws Exception {
         Gson gson = new Gson();
 
         Assert.notNull(serviceUri);
@@ -181,10 +182,10 @@ public class SparqlExportServlet {
         JobExecution jobExecution = sparqlExportManager.launchSparqlExport(serviceUri, defaultGraphUris, queryString, targetFile.getAbsolutePath());
         long jobExecutionId = jobExecution.getId();
 
-        String jobExeuctionUri = "http://example.org/resource/jobExecution" + jobExecutionId;
+        String jobExecutionUri = "http://example.org/resource/jobExecution" + jobExecutionId;
 
         Map<String, Object> data = new HashMap<String, Object>();
-        data.put("id", jobExeuctionUri);
+        data.put("id", jobExecutionUri);
 
         String result = gson.toJson(data);
 
