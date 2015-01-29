@@ -29,7 +29,7 @@ public class SparqlExportManager {
     private JobRepository jobRepository;
     private JobLauncher jobLauncher;
     private Job job;
-    
+
 
     public SparqlExportManager(JobExplorer jobExplorer, JobRepository jobRepository, JobLauncher jobLauncher, Job job) {
         this.jobExplorer = jobExplorer;
@@ -37,7 +37,7 @@ public class SparqlExportManager {
         this.jobLauncher = jobLauncher;
         this.job = job;
     }
-    
+
     public JobExecution launchSparqlExport(String serviceUri, Collection<String> defaultGraphUris, String queryString, String targetResource) throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException
     {
         //ApplicationContext context = new AnnotationConfigApplicationContext(SparqlExportJobConfig.class);
@@ -45,19 +45,19 @@ public class SparqlExportManager {
         //JobLauncher jobLauncher = context.getBean(JobLauncher.class);
         //Job job = context.getBean(Job.class);
 
-        
+
         Set<String> tmp = new TreeSet<String>(defaultGraphUris);
         String dgu = Joiner.on(' ').join(tmp);
-        
+
         JobParameters jobParameters = new JobParametersBuilder()
             .addString(SparqlExportJobConfig.JOBPARAM_SERVICE_URI, serviceUri, true)
             .addString(SparqlExportJobConfig.JOBPARAM_DEFAULT_GRAPH_URIS, dgu, true)
             .addString(SparqlExportJobConfig.JOBPARAM_QUERY_STRING, queryString, true)
-            .addString(SparqlExportJobConfig.JOBPARAM_TARGET_RESOURCE, targetResource, true)
+            .addString(SparqlExportJobConfig.JOBPARAM_TARGET_RESOURCE, targetResource, false)
             .toJobParameters();
 
         JobExecution result = jobRepository.getLastJobExecution(job.getName(), jobParameters);
-        
+
         // If there was a prior job, return its execution context
         BatchStatus status = result == null ? null : result.getStatus();
         if(status != null) {
@@ -71,22 +71,22 @@ public class SparqlExportManager {
 //            break;
 //            default
 //        }
-        
+
         result = jobLauncher.run(job, jobParameters);
-       
+
         return result;
-    }    
-    
+    }
+
     public InputStream getTargetInputStream(long jobExecutionId) throws FileNotFoundException {
         JobExecution jobExecution = jobExplorer.getJobExecution(jobExecutionId);
         JobParameters jobParameters = jobExecution.getJobParameters();
         String targetResource = jobParameters.getString(SparqlExportJobConfig.JOBPARAM_TARGET_RESOURCE);
-        
+
         FileInputStream result = new FileInputStream(targetResource);
         return result;
     }
-    
-    
+
+
     public static SparqlExportManager createTestInstance() {
 
         ApplicationContext context = new AnnotationConfigApplicationContext(SparqlExportJobConfig.class);

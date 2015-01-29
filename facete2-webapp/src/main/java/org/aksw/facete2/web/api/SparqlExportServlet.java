@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -32,6 +33,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.aksw.facete2.web.main.SparqlExportManager;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
+import org.aksw.jena_sparql_api.core.ResultSetRename;
 import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
 import org.aksw.sparqlify.algebra.sql.exprs2.S_ColumnRef;
 import org.aksw.sparqlify.core.cast.SqlValue;
@@ -50,6 +52,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 import com.google.common.base.Supplier;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
@@ -58,6 +61,7 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.sparql.core.Quad;
 import com.hp.hpl.jena.sparql.core.Var;
@@ -135,7 +139,7 @@ public class SparqlExportServlet {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @javax.ws.rs.Path("start")
-    public String startExport(@QueryParam("service-uri") String serviceUri, @QueryParam("default-graph-uri") List<String> defaultGraphUris, @QueryParam("query") String queryString, @QueryParam("id") String id) throws Exception {
+    public String startExportGet(@QueryParam("service-uri") String serviceUri, @QueryParam("default-graph-uri") List<String> defaultGraphUris, @QueryParam("query") String queryString, @QueryParam("id") String id) throws Exception {
         String result = startExportCore(serviceUri, defaultGraphUris, queryString, id);
         return result;
     }
@@ -224,8 +228,15 @@ public class SparqlExportServlet {
         return jobExecutionId;
     }
 
+    /*
+    public Response retrieveExportCsv(@QueryParam("id") String id, @QueryParam("rename") Map<String, String> varMap) {
+        return retrieveExportCsvCore(id, varMap);
+    }
+    */
 
-    public Response retrieveExportCsv(@QueryParam("id") String id) {
+
+    public Response retrieveExportCsv(String id, final Map<Var, Var> varMap) {
+
 //        Gson gson = new Gson();
 //        Type t = new TypeToken<Map<String, String>>(){}.getType();
 //        varMapStr = varMapStr == null || varMapStr.isEmpty() ? "{}" : varMapStr;
@@ -251,7 +262,7 @@ public class SparqlExportServlet {
             @Override
             public void write(OutputStream output) throws IOException,
                     WebApplicationException {
-                resultSetToCsv(inputStreamSupplier, output);
+                resultSetToCsv(inputStreamSupplier, varMap, output);
             }
         };
 
@@ -269,14 +280,37 @@ public class SparqlExportServlet {
     @javax.ws.rs.Path("/retrieve")
     @GET
     @Produces({ MediaType.APPLICATION_OCTET_STREAM })
-    public Response retrieveExport(@QueryParam("id") String id, @QueryParam("format") String format) throws FileNotFoundException {
+    public Response retrieveExport(@QueryParam("id") String id, @QueryParam("format") String format, @QueryParam("rename") String varMapStr) throws FileNotFoundException {
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<Map<String, String>>() {}.getType();
+        Map<String, String> _varMap;
+        if(varMapStr == null) {
+            _varMap = Collections.<String, String>emptyMap();
+        } else {
+            _varMap = gson.fromJson(varMapStr, type);
+        }
+
+
+        Map<Var, Var> varMap = new HashMap<Var, Var>();
+        for(Entry<String, String> entry : _varMap.entrySet()) {
+            Var k = Var.alloc(entry.getKey());
+            Var v = Var.alloc(entry.getValue());
+
+            varMap.put(k, v);
+        }
+
+        return retrieveExportCore(id, format, varMap);
+    }
+
+    public Response retrieveExportCore(String id, String format, Map<Var, Var> varMap) throws FileNotFoundException {
         format = format == null ? "xml" : format.trim().toLowerCase();
 
         Response result;
         if(format.equals("xml")) {
-            result = retrieveExportXml(id);
+            result = retrieveExportXml(id, varMap);
         } else if(format.equals("csv")) {
-            result = retrieveExportCsv(id);
+            result = retrieveExportCsv(id, varMap);
         } else {
             throw new RuntimeException("Invalid format: " + format);
         }
@@ -300,14 +334,24 @@ public class SparqlExportServlet {
 //    @javax.ws.rs.Path("/retrieveXml")
 //    @GET
 //    @Produces({ MediaType.APPLICATION_OCTET_STREAM })
-    public Response retrieveExportXml(@QueryParam("id") String id) throws FileNotFoundException {
+    // @QueryParam("id")
+    public Response retrieveExportXml(String id, Map<Var, Var> varMap) throws FileNotFoundException {
 
         final Long jobExecutionId = getExportJobExecutionId(id);
 
-        StreamingOutput out;
-
+        // TODO Take the varMap into account
         InputStream in = sparqlExportManager.getTargetInputStream(jobExecutionId);
-        out = new StreamingOutputInputStream(in);
+        ResultSet tmpRs = ResultSetFactory.fromXML(in);
+        final ResultSet rs = ResultSetRename.wrapIfNeeded(tmpRs, varMap);
+
+        StreamingOutput out = new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException,
+                    WebApplicationException {
+
+                ResultSetFormatter.outputAsXML(output, rs);
+            }
+        };
 
         ContentDisposition contentDisposition = ContentDisposition.type("attachment")
                 .fileName("export.xml").creationDate(new Date()).build();
@@ -322,7 +366,7 @@ public class SparqlExportServlet {
 //    @javax.ws.rs.Path("/retrieveCsv")
 //    @GET
 //    @Produces({ MediaType.APPLICATION_OCTET_STREAM })
-    public static void resultSetToCsv(Supplier<InputStream> xmlSparqlResultSetStreamSupplier, OutputStream out) {
+    public static void resultSetToCsv(Supplier<InputStream> xmlSparqlResultSetStreamSupplier, Map<Var, Var> varMap, OutputStream out) {
         // Map<String, String> varMap
         // varMap = varMap == null ? new HashMap<String, String>() : varMap;
 
@@ -330,6 +374,8 @@ public class SparqlExportServlet {
         InputStream firstPass = xmlSparqlResultSetStreamSupplier.get();
 
         ResultSet rs = ResultSetFactory.fromXML(firstPass);
+        rs = ResultSetRename.wrapIfNeeded(rs, varMap);
+
         List<Var> vars = new ArrayList<Var>(rs.getResultVars().size());
 
         for(String varName : rs.getResultVars()) {
@@ -395,6 +441,8 @@ public class SparqlExportServlet {
 
         InputStream secondPass = xmlSparqlResultSetStreamSupplier.get();
         rs = ResultSetFactory.fromXML(secondPass);
+        rs = ResultSetRename.wrapIfNeeded(rs, varMap);
+
         while(rs.hasNext()) {
             Binding binding = rs.nextBinding();
 

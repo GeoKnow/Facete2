@@ -184,7 +184,7 @@ public class SparqlExportJobConfig {
     @JobScope
     //@StepScope
     public Query query(@Value("#{jobParameters[queryString]}") String queryString) {
-        Query query = QueryFactory.create(queryString, Syntax.syntaxSPARQL_11);
+        Query query = QueryFactory.create(queryString, Syntax.syntaxARQ);
         return query;
     }
 
