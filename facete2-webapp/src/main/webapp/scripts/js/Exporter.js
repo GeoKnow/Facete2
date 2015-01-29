@@ -7,7 +7,7 @@ var Exporter = Class.create({
 
     exportQuery: function(query) {//, varNameToHeading) {
 
-        var result = jQuery.ajax({
+        var ajaxSpec = {
             url: this.apiUrl,
             type: 'POST',
             traditional: true,
@@ -17,7 +17,13 @@ var Exporter = Class.create({
                 query: '' + query
                 //varNameToHeading: varNameToHeading
             }
-        });
+        };
+
+//        if(varMapStr) {
+//            ajaxSpec.data.rename = JSON.stringify(varMapStr);
+//        }
+
+        var result = jQuery.ajax(ajaxSpec);
 
         return result;
     },

@@ -163,7 +163,7 @@
                 <tabset>
                     <tab heading="All" active="app.data.tabs[0].isActive">
                         <div class="well well-sm">
-                            <button class="btn btn-primary" ng-click="exportQuery(active.tableFacetAll.configSupplier().query)">Export</button>
+                            <button class="btn btn-primary" ng-click="exportFacetTable(active.tableFacetAll.configSupplier())">Export</button>
                         </div>
 
                         <sparql-table table-service-supplier="active.tableFacetAll.tableServiceSupplier" config-supplier="active.tableFacetAll.configSupplier" table-mod="active.tableFacetAll.tableMod" cell-renderer-supplier="active.tableFacetAll.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
@@ -171,7 +171,7 @@
 
                     <tab heading="Selection" active="app.data.tabs[1].isActive">
                         <div class="well well-sm">
-                            <button class="btn btn-primary" ng-click="exportQuery(active.tableFacetSelection.configSupplier().query)">Export</button>
+                            <button class="btn btn-primary" ng-click="exportFacetTable(active.tableFacetSelection.configSupplier())">Export</button>
                         </div>
 
                         <sparql-table table-service-supplier="active.tableFacetSelection.tableServiceSupplier" config-supplier="active.tableFacetSelection.configSupplier" table-mod="active.tableFacetSelection.tableMod" cell-renderer-supplier="active.tableFacetSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[1].isActive"></sparql-table>

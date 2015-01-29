@@ -49,10 +49,10 @@
                                 <table style="width: 100%">
                                    <tr>
                                        <td style="padding: 5px;">
-                                           <a ng-if="item.jobStatus.isSucceeded" class="btn btn-primary btn-large" style="width: 100%;" target="_blank" href="api/export/retrieve?id={{item.jobStatus.id}}&format=csv">CSV</a>
+                                           <a ng-if="item.jobStatus.isSucceeded" class="btn btn-primary btn-large" style="width: 100%;" target="_blank" href="api/export/retrieve?id={{item.jobStatus.id}}&format=csv&rename={{item.rename}}">CSV</a>
                                        </td>
                                        <td style="padding: 5px;">
-                                           <a ng-if="item.jobStatus.isSucceeded" class="btn btn-primary btn-large" style="width: 100%;" target="_blank" href="api/export/retrieve?id={{item.jobStatus.id}}&format=xml">XML</a>
+                                           <a ng-if="item.jobStatus.isSucceeded" class="btn btn-primary btn-large" style="width: 100%;" target="_blank" href="api/export/retrieve?id={{item.jobStatus.id}}&format=xml&rename={{item.rename}}">XML</a>
                                        </td>
                                    <tr>
                                 </table>

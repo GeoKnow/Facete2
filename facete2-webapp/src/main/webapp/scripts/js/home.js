@@ -22,6 +22,22 @@ angular.module('Facete2')
 .controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', function($scope, $q, $rootScope, $timeout, $location) {
 
 
+    var varMapToJson = function(varMap) {
+        var result = null;
+        if(varMap) {
+            result = {};
+            varMap.entries().forEach(function(entry) {
+                var a = entry.key;
+                var b = entry.val;
+
+                result[a.getName()] = b.getName();
+            });
+            console.log('Rename: ' + result);
+        }
+        return result;
+    };
+
+
     // query string arguments
     var qsa = $location.search();
     //alert(JSON.stringify(qsa));
@@ -1169,11 +1185,55 @@ angular.module('Facete2')
         });
     };
 
-    $scope.exportQuery = function(query) {
+
+    $scope.exportFacetTable = function(config) {
+//        var config = {
+//                query: queryFactory.createQuery(),
+//                tableConfigFacet: tableConfigFacet
+//            };
+
+        var query = config.query;
+        var tableConfigFacet = config.tableConfigFacet;
+
+        var lookupServicePathLabels = $scope.active.services.lookupServicePathLabels;
+
+        var paths = tableConfigFacet.getPaths();
+
+        var result = lookupServicePathLabels.lookup(paths).then(function(map) {
+
+            var varMap = new jassa.util.HashMap();
+            paths.forEach(function(path) {
+                var colId = tableConfigFacet.getColumnId(path);
+                var a = rdf.NodeFactory.createVar(colId);
+
+                var label = map.get(path) || colId;
+                var b = rdf.NodeFactory.createVar(label);
+
+                if(!a.equals(b)) {
+                    varMap.put(a, b);
+                }
+
+                var r = $scope.exportQuery(query, varMap);
+                return r;
+            });
+
+
+            // Set up the variable mapping
+        });
+
+        return result;
+    };
+
+    /**
+     * varMap can be used to rename variables (which may include special symbols and white spaces
+     *
+     */
+    $scope.exportQuery = function(query, varMap) {
         var ds = $scope.active.service.dataService;
 
         var status = {
-            msg: 'Export started.'
+            msg: 'Export started.',
+            rename: encodeURIComponent(JSON.stringify(varMapToJson(varMap || {})))
         };
 
         $scope.notifications.push(status);
@@ -1254,7 +1314,7 @@ angular.module('Facete2')
 
                     return html;
                 }
-            }
+            };
         };
 
         var allElementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, facetElementFactory]);
