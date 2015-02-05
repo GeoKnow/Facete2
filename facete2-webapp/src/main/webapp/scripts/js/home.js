@@ -288,7 +288,7 @@ angular.module('Facete2')
 
 
     // On startup, expand the root facet node
-    var rootPath = new facete.Path()
+    var rootPath = new facete.Path();
 
     var facetTreeState = facetTreeConfig.getFacetTreeState();
 
@@ -463,10 +463,17 @@ angular.module('Facete2')
     };
 
 
+//    ng-class="!item.isExpanded ? \'hide\' : { \'show-on-hover-child\': !item.tags.controls.isContained }"
+//    ng-class="{ \'show-on-hover-child\': !item.tags.table.isContained }"
+//    '<a style="margin-left: 5px; margin-right: 5px;" href="" ng-click="pluginContext.toggleControls(item.getPath())"><span class="glyphicon glyphicon-cog"></span></a>',
     $scope.facetTreePlugins = [
-        '<a style="margin-left: 5px; margin-right: 5px;" ng-class="!data.isExpanded ? \'hide\' : { \'show-on-hover-child\': !data.item.getTags().controls.isContained }" href="" ng-click="context.toggleControls(data.item.getPath())"><span class="glyphicon glyphicon-cog"></span></a>',
-        '<a style="margin-left: 5px; margin-right: 5px;" ng-class="{ \'show-on-hover-child\': !data.item.getTags().table.isContained }" href="" ng-click="context.toggleTableLink(data.item.getPath())"><span class="glyphicon glyphicon-list-alt"></span></a>'
+        '<a style="margin-left: 5px; margin-right: 5px;" href="" ng-click="pluginContext.toggleTableLink(item.path)"><span class="glyphicon glyphicon-list-alt"></span></a>'
     ];
+
+//    '<a style="margin-left: 5px; margin-right: 5px;" ng-class="!data.isExpanded ? \'hide\' : { \'show-on-hover-child\': !item.tags.controls.isContained }" href="" ng-click="pluginContext.toggleControls(data.item.getPath())"><span class="glyphicon glyphicon-cog"></span></a>',
+//    '<a style="margin-left: 5px; margin-right: 5px;" ng-class="{ \'show-on-hover-child\': !data.item.tags.table.isContained }" href="" ng-click="pluginContext.toggleTableLink(data.item.getPath())"><span class="glyphicon glyphicon-list-alt"></span></a>'
+
+
 
 //    $scope.facetTreePlugins = [
 //                               '<a style="margin-left: 5px; margin-right: 5px;" ng-show="data.isExpanded && (data.isHovered || data.item.getTags().controls.isContained)" href="" ng-click="context.toggleControls(data.item.getPath())"><span class="glyphicon glyphicon-cog"></span></a>',
