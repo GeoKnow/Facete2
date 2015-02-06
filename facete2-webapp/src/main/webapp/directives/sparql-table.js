@@ -26,8 +26,10 @@ angular.module('Facete2')
         _(scs).each(function(sc) {
             newFields.push(sc.getColumnId());
 
-            var d = sc.getSortDir();
-            var dirName = d > 0 ? 'asc' : (d < 0 ? 'desc' : '');
+            //var d = sc.getSortDir();
+            //var dirName = d > 0 ? 'asc' : (d < 0 ? 'desc' : '');
+
+            var dirName = sc.getSortDir();
 
             newDirs.push(dirName);
         });
@@ -44,10 +46,11 @@ angular.module('Facete2')
             var columnId = sortInfo.fields[i];
             var dir = sortInfo.directions[i];
 
-            var d = dir === 'asc' ? 1 : (dir === 'desc' ? -1 : 0);
+            //var d = dir === 'asc' ? 1 : (dir === 'desc' ? -1 : 0);
 
-            if(d !== 0) {
-                var sortCondition = new facete.SortCondition(columnId, d);
+            //if(dir !== 0) {
+            if(dir) {
+                var sortCondition = new facete.SortCondition(columnId, dir);
                 newSortConditions.push(sortCondition);
             }
         }

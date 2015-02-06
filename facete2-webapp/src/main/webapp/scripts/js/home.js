@@ -577,8 +577,16 @@ angular.module('Facete2')
 
 
     // On startup, show the list of types
+    // For facet tree:
     $scope.active.path = facete.Path.parse(vocab.rdf.type.getUri());
     $scope.active.targetPath = facete.Path.parse(vocab.rdf.type.getUri());
+
+    // For facet list:
+    $scope.active.breadcrumb = {
+        pathHead: new jassa.facete.PathHead(new jassa.facete.Path()),
+        property: jassa.vocab.rdf.type.getUri()
+    };
+
 
 
     var findConceptPaths = function(sourceConcept, targetConcept) {
@@ -1206,6 +1214,7 @@ angular.module('Facete2')
 
         var paths = tableConfigFacet.getPaths();
 
+        // Lookup column heading labels based on the paths
         var result = lookupServicePathLabels.lookup(paths).then(function(map) {
 
             var varMap = new jassa.util.HashMap();
@@ -1219,12 +1228,10 @@ angular.module('Facete2')
                 if(!a.equals(b)) {
                     varMap.put(a, b);
                 }
-
-                var r = $scope.exportQuery(query, varMap);
-                return r;
             });
 
-
+            var r = $scope.exportQuery(query, varMap);
+            return r;
             // Set up the variable mapping
         });
 
@@ -1240,7 +1247,7 @@ angular.module('Facete2')
 
         var status = {
             msg: 'Export started.',
-            rename: encodeURIComponent(JSON.stringify(varMapToJson(varMap || {})))
+            rename: encodeURIComponent(JSON.stringify(varMapToJson(varMap || new jassa.util.HashMap())))
         };
 
         $scope.notifications.push(status);
