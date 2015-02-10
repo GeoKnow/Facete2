@@ -60,26 +60,31 @@ public class WebAppInitializer
         dispatcherContext.register(WebMvcConfig.class);
 
         ServletRegistration.Dynamic jassaServlet = servletContext.addServlet("jassa-servlet", new ServletContainer());
-        jassaServlet.setInitParameter("jersey.config.server.provider.packages", "org.aksw.jena_sparql_api.web.servlets org.aksw.facete2.web.api"); //"org.aksw.jassa.web.api");
-        //ServletRegistration.Dynamic jassaServlet = servletContext.addServlet("jassa-servlet", new DispatcherServlet(dispatcherContext));
+        jassaServlet.setInitParameter("jersey.config.server.provider.classnames", "org.aksw.jena_sparql_api.web.servlets.PathFindingApi org.aksw.facete2.web.api.ServletDataStore org.aksw.facete2.web.api.ServletExportSparql org.aksw.facete2.web.api.ServletSparqlSpringBatchStatus");
         jassaServlet.addMapping("/api/*");
         jassaServlet.setAsyncSupported(true);
         jassaServlet.setLoadOnStartup(1);
 
         ServletRegistration.Dynamic facete2Servlet = servletContext.addServlet("facete2-servlet", new ServletContainer());
-        //ServletRegistration.Dynamic facete2Servlet = servletContext.addServlet("facete2-servlet", new DispatcherServlet(dispatcherContext));
-        facete2Servlet.setInitParameter("jersey.config.server.provider.packages", "org.aksw.facete2.web.api");
+        facete2Servlet.setInitParameter("jersey.config.server.provider.classnames", "org.aksw.facete2.web.api.ServletSparqlProxyCache");
         facete2Servlet.addMapping("/cache/*");
         facete2Servlet.setAsyncSupported(true);
         facete2Servlet.setLoadOnStartup(1);
 
 
+        ServletRegistration.Dynamic staticServlet = servletContext.addServlet("static-servlet", new ServletContainer());
+        staticServlet.setInitParameter("jersey.config.server.provider.classnames", "org.aksw.facete2.web.api.ServletSparqlStaticData");
+        staticServlet.addMapping("/static/*");
+        staticServlet.setAsyncSupported(true);
+        staticServlet.setLoadOnStartup(1);
+
+
+        //staticServlet.setInitParameter("jersey.config.server.provider.packages", "org.aksw.facete2.web.api.ServletSparqlStaticData");
 //        ServletRegistration.Dynamic defaultServlet = servletContext.addServlet("default-servlet", new DefaultServlet());
 //        defaultServlet.addMapping("/resources/*");
 //        defaultServlet.setLoadOnStartup(1);
 
         ServletRegistration.Dynamic defaultServlet = servletContext.addServlet("default-servlet", new DispatcherServlet(dispatcherContext));
-        //defaultServlet.addMapping("/resources/app/**");
         defaultServlet.addMapping("*.do");
         defaultServlet.setLoadOnStartup(1);
         //dispatcherServlet.addMapping("/**");

@@ -12,7 +12,7 @@ import javax.ws.rs.core.Context;
 
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
-import org.aksw.jena_sparql_api.web.SparqlEndpointBase;
+import org.aksw.jena_sparql_api.web.servlets.SparqlEndpointBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,7 @@ import com.hp.hpl.jena.query.QueryExecution;
 @Service
 //@Component
 @javax.ws.rs.Path("/sparql")
-public class SparqlEndpointCache
+public class ServletSparqlProxyCache
     extends SparqlEndpointBase
 {
 
@@ -42,7 +42,7 @@ public class SparqlEndpointCache
 //    @Context
 //    private UriInfo uriInfo;
 
-    public SparqlEndpointCache() {
+    public ServletSparqlProxyCache() {
 
     }
 

@@ -32,7 +32,7 @@ import com.google.gson.reflect.TypeToken;
 @Service
 //@Component
 @javax.ws.rs.Path("/store")
-public class DataStoreServlet {
+public class ServletDataStore {
 
     @Resource(name="dataSource")
     private DataSource dataSource;

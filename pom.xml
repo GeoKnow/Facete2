@@ -40,7 +40,8 @@
 
         <!-- Dependency Versions -->
         <!-- facete2 only works with jena-sparql-api version 2.10.0-27 and onwards -->
-        <jena-sparql-api.version>2.11.2-60-SNAPSHOT</jena-sparql-api.version>
+        <jena-sparql-api.version>2.12.1-1</jena-sparql-api.version>
+        <sparqlify.version>0.6.14</sparqlify.version>
 <!--		<jassa.version>0.0.4</jassa.version> -->
 
         <spring.version>4.1.4.RELEASE</spring.version>
@@ -130,6 +131,12 @@
 
             <dependency>
                 <groupId>org.aksw.jena-sparql-api</groupId>
+                <artifactId>jena-sparql-api-web</artifactId>
+                <version>${jena-sparql-api.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.aksw.jena-sparql-api</groupId>
                 <artifactId>jena-sparql-api-server</artifactId>
                 <version>${jena-sparql-api.version}</version>
             </dependency>
@@ -140,17 +147,17 @@
 <!--                 <version>${jena-sparql-api.version}</version> -->
 <!--             </dependency> -->
 
-                        <dependency>
-                                <groupId>org.aksw.jena-sparql-api</groupId>
-                                <artifactId>jena-sparql-api-servlets</artifactId>
-                                <version>${jena-sparql-api.version}</version>
-                        </dependency>
+<!--                         <dependency> -->
+<!--                                 <groupId>org.aksw.jena-sparql-api</groupId> -->
+<!--                                 <artifactId>jena-sparql-api-servlets</artifactId> -->
+<!--                                 <version>${jena-sparql-api.version}</version> -->
+<!--                         </dependency> -->
 
             <dependency>
                 <groupId>org.aksw.sparqlify</groupId>
                 <artifactId>sparqlify-core</artifactId>
 <!--                 <version>0.6.12</version> -->
-                <version>0.6.14-SNAPSHOT</version>
+                <version>${sparqlify.version}</version>
             </dependency>
 
 
@@ -377,7 +384,7 @@
                     <excludes>
                         <exclude>postgresql-</exclude>
                         <exclude>commons-beanutils-</exclude>
-			<exclude>xmlpull-</exclude>
+            <exclude>xmlpull-</exclude>
 
                         <!-- TODO These conflicts should be resolved -->
                         <!-- <exclude>stax-api-</exclude> -->

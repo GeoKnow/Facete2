@@ -72,7 +72,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 @Service
 @javax.ws.rs.Path("/export/")
-public class SparqlExportServlet {
+public class ServletExportSparql {
 
     @Resource(name = "sparqlServiceFactory")
     private SparqlServiceFactory sparqlServiceFactory;
@@ -96,9 +96,9 @@ public class SparqlExportServlet {
     private ServletContext servletContext;
 
 
-    private static final Logger logger = LoggerFactory.getLogger(SparqlExportServlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServletExportSparql.class);
 
-    public SparqlExportServlet() {
+    public ServletExportSparql() {
 
     }
 

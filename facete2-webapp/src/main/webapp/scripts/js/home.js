@@ -21,6 +21,56 @@ angular.module('Facete2')
 
 .controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', function($scope, $q, $rootScope, $timeout, $location) {
 
+    $scope.datacatSparqlService = service.SparqlServiceBuilder
+        .http('static/sparql', [], {type: 'POST'})
+        .cache().virtFix().paginate(1000).pageExpand(100).create();
+
+
+
+    $scope.edit = {
+        id: null,
+        name: '',
+        dataServiceIri: '',
+        dataGraphIris: [],
+        jsServiceIri: '',
+        jsGraphIris: []
+    };
+
+
+    $scope.selectDataset = function(dataset, resource, distribution) {
+        console.log('Dataset selected:', arguments);
+
+        var edit = $scope.edit;
+
+        var dataDist = null;
+        var jsDist = null;
+
+        if(!distribution) {
+            edit.name = dataset.label;
+
+            typeToResource = _.indexBy(dataset.resources, 'type');
+
+            dataDist = jassa.util.ExceptionUtils.tryEval(function() { return typeToResource['dataset'].items[0]; });
+            jsDist = jassa.util.ExceptionUtils.tryEval(function() { return typeToResource['join-summary'].items[0]; });
+        } else {
+
+            if(resource.type === 'dataset') {
+                dataDist = distribution
+            } else if(resource.type === 'join-summary') {
+                jsDist = distribution;
+            }
+        }
+
+        if(dataDist) {
+            edit.dataServiceIri = dataDist.accessUrl;
+            edit.dataGraphIris = dataDist.graphs;
+        }
+
+        if(jsDist) {
+            edit.jsServiceIri = jsDist.accessUrl;
+            edit.jsGraphIris = jsDist.graphs;
+        }
+    };
 
     var varMapToJson = function(varMap) {
         var result = null;
@@ -135,14 +185,6 @@ angular.module('Facete2')
             AppConfig.resizableConfig.disabled;
     });
 
-    $scope.edit = {
-        id: null,
-        dataServiceIri: '',
-        dataGraphIris: [],
-        jsServiceIri: '',
-        jsGraphIris: []
-    };
-
     var tableConfigFacet; // Initialized later - TODO Fix the order
 
 //    var applyScope = function() {
@@ -238,11 +280,6 @@ angular.module('Facete2')
 
     $scope.addDataSource = function() {
         var spec = _($scope.edit).clone();
-
-        // Fix the spec by post processing the attributes
-        // TODO Angular provides native support for splitting strings in models on a separator
-        //spec.dataGraphIris = spec.dataGraphIris.match(/\S+/g);
-        //spec.jsGraphIris = spec.jsGraphIris.match(/\S+/g);
 
         dataSourceManager.addDataSource(spec)
             .then(function() {
@@ -459,6 +496,12 @@ angular.module('Facete2')
                 tableConfigFacet.togglePath(path);
             }
 
+        },
+        isLinkedToTable: function(path) {
+            var tmp = new jassa.util.ArrayList(tableConfigFacet.getPaths());
+
+            var result = tmp.contains(path);
+            return result;
         }
     };
 
@@ -467,7 +510,8 @@ angular.module('Facete2')
 //    ng-class="{ \'show-on-hover-child\': !item.tags.table.isContained }"
 //    '<a style="margin-left: 5px; margin-right: 5px;" href="" ng-click="pluginContext.toggleControls(item.getPath())"><span class="glyphicon glyphicon-cog"></span></a>',
     $scope.facetTreePlugins = [
-        '<a style="margin-left: 5px; margin-right: 5px;" href="" ng-click="pluginContext.toggleTableLink(item.path)"><span class="glyphicon glyphicon-list-alt"></span></a>'
+        //'plugins/link-to-table/link-to-table.html'
+        '<button class="btn" ng-class="pluginContext.isLinkedToTable(item.path) ? \'btn-primary\' : \'btn-default visible-on-hover-child\'" href="" ng-click="pluginContext.toggleTableLink(item.path)"><span class="glyphicon glyphicon-list-alt"></span></button>'
     ];
 
 //    '<a style="margin-left: 5px; margin-right: 5px;" ng-class="!data.isExpanded ? \'hide\' : { \'show-on-hover-child\': !item.tags.controls.isContained }" href="" ng-click="pluginContext.toggleControls(data.item.getPath())"><span class="glyphicon glyphicon-cog"></span></a>',

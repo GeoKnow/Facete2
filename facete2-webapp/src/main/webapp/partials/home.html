@@ -255,33 +255,38 @@
         <tabset style="pointer-events: auto;">
             <tab ng-if="app.dataSources.showAddDialog" heading="Data Source" style="width: 500px;">
 
-                <div style="border-style:solid; background-color:#ffffff; #eeeeee; border-width: 1px; margin: 5px; padding: 5px;">
+                <div class="row" style="border-style:solid; background-color:#ffffff; #eeeeee; border-width: 1px; margin: 5px; padding: 5px;">
+                    <div class="col-md-6">
 
-                    <form class="well form-horizontal">
-                        <div class="form-group">
-                            <label>Title: <input ng-model="edit.name" type="text" class="form-control"></input></label>
-                        </div>
-                        <div class="form-group">
-                            <label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label>
-                        </div>
-                        <div class="form-group">
-                            <label>Named Graphs (Separate entries with white space): <input ng-model="edit.dataGraphIris" ng-list=" " ng-trim="false" type="text" class="form-control"></input></label>
-                        </div>
-                        <div class="form-group">
-                            <label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>
-                        </div>
-                        <div class="form-group">
-                            <label>Join Summary Graphs (Separate entries with white space): <input ng-model="edit.jsGraphIris" ng-list=" " ng-trim="false" type="text" class="form-control"></input></label>
-                        </div>
+                        <form class="well form-horizontal">
+                            <div class="form-group">
+                                <label>Title: <input ng-model="edit.name" type="text" class="form-control"></input></label>
+                            </div>
+                            <div class="form-group">
+                                <label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label>
+                            </div>
+                            <div class="form-group">
+                                <label>Named Graphs (Separate entries with white space): <input ng-model="edit.dataGraphIris" ng-list=" " ng-trim="false" type="text" class="form-control"></input></label>
+                            </div>
+                            <div class="form-group">
+                                <label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>
+                            </div>
+                            <div class="form-group">
+                                <label>Join Summary Graphs (Separate entries with white space): <input ng-model="edit.jsGraphIris" ng-list=" " ng-trim="false" type="text" class="form-control"></input></label>
+                            </div>
 
-                        <button class="btn btn-primary" ng-click="app.dataSources.showAddDialog=false">Cancel</button>
-                        <button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>
-                    </form>
+                            <button class="btn btn-primary" ng-click="app.dataSources.showAddDialog=false">Cancel</button>
+                            <button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>
+                        </form>
+                    </div>
+                    <div class="col-md-6" style="max-height: 500px; overflow: auto">
+                        <dataset-browser sparql-service="datacatSparqlService" on-select="selectDataset(dataset, resource, distribution)"></dataset-browser>
+                    </div>
+
                 </div>
             </tab>
         </tabset>
     </div>
-
 
 <!--     <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.mapConfig" sources="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div> -->
      <div jassa-map-ol="map" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; z-index:-9999" config="active.mapConfig" sources="active.dataSources" select="selectGeom(data)" unselect="unselectGeom(data)"></div>

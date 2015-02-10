@@ -1,0 +1,265 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+@prefix data: <http://example.org/dataset/> .
+@prefix dist: <http://example.org/distribution/> .
+@prefix distgraphs: <http://example.org/distribution-graphs> .
+
+
+@prefix o: <http://example.org/ontology/> .
+@prefix r: <http://example.org/resource/> .
+@prefix theme: <http://example.org/resource/theme/> .
+
+rdf:type a rdf:Property .
+rdfs:label a rdf:Property .
+rdfs:comment a rdf:Property .
+foaf:depiction a rdf:Property .
+o:distributionOf a rdf:Property .
+dcat:accessURL a rdf:Property .
+o:graph a rdf:Property .
+o:group a rdf:Property .
+o:artifact a rdf:Property .
+o:version a rdf:Property .
+dcat:theme a rdf:Property .
+
+
+data:org.dbpedia_dbpedia-essential_2014
+    a dcat:Dataset ;
+    dcat:theme theme:primary ;
+    o:group "org.dbpedia" ;
+    o:artifact "dbpedia-essential" ;
+    o:version "2014" ;
+    rdfs:label "DBpedia 2014" ;
+    rdfs:comment "The DBpedia dataset as published via the official SPARQL endpoint" ;
+    foaf:depiction <http://upload.wikimedia.org/wikipedia/commons/7/73/DBpediaLogo.svg> ;
+    .
+
+dist:org.dbpedia_dbpedia-essential_2014_1
+    a dcat:Distribution ;
+    o:priority 1 ;
+    o:distributionOf data:org.dbpedia_dbpedia-essential_2014 ;
+    dcat:accessURL <http://dbpedia.org/sparql> ;
+    o:graph <http://dbpedia.org> ;
+    .
+
+dist:org.dbpedia_dbpedia-essential_2014_2
+    a dcat:Distribution ;
+    o:priority 2 ;
+    o:distributionOf data:org.dbpedia_dbpedia-essential_2014 ;
+    dcat:accessURL <http://lod.openlinksw.com/sparql> ;
+    o:graph <http://dbpedia.org> ;
+    .
+
+
+data:org.cstadler_dbpedia-essential-join-summary_2014
+    a dcat:Dataset ;
+    dcat:theme theme:joinSummary ;
+    o:group "org.cstadler" ;
+    o:artifact "dbpedia-essential-join-summary" ;
+    o:version "2014" ;
+    o:joinSummaryOf data:org.dbpedia_dbpedia-essential_2014 ;
+    rdfs:label "DBpedia Join Summary 2014" ;
+    rdfs:comment "A simple join summary for the DBpedia 2014 dataset" ;
+    .
+
+dist:org.cstadler_dbpedia-essential-join-summary_2014_1
+    a dcat:Distribution ;
+    o:priority 1 ;
+    o:distributionOf data:org.cstadler_dbpedia-essential-join-summary_2014 ;
+    dcat:accessURL <http://cstadler.aksw.org/service/join-summary/sparql> ;
+    o:graph <http://dbpedia.org/2013-12-22/join-summary-essential/> ;
+    .
+
+
+
+data:org.linkedgeodata_linkedgeodata-essential_2013
+    a dcat:Dataset ;
+    dcat:theme theme:primary ;
+    o:group "org.linkedgeodata" ;
+    o:artifact "linkedgeodata-essential" ;
+    o:version "2013" ;
+    rdfs:label "LinkedGeoData 2013" ;
+    rdfs:comment "The LinkedGeoData RDF dataset as published via the official SPARQL endpoint. This dataset contains a selected set of entities from the OpenStreetMap database" ;
+    foaf:depiction <http://linkedgeodata.org/files/lgdlogo.png> ;
+    .
+
+dist:org.linkedgeodata_linkedgeodata-essential_2013_1
+    a dcat:Distribution ;
+    o:priority 1 ;
+    o:distributionOf data:org.linkedgeodata_linkedgeodata-essential_2013 ;
+    dcat:accessURL <http://linkedgeodata.org/sparql> ;
+    o:graph <http://linkedgeodata.org> ;
+    .
+
+
+data:org.aksw.freebase_freebase-germany_2013
+    a dcat:Dataset ;
+    dcat:theme theme:primary ;
+    o:group "org.aksw.freebase" ;
+    o:artifact "freebase-germany" ;
+    o:version "2013" ;
+    rdfs:label "Freebase Germany 2013" ;
+    rdfs:comment "A subset of Freebase about points of interests in Germany" ;
+    foaf:depiction <http://ganbox.com/blog/wp-content/pub/freebase.png> ;
+    .
+
+dist:org.aksw.freebase_freebase-germany_2013_1
+    a dcat:Distribution ;
+    o:priority 1 ;
+    o:distributionOf data:org.aksw.freebase_freebase-germany_2013 ;
+    dcat:accessURL <http://cstadler.aksw.org/conti/freebase/germany/sparql> ;
+    o:graph <http://freebase.com/2013-09-22/data/> ;
+    .
+
+
+data:org.cstadler_freebase-germany-join-summary_2013
+    a dcat:Dataset ;
+    dcat:theme theme:joinSummary ;
+    o:group "org.cstadler" ;
+    o:artifact "freebase-germany-join-summary" ;
+    o:version "2013" ;
+    o:joinSummaryOf data:org.aksw.freebase_freebase-germany_2013 ;
+    rdfs:label "Freebase Germany Join Summary 2013" ;
+    rdfs:comment "A simple join summary for the Freebase Germany 2013 dataset" ;
+    .
+
+dist:org.cstadler_freebase-germany-join-summary_2013_1
+    a dcat:Distribution ;
+    o:priority 1 ;
+    o:distributionOf data:org.cstadler_freebase-germany-join-summary_2013 ;
+    dcat:accessURL <http://cstadler.aksw.org/service/join-summary/sparql> ;
+    o:graph <http://freebase.com/2013-09-22/data/> ;
+    .
+
+
+
+data:org.aksw.freebase_freebase-germany-prioritized_2013
+    a dcat:Dataset ;
+    dcat:theme theme:primary ;
+    o:group "org.aksw.freebase" ;
+    o:artifact "freebase-germany" ;
+    o:version "2013" ;
+    rdfs:label "Freebase Germany 2013 with prioritized properties" ;
+    rdfs:comment "A subset of Freebase about points of interests in Germany with proritized properties" ;
+    foaf:depiction <http://ganbox.com/blog/wp-content/pub/freebase.png> ;
+    .
+
+dist:org.aksw.freebase_freebase-germany-prioritized_2013_1
+    a dcat:Distribution ;
+    o:priority 1 ;
+    o:distributionOf data:org.aksw.freebase_freebase-germany-prioritized_2013 ;
+    dcat:accessURL <http://cstadler.aksw.org/conti/freebase/germany/prioritized/sparql> ;
+    o:graph <http://freebase.com/2013-09-22/data/germany/prioritized/> ;
+    .
+
+
+data:org.cstadler_freebase-germany-prioritized-join-summary_2013
+    a dcat:Dataset ;
+    dcat:theme theme:joinSummary ;
+    o:group "org.cstadler" ;
+    o:artifact "freebase-germany-join-summary" ;
+    o:version "2013" ;
+    o:joinSummaryOf data:org.aksw.freebase_freebase-germany-prioritized_2013 ;
+    rdfs:label "Freebase Germany Join Summary for prioritized properties 2013" ;
+    rdfs:comment "A simple join summary for the Freebase Germany 2013 dataset" ;
+    .
+
+dist:org.cstadler_freebase-germany-prioritized-join-summary_2013_1
+    a dcat:Distribution ;
+    o:priority 1 ;
+    o:distributionOf data:org.cstadler_freebase-germany-prioritized-join-summary_2013 ;
+    dcat:accessURL <http://cstadler.aksw.org/conti/freebase/germany/prioritized/sparql> ;
+    o:graph <http://freebase.com/2013-09-22/join-summary/germany/prioritized/> ;
+    .
+
+
+
+
+data:org.aksw.cordis_fp7-ict-research-projects_2014
+    a dcat:Dataset ;
+    dcat:theme theme:primary ;
+    o:group "org.aksw.cordis" ;
+    o:artifact "fp7-ict-research-projects" ;
+    o:version "2014" ;
+    rdfs:label "ICT research projects under EU-FP7 as of 2014" ;
+    rdfs:comment "An unofficial RDF version of this dataset created by AKSW." ;
+    foaf:depiction <https://open-data.europa.eu/data/images/logo/logo.gif> ;
+    .
+
+dist:org.aksw.cordis_fp7-ict-research-projects_2014_1
+    a dcat:Distribution ;
+    o:priority 1 ;
+    o:distributionOf data:org.aksw.cordis_fp7-ict-research-projects_2014 ;
+    dcat:accessURL <http://fp7-pp.publicdata.eu/sparql> ;
+    o:graph <http://fp7-pp.publicdata.eu/> ;
+    .
+
+
+data:org.panlex_panlex-rdf_2014
+    a dcat:Dataset ;
+    dcat:theme theme:primary ;
+    o:group "org.panlex" ;
+    o:artifact "panlex-rdf" ;
+    o:version "2014" ;
+    rdfs:label "The PanLex dataset" ;
+    rdfs:comment "A dataset comprised of lots of of linguistic resource featuring lexical translations for thousands of languages" ;
+    foaf:depiction <http://panlex.org/logo.png> ;
+    .
+
+dist:org.panlex_panlex-rdf_2014_1
+    a dcat:Distribution ;
+    o:priority 1 ;
+    o:distributionOf data:org.panlex_panlex-rdf_2014 ;
+    dcat:accessURL <http://ld.panlex.org/sparql> ;
+    o:graph <http://ld.panlex.org/> ;
+    .
+
+dist:org.panlex_panlex-rdf_2014_sparqlify
+    a dcat:Distribution ;
+    rdfs:label "A distribution of the PanLex dataset via Sparqlify" ;
+    o:priority 2 ;
+    o:distributionOf data:org.panlex_panlex-rdf_2014 ;
+    dcat:accessURL <http://ld.panlex.org/vsparql> ;
+    .
+
+data:org.lexvo_lexvo_2013-02-09
+    a dcat:Dataset ;
+    dcat:theme theme:primary ;
+    o:group "org.lexvo" ;
+    o:artifact "lexvo" ;
+    o:version "2013-02-09" ;
+    rdfs:label "The lexvo dataset" ;
+    rdfs:comment "Lexvo.org brings information about languages, words, characters, and other human language-related entities to the Linked Data Web and Semantic Web." ;
+    foaf:depiction <http://www.lexvo.org/lexvo-tr.png> ;
+    .
+
+dist:org.lexvo_lexvo_2013-02-09
+    a dcat:Distribution ;
+    o:priority 1 ;
+    o:distributionOf data:org.lexvo_lexvo_2013-02-09 ;
+    dcat:accessURL <http://cstadler.aksw.org/sparql> ;
+    o:graph data:org.lexvo_lexvo_2013-02-09 ;
+    .
+
+data:org.aksw.linked-spending_linked-spending_2015
+    a dcat:Dataset ;
+    dcat:theme theme:primary ;
+    o:group "org.aksw.linked-spending" ;
+    o:artifact "linked-spending" ;
+    o:version "2015" ;
+    rdfs:label "Linked Spending" ;
+    rdfs:comment "LinkedSpending contains government spendings from all over the world as Linked Data." ;
+    foaf:depiction <http://linkedspending.aksw.org/extensions/themes/bluewhite/images/logo-ontowiki.png> ;
+    .
+
+dist:org.aksw.linked-spending_linked-spending_2015_1
+    a dcat:Distribution ;
+    o:priority 1 ;
+    o:distributionOf data:org.aksw.linked-spending_linked-spending_2015 ;
+    dcat:accessURL <http://linkedspending.aksw.org/sparql> ;
+    o:graph <http://linkedspending.aksw.org/> ;
+    .
+
+

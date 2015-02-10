@@ -72,29 +72,29 @@ public class DebuggingTest {
         //String qs = "Select ?p_1 ?_c_ {{{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/hasEndpoints>)))}  Limit 1000 }}  }} Group By ?p_1  }}}  Limit 1000";
 
         //qs = "Select ?p_1 ?_c_ {{{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/hasEndpoints>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/url>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://www.w3.org/2000/01/rdf-schema#label>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/owner>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/hasDownloads>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/version>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>)))}  Limit 1000 }}  }} Group By ?p_1  }}  Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/hasDefaultGraphs>)))}  Limit 1000 }}  }} Group By ?p_1  }}}";
-        
-        String lastWorking = "Select ?p_1 ?_c_ {{{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/hasEndpoints>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/url>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://www.w3.org/2000/01/rdf-schema#label>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/owner>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/hasDownloads>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/version>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>)))}  Limit 1000 }}  }}                                               Group By ?p_1  }}}";        
+
+        String lastWorking = "Select ?p_1 ?_c_ {{{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/hasEndpoints>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/url>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://www.w3.org/2000/01/rdf-schema#label>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/owner>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/hasDownloads>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/version>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>)))}  Limit 1000 }}  }}                                               Group By ?p_1  }}}";
         String firstNotWorking = "Select ?p_1 ?_c_ {{{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/hasEndpoints>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/url>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://www.w3.org/2000/01/rdf-schema#label>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/owner>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/hasDownloads>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/version>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>)))}  Limit 1000 }}  }}                                                Group By ?p_1  }}}";
 
         //qs = lastWorking;
         qs = firstNotWorking;
-        
+
         System.out.println(qs.length());
         //qs = "Select ?p_1 ?_c_ {{{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/hasEndpoints>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/url>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://www.w3.org/2000/01/rdf-schema#label>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/owner>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/hasDownloads>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://dcat.cc/ontology/version>)))}  Limit 1000 }}  }} Group By ?p_1  }} Union {{ Select ?p_1 (Count(*) As ?_c_) {{ Select ?p_1 ?o_1 {{ Select ?p_1 ?o_1 {?s ?p_1 ?o_1 . Filter((?p_1 In (<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>)))}  Limit 1000 }}  }} Group By ?p_1  }}}";
-       
+
         //String qs = "Select * { ?s ?p ?o }";
         QueryEngineHTTP qe = new QueryEngineHTTP("http://localhost:7533/api/sparql", qs);
         ResultSet rs = qe.execSelect();
         String str = ResultSetFormatter.asText(rs);
         System.out.println(str);
     }
-    
+
 }
 
 /**
  * A query execution implementation where queries are executed against a remote
  * service
- * 
+ *
  */
 class QueryEngineHTTP implements QueryExecution {
 
@@ -150,7 +150,7 @@ class QueryEngineHTTP implements QueryExecution {
     public QueryEngineHTTP(String serviceURI, Query query) {
         this(serviceURI, query, query.toString());
     }
-    
+
     public QueryEngineHTTP(String serviceURI, Query query, HttpAuthenticator authenticator) {
         this(serviceURI, query, query.toString(), authenticator);
     }
@@ -158,11 +158,11 @@ class QueryEngineHTTP implements QueryExecution {
     public QueryEngineHTTP(String serviceURI, String queryString) {
         this(serviceURI, null, queryString);
     }
-    
+
     public QueryEngineHTTP(String serviceURI, String queryString, HttpAuthenticator authenticator) {
         this(serviceURI, null, queryString, authenticator);
     }
-    
+
     private QueryEngineHTTP(String serviceURI, Query query, String queryString) {
         this(serviceURI, query, queryString, null);
     }
@@ -176,7 +176,7 @@ class QueryEngineHTTP implements QueryExecution {
 
         // Apply service configuration if relevant
         QueryEngineHTTP.applyServiceConfig(serviceURI, this);
-        
+
         // Don't want to overwrite credentials we may have picked up from
         // service context in the parent constructor if the specified
         // authenticator is null
@@ -196,7 +196,7 @@ class QueryEngineHTTP implements QueryExecution {
      * omits parameter merging since that will be done automatically whenever
      * the {@link QueryEngineHTTP} instance makes a query for remote submission.
      * </p>
-     * 
+     *
      * @param serviceURI
      *            Service URI
      */
@@ -232,7 +232,7 @@ class QueryEngineHTTP implements QueryExecution {
 
     /**
      * Applies context provided timeouts to the given engine
-     * 
+     *
      * @param engine
      *            Engine
      * @param context
@@ -269,11 +269,6 @@ class QueryEngineHTTP implements QueryExecution {
     // public void setParams(Params params)
     // { this.params = params ; }
 
-    // Meaning-less
-    @Override
-    public void setFileManager(FileManager fm) {
-        throw new UnsupportedOperationException("FileManagers do not apply to remote query execution");
-    }
 
     @Override
     public void setInitialBinding(QuerySolution binding) {
@@ -349,7 +344,7 @@ class QueryEngineHTTP implements QueryExecution {
      * default authenticator applies, this is controlled via the
      * {@link HttpOp#setDefaultAuthenticator(HttpAuthenticator)} method
      * </p>
-     * 
+     *
      * @return True if an authenticator has been provided
      */
     public boolean isUsingBasicAuthentication() {
@@ -363,7 +358,7 @@ class QueryEngineHTTP implements QueryExecution {
      * <p>
      * Note that it may be more flexible to
      * </p>
-     * 
+     *
      * @param user
      * @param password
      */
@@ -375,7 +370,7 @@ class QueryEngineHTTP implements QueryExecution {
      * Sets the HTTP authenticator to use, if none is set then the default
      * authenticator is used. This may be configured via the
      * {@link HttpOp#setDefaultAuthenticator(HttpAuthenticator)} method.
-     * 
+     *
      * @param authenticator
      *            HTTP authenticator
      */
@@ -607,7 +602,7 @@ class QueryEngineHTTP implements QueryExecution {
     /**
      * Gets whether HTTP requests will indicate to the remote server that GZip
      * encoding of responses is accepted
-     * 
+     *
      * @return True if GZip encoding will be accepted
      */
     public boolean getAllowGZip() {
@@ -617,7 +612,7 @@ class QueryEngineHTTP implements QueryExecution {
     /**
      * Gets whether HTTP requests will indicate to the remote server that
      * Deflate encoding of responses is accepted
-     * 
+     *
      * @return True if Deflate encoding will be accepted
      */
     public boolean getAllowDeflate() {
@@ -740,7 +735,7 @@ class QueryEngineHTTP implements QueryExecution {
     /**
      * Sets the Content Type for SELECT queries provided that the format is
      * supported
-     * 
+     *
      * @param contentType
      */
     public void setSelectContentType(String contentType) {
@@ -760,7 +755,7 @@ class QueryEngineHTTP implements QueryExecution {
     /**
      * Sets the Content Type for ASK queries provided that the format is
      * supported
-     * 
+     *
      * @param contentType
      */
     public void setAskContentType(String contentType) {
@@ -779,7 +774,7 @@ class QueryEngineHTTP implements QueryExecution {
     /**
      * Sets the Content Type for CONSTRUCT/DESCRIBE queries provided that the
      * format is supported
-     * 
+     *
      * @param contentType
      */
     public void setModelContentType(String contentType) {
@@ -790,5 +785,11 @@ class QueryEngineHTTP implements QueryExecution {
         if (!RDFLanguages.isTriples(lang))
             throw new IllegalArgumentException("Given Content Type '" + contentType + "' is not a RDF Graph format");
         modelContentType = contentType;
+    }
+
+    @Override
+    public boolean isClosed() {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

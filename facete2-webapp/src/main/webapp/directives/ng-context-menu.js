@@ -21,12 +21,12 @@ angular.module('Facete2')
                 $li.addClass('divider');
             } else {
                 $a = $('<a>');
-                $a.attr({ tabindex: '-1', href: '#' });
+                $a.attr({ tabindex: '-1' });
 
                 if(item.linkAttrs) {
                     $a.attr(item.linkAttrs);
                 }
-
+                //href: '#'
 
                 $a.text(item.text);
                 $li.append($a);

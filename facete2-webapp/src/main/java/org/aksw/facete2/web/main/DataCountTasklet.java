@@ -1,6 +1,6 @@
 package org.aksw.facete2.web.main;
 
-import org.aksw.facete2.web.api.SparqlExportServlet;
+import org.aksw.facete2.web.api.ServletExportSparql;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.listener.StepExecutionListenerSupport;
@@ -29,7 +29,7 @@ public class DataCountTasklet
     public RepeatStatus execute(StepContribution contribution,
             ChunkContext chunkContext) throws Exception {
 
-        long count = SparqlExportServlet.countQuery(query, sparqlService);
+        long count = ServletExportSparql.countQuery(query, sparqlService);
 
         chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().put(KEY, count);
 

@@ -4,6 +4,8 @@ import java.io.File;
 
 import javax.sql.DataSource;
 
+import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
+import org.aksw.jena_sparql_api.core.QueryExecutionFactoryDataset;
 import org.aksw.sparqlify.config.syntax.Config;
 import org.aksw.sparqlify.core.algorithms.CandidateViewSelectorImpl;
 import org.aksw.sparqlify.core.interfaces.SparqlSqlOpRewriterImpl;
@@ -22,6 +24,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
+
+import com.hp.hpl.jena.query.Dataset;
 
 @Configuration
 @ComponentScan({"org.aksw.jassa.web", "org.aksw.facete2.web"})
@@ -47,6 +52,30 @@ public class AppConfig {
     @Bean
     public String contextConfigLocation() {
         return "foobar";
+    }
+
+    @Bean
+    public QueryExecutionFactory queryExecutionFactoryStaticData() throws Exception {
+        String folder = env.getProperty("fs.rdfDataPath");
+        //folder = "/opt/facete2/rdf.d/";
+        folder = StringUtils.trimWhitespace(folder);
+
+        Dataset dataset;
+
+        if(!StringUtils.isEmpty(folder)) {
+            final DatasetFromWatchedFolder watcher = DatasetFromWatchedFolder.create(folder);
+            watcher.init();
+
+            new Thread(watcher).start();
+
+            dataset = watcher.getDataset();
+        } else {
+            dataset = null;
+        }
+
+        QueryExecutionFactory result = new QueryExecutionFactoryDataset(dataset);
+
+        return result;
     }
 
     @Bean
