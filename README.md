@@ -41,7 +41,7 @@ Point your browser to
 ## Dataset requirements
 
 * All properties must be declared with `?x a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property>
-* Geo-Vocabulary is by default configured to wgs84; GeoSPARQL and Virtuoso are supported in the API, however at present there is no switch in the UI
+* Geo-Vocabulary is by default configured to wgs84; GeoSPARQL and Virtuoso are supported in the API, however at present there is no switch in the user interface
 * Full text functionality currently requires bif:contains (Virtuoso-specific) to work on `rdfs:label`'s. In order to create the index, open Virtuoso's isql client and run `DB.DBA.RDF_OBJ_FT_RULE_ADD(null, null, 'All');`
 
 
