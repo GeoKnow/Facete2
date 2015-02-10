@@ -8,8 +8,7 @@ echo "Removing old deb packages"
 find -name '*.deb' | xargs rm
 
 echo "Running mvn install"
-(cd facete2-debian-tomcat-common && mvn install)
-(cd facete2-debian-tomcat7 && mvn install)
+mvn install
 
 echo "Installing debs"
 sudo dpkg -i `find facete2-debian-tomcat-common/target -name *.deb`

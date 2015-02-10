@@ -66,7 +66,7 @@ public class AppConfig {
             final DatasetFromWatchedFolder watcher = DatasetFromWatchedFolder.create(folder);
             watcher.init();
 
-            new Thread(watcher).start();
+            new Thread(watcher, "Dataset Watcher on " + folder).start();
 
             dataset = watcher.getDataset();
         } else {

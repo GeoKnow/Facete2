@@ -93,7 +93,10 @@
                                 <data>
                                     <type>directory</type>
                                     <src>${basedir}/src/deb/resources/usr</src>
-                                    <dst>/usr</dst>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/usr</prefix>
+                                    </mapper>
                                 </data>
 
                                 <data>
