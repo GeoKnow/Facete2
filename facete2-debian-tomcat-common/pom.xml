@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.aksw.facete2</groupId>
         <artifactId>facete2-parent</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <version>0.9.0</version>
     </parent>
 
     <artifactId>facete2-debian-tomcat-common</artifactId>
