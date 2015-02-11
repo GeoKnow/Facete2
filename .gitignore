@@ -15,3 +15,6 @@ bower_components
 deptree.txt
 dist
 
+pom.xml.releaseBackup
+release.properties
+

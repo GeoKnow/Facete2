@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.aksw.facete2</groupId>
 		<artifactId>facete2-parent</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.9.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>facete2-debian-tomcat7</artifactId>
@@ -66,7 +66,7 @@
                                                         <changesOut>${project.build.directory}/${deb.packageName}_[[version]]_all.changes</changesOut>
 
                                                         <snapshotExpand>true</snapshotExpand>
-                                                        <snapshotEnv></snapshotEnv>
+                                                        <snapshotEnv />
 
                                                         <signPackage>${jdeb.signPackage}</signPackage>
                                                         <signMethod>dpkg-sig</signMethod>
