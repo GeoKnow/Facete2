@@ -4,7 +4,7 @@
 
     <groupId>org.aksw.facete2</groupId>
     <artifactId>facete2-parent</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Facete2 - Parent</name>
@@ -65,7 +65,7 @@
         <!-- developerConnection></developerConnection -->
         <!-- url>https://my-project.googlecode.com/svn</url -->
         <connection>scm:git:git@github.com:GeoKnow/facete2.git</connection>
-        <tag>facete2-parent-0.9.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
 
