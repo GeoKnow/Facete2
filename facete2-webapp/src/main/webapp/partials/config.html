@@ -1,11 +1,32 @@
-<h3>Global Configuration</h3>
+<h3>Facete2 Control Panel</h3>
 
-<form role="form">
-    <div class="form-group">
-        <label>Default Sparql Proxy Cache Time to Live
-            <input ng-model="config.cacheTime" type="text" class="form-control" placeholder="e.g. 10">
-        </label>
-        TODO Add dropdown with time unit (minutes, hours, days, and weeks)
-        <input type="submit" value="Confirm">
-    </div>
-</form>
+<!-- <form role="form"> -->
+<!--     <div class="form-group"> -->
+<!--         <label>Default Sparql Proxy Cache Time to Live -->
+<!--             <input ng-model="config.cacheTime" type="text" class="form-control" placeholder="e.g. 10"> -->
+<!--         </label> -->
+<!--         TODO Add dropdown with time unit (minutes, hours, days, and weeks) -->
+<!--         <input type="submit" value="Confirm"> -->
+<!--     </div> -->
+<!-- </form> -->
+
+<div class="row">
+<div class="col-md-12">
+
+<table class="table table-striped">
+    <tr>
+        <td>Dataset languages</td>
+        <td><lang-select langs="langs" available-langs="availableLangs"></lang-select></td>
+    </tr>
+    <tr>
+        <td>Server side SPARQL Cache</td>
+        <td>
+            <div class="input-group">
+                <button class="btn btn-warning" ng-click="clearServerSideSparqlCache()">Clear Cache</button>
+            </div>
+        </td>
+    </tr>
+</table>
+
+</div>
+</div>

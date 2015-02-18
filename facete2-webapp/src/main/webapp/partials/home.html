@@ -59,6 +59,9 @@
                     GeoLinks
                 </accordion-heading>
 
+<!-- ng-options="option.value as option.label for option in geoModes" -->
+                <select class="form-control" ng-model="active.geoMode" ng-options="option.label for option in geoModes"></select>
+
 <!--                <tabset> -->
                         <sparql-table table-service-supplier="active.tableGeoLink.tableServiceSupplier" config-supplier="active.tableGeoLink.configSupplier" table-mod="active.tableGeoLink.tableMod" context="tableContext" cell-renderer-supplier="active.tableGeoLink.cellRendererSupplier"></sparql-table>
 
@@ -192,6 +195,15 @@
 
                         <sparql-table table-service-supplier="active.tableEssentialSelection.tableServiceSupplier" config-supplier="active.tableEssentialSelection.configSupplier" table-mod="active.tableEssentialSelection.tableMod" cell-renderer-supplier="active.tableEssentialSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[3].isActive"></sparql-table>
                     </tab>
+
+                    <tab heading="Resource (Selection)" active="app.data.tabs[4].isActive">
+                        <div class="well well-sm">
+                            <button class="btn btn-primary" ng-click="exportQuery(active.tableResourceSelection.configSupplier().query)">Export</button>
+                        </div>
+
+                        <sparql-table table-service-supplier="active.tableResourceSelection.tableServiceSupplier" config-supplier="active.tableResourceSelection.configSupplier" table-mod="active.tableResourceSelection.tableMod" cell-renderer-supplier="active.tableResourceSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[4].isActive"></sparql-table>
+                    </tab>
+
 
 <!--                    <tab heading="Interlinking"> -->
 <!--                        <form class="well form-horizontal"> -->

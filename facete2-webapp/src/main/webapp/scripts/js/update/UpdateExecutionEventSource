@@ -1,0 +1,23 @@
+var UpdateExecutionEventSource = Class.create(UpdateExecutionDelegate, {
+    initialize: function($super, delegate, listeners) {
+        $super(delegate);
+        this.listeners = listeners || [];
+    },
+
+    execUpdate: function() {
+        notifyBeforeUpdate();
+
+        var self = this;
+        var result = this.delegate.execUpdate().then(function() {
+            self.notifyAfterUpdate();
+        });
+
+        notifyRunningUpdate();
+
+        return result;
+    }
+
+
+});
+
+modules.export = UpdateExecutionEventSource;

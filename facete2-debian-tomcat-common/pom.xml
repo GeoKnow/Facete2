@@ -106,8 +106,8 @@
                                         <prefix>/opt/facete2</prefix>
                                         <user>tomcat7</user>
                                         <group>tomcat7</group>
-<!--                                         <filemode>775</filemode> -->
-<!--                                         <dirmode>775</dirmode> -->
+<!--                                        <filemode>775</filemode> -->
+                                        <dirmode>775</dirmode>
                                     </mapper>
                                 </data>
 

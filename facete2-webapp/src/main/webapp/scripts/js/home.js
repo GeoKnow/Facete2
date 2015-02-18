@@ -13,28 +13,48 @@ var client = jassa.client;
 
 angular.module('Facete2')
 
-.config(['$locationProvider', function($locationProvider) {
-//    $locationProvider
-//        .html5Mode(true)
-//        .hashPrefix('!');
-}])
+.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', function($scope, $q, $rootScope, $timeout, $location, $http) {
 
-.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', function($scope, $q, $rootScope, $timeout, $location) {
+
+    $scope.availableLangs = ['en', 'de', ''];
+    $scope.langs = ['en', 'de', ''];
+
+    $scope.clearServerSideSparqlCache = function() {
+        $http.post('cache/ctrl/clear').then(function() {
+            alert('Cache successfully cleared');
+        }, function() {
+            alert('Failed to clear the cache');
+        });
+    };
+
+    /**
+     * Used for progress bar
+     */
+    $scope.Math = Math;
+
+    $scope.geoModes = AppConfig.geoModes;
+    $scope.edit = AppConfig.edit.createDefaults();
+
+    /* Application UI state */
+    $scope.app = AppConfig.ui;
+
+
+    $scope.$watch('app.data.isOpen', function(state) {
+        $scope.resizableConfig = state ?
+            AppConfig.resizableConfig.enabled :
+            AppConfig.resizableConfig.disabled;
+    });
+
+    $scope.active = {
+        services: {}
+    };
+
+    $scope.active.geoMode = $scope.geoModes[0];
+
 
     $scope.datacatSparqlService = service.SparqlServiceBuilder
         .http('static/sparql', [], {type: 'POST'})
         .cache().virtFix().paginate(1000).pageExpand(100).create();
-
-
-
-    $scope.edit = {
-        id: null,
-        name: '',
-        dataServiceIri: '',
-        dataGraphIris: [],
-        jsServiceIri: '',
-        jsGraphIris: []
-    };
 
 
     $scope.selectDataset = function(dataset, resource, distribution) {
@@ -55,7 +75,7 @@ angular.module('Facete2')
         } else {
 
             if(resource.type === 'dataset') {
-                dataDist = distribution
+                dataDist = distribution;
             } else if(resource.type === 'join-summary') {
                 jsDist = distribution;
             }
@@ -125,65 +145,8 @@ angular.module('Facete2')
     //alert(JSON.stringify(tmp));
 
     var qsaDataSourceSpec = tmp.serviceUri ? specToDataSource(tmp) : null;
-    //alert(JSON.stringify(qsaDataSourceSpec));
 
 
-    //alert(JSON.stringify(foo));
-    /*
-    foo = {
-
-        sparqlS
-            var conceptPathFinderApiUrl = config.conceptPathFinderApiUrl;
-            var sparqlServiceIri = config.dataService.serviceIri;
-            var defaultGraphIris = config.dataService.defaultGraphIris;
-            var joinSummaryServiceIri = config.joinSummaryService.serviceIri;
-            var joinSummaryDefaultGraphIris = config.joinSummaryService.defaultGraphIris;
-
-    };
-    */
-
-
-
-    /**
-     * Used for progress bar
-     */
-    $scope.Math = Math;
-
-    $scope.active = {
-        services: {}
-    };
-
-    /* Application UI state */
-    $scope.app = {
-        search: {
-            show: false,
-            isOpen: false
-        },
-        dataSources: {
-            isOpen: false,
-            showAddDialog: false
-        },
-        data: {
-            isOpen: false,
-            tabs: [{isActive: true}, {isActive: false}, {isActive: false}, {isActive: false}, {isActive: false}],
-            originalBounds: {}, // Bounds to restore size
-            bounds: {} // Bounds for current size; watched and synced by the directive
-        },
-        geoLinks: {
-            isOpen: false
-        },
-        facets: {
-            isOpen: false
-        },
-        baseConceptFilterString: null,
-        baseConceptFilterStringTmp: '',
-    };
-
-    $scope.$watch('app.data.isOpen', function(state) {
-        $scope.resizableConfig = state ?
-            AppConfig.resizableConfig.enabled :
-            AppConfig.resizableConfig.disabled;
-    });
 
     var tableConfigFacet; // Initialized later - TODO Fix the order
 
@@ -211,7 +174,7 @@ angular.module('Facete2')
 
             facetTreeConfig: facetTreeConfig,
             mapConfig: {
-                mapFactory: geo.GeoMapFactoryUtils.wgs84MapFactory,
+                mapFactory: geo.GeoMapFactoryUtils.wgs84CastMapFactory,
                 geoConcept: geo.GeoConceptUtils.conceptWgs84,
                 quadTreeConfig: {
                     maxItemsPerTileCount: 1000,
@@ -382,6 +345,10 @@ angular.module('Facete2')
 
 
 
+    /**
+     * Create a base concept (subject-concept) that is optionally constrained by a filter string (full text)
+     * TODO We could port this to make use of sparql.KeywordSearchUtils
+     */
     var createBaseConcept = function(filterString, baseVar) {
         var result;
         var vs = baseVar || rdf.NodeFactory.createVar('s');
@@ -423,7 +390,7 @@ angular.module('Facete2')
         } else {
             $scope.app.baseConceptFilterString = filterString;
         }
-    }
+    };
 
 
     $scope.tableContext = {};
@@ -436,49 +403,8 @@ angular.module('Facete2')
     };
 
 
+    $scope.tableContext.menuOptions = AppConfig.tableConfig.createMenuOptions($scope);
 
-    $scope.tableContext.menuOptions = function($scope) {
-        var result = [];
-
-        var item = $scope.cell;
-        var node = item ? item.node : null;
-        if(node && node.isUri && node.isUri()) {
-            result.push({
-                //html: '<a href="' + node.getUri() + '">Show resource in new Browser Tab<a/>',
-                text: 'Show resource in new browser tab',
-                linkAttrs: {
-                    href: node.getUri(),
-                    target: '_blank'
-                }
-            });
-        }
-
-        result.push({
-            text: 'Copy to clip board...',
-            callback: function($itemScope) {
-                var text;
-                if(node.isUri()) {
-                    text = node.getUri();
-                } else {
-                    text = '' + node;
-                }
-                prompt('Copy the text below to the clip board', '' + text);
-            }
-        });
-
-
-        var path = $scope.colDef.path;
-
-        result.push({
-            text: 'Toggle constraint from this value',
-            callback: function($itemScope) {
-                var constraint = new facete.ConstraintEquals(path, node);
-                facetTreeConfig.getFacetConfig().getConstraintManager().toggleConstraint(constraint);
-            }
-        });
-
-        return result;
-    };
 
     // TODO RESTORE
     var visibleControls = new util.HashSet();
@@ -505,26 +431,9 @@ angular.module('Facete2')
         }
     };
 
-
-//    ng-class="!item.isExpanded ? \'hide\' : { \'show-on-hover-child\': !item.tags.controls.isContained }"
-//    ng-class="{ \'show-on-hover-child\': !item.tags.table.isContained }"
-//    '<a style="margin-left: 5px; margin-right: 5px;" href="" ng-click="pluginContext.toggleControls(item.getPath())"><span class="glyphicon glyphicon-cog"></span></a>',
     $scope.facetTreePlugins = [
-        //'plugins/link-to-table/link-to-table.html'
         '<button class="btn" ng-class="pluginContext.isLinkedToTable(item.path) ? \'btn-primary\' : \'btn-default visible-on-hover-child\'" href="" ng-click="pluginContext.toggleTableLink(item.path)"><span class="glyphicon glyphicon-list-alt"></span></button>'
     ];
-
-//    '<a style="margin-left: 5px; margin-right: 5px;" ng-class="!data.isExpanded ? \'hide\' : { \'show-on-hover-child\': !item.tags.controls.isContained }" href="" ng-click="pluginContext.toggleControls(data.item.getPath())"><span class="glyphicon glyphicon-cog"></span></a>',
-//    '<a style="margin-left: 5px; margin-right: 5px;" ng-class="{ \'show-on-hover-child\': !data.item.tags.table.isContained }" href="" ng-click="pluginContext.toggleTableLink(data.item.getPath())"><span class="glyphicon glyphicon-list-alt"></span></a>'
-
-
-
-//    $scope.facetTreePlugins = [
-//                               '<a style="margin-left: 5px; margin-right: 5px;" ng-show="data.isExpanded && (data.isHovered || data.item.getTags().controls.isContained)" href="" ng-click="context.toggleControls(data.item.getPath())"><span class="glyphicon glyphicon-cog"></span></a>',
-//                               '<a style="margin-left: 5px; margin-right: 5px;" ng-show="data.isHovered || data.item.getTags().table.isContained" href="" ng-click="context.toggleTableLink(data.item.getPath())"><span class="glyphicon glyphicon-list-alt"></span></a>'
-//                           ];
-
-
 
 
     $scope.active.services.sparqlService = new service.SparqlServiceDummy();
@@ -540,6 +449,7 @@ angular.module('Facete2')
     // TODO: Whenever the facet selection changes, we need to recreate the map data source service for the modified concept
     var createMapDataSource = function(sparqlService, geoMapFactory, concept, fillColor) {
 
+        console.log('Concept: ' + concept, geoMapFactory)
 
         //Factory = geo.GeoMapFactoryUtils.createWktMapFactory('http://www.w3.org/2003/01/geo/wgs84_pos#Geometry', '<bif:st_intersects>', '<bif:st_geomFromText>');
 
@@ -548,7 +458,8 @@ angular.module('Facete2')
         var bboxListService = new geo.ListServiceBbox(sparqlService, geoMapFactory, concept);
 
         // Wrap this service for augmenting (enriching) it with labels
-        var lookupServiceLabels = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService);
+        // TODO Make dependent on scope.langs
+        var lookupServiceLabels = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService, null, $scope.langs);
 //        lookupServiceLabels = new service.LookupServiceTransform(lookupServiceLabels, function(doc, id) {
 //            var result = {
 //                shortLabel: doc
@@ -608,7 +519,7 @@ angular.module('Facete2')
 
         // Wrap the list service with clustering support
         //var result = new geo.DataServiceBboxCache(bboxListService, 1500, 500, 2);
-        var result = new geo.DataServiceBboxCache(bboxListService, 100, 100, 2);
+        var result = new geo.DataServiceBboxCache(bboxListService, 500, 300, 2);
 
         return result;
     };
@@ -620,7 +531,7 @@ angular.module('Facete2')
      */
 
 
-    // On startup, show the list of types
+    // On startup, show the list of rdf:types
     // For facet tree:
     $scope.active.path = facete.Path.parse(vocab.rdf.type.getUri());
     $scope.active.targetPath = facete.Path.parse(vocab.rdf.type.getUri());
@@ -631,6 +542,10 @@ angular.module('Facete2')
         property: jassa.vocab.rdf.type.getUri()
     };
 
+
+    /**
+     * Concept Path Finding
+     */
 
 
     var findConceptPaths = function(sourceConcept, targetConcept) {
@@ -644,7 +559,7 @@ angular.module('Facete2')
         var promise = conceptPathFinder.findPaths(sourceConcept, targetConcept);
         var result = $q.when(promise).then(function(paths) {//sponate.angular.bridgePromise(promise, $q.defer(), $rootScope, function(paths) {
 
-            console.log('Paths' + JSON.stringify(paths) + ' Source: ' + sourceConcept + ' Target: ' + targetConcept);
+            //console.log('Paths' + JSON.stringify(paths) + ' Source: ' + sourceConcept + ' Target: ' + targetConcept);
             var tmp = _(paths).map(function(path) {
 
                 var pathName = path.toString();
@@ -667,9 +582,6 @@ angular.module('Facete2')
         return result;
     };
 
-    /*
-     * Concept Path Finding
-     */
     var refresh = function(config) {
 
         var conceptPathFinderApiUrl = config.conceptPathFinderApiUrl;
@@ -751,6 +663,8 @@ angular.module('Facete2')
         $scope.active.tableGeoLink = createTableConfigGeoLink(tableConfigGeoLink, conceptPathFinder, sourceConcept, targetConcept);
     };
 
+    // TODO This mapping of config objects to their services sucks; a different concept such as a IoC container might help: We would then have a context of beans, and services that are instanciated against the beans
+    //
     var hashToServices = {};
 
     var refreshServices = function(config) {
@@ -763,7 +677,7 @@ angular.module('Facete2')
         var facetTreeConfig = config.facetTreeConfig;
 
         var serviceState = {
-            url: 'cache/sparql',
+            url: AppConfig.cacheProxyUrl,
             defaultGraphIris: dataCnf.defaultGraphIris,
             ajaxOptions: {
                 type: 'POST'
@@ -781,7 +695,7 @@ angular.module('Facete2')
             services = hashToServices[serviceHash] = {};
 
             // Init Sparql Service
-            var sparqlService = service.SparqlServiceBuilder.http('cache/sparql', dataCnf.defaultGraphIris, {type: 'POST'}, {'service-uri': dataCnf.serviceIri})
+            var sparqlService = service.SparqlServiceBuilder.http(AppConfig.cacheProxyUrl, dataCnf.defaultGraphIris, {type: 'POST'}, {'service-uri': dataCnf.serviceIri})
                 .cache().virtFix().paginate(1000).pageExpand(100).create();
 
 //            sparqlService = new service.SparqlServiceHttp('cache/sparql', dataCnf.defaultGraphIris, {}, {'service-uri': dataCnf.serviceIri});
@@ -790,53 +704,7 @@ angular.module('Facete2')
 
 
             // Init Lookup Service
-            // TODO: The label map must remain dynamic
-            /*
-            var store = new sponate.StoreFacade(sparqlService);
-
-            var labelMap = sponate.SponateUtils.createDefaultLabelMap();
-            store.addMap(labelMap, 'labels');
-            var labelsStore = store.labels;
-            */
-
-            var lookupServiceNodeLabels = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService, 20 /*, langs, predicates */);
-
-            /*
-                new service.LookupServiceSponate(labelsStore);
-            lookupServiceNodeLabels = new service.LookupServiceChunker(lookupServiceNodeLabels, 20);
-            lookupServiceNodeLabels = new service.LookupServiceIdFilter(lookupServiceNodeLabels, function(node) {
-                // TODO Using a proper URI validator would increase quality
-                var r = node && node.isUri();
-                if(r) {
-                    var uri = node.getUri();
-                    r = r && !_(uri).include(' ');
-                    r = r && !_(uri).include('<');
-                    r = r && !_(uri).include('>');
-                }
-                return r;
-            });
-            lookupServiceNodeLabels = new service.LookupServiceTimeout(lookupServiceNodeLabels, 20);
-            lookupServiceNodeLabels = new service.LookupServiceTransform(lookupServiceNodeLabels, function(doc, id) {
-                var result = doc ? doc.displayLabel : null;
-
-                if(!result) {
-                    if(!id) {
-                        result = null; //'(null id)';
-                    }
-                    else if(id.isUri()) {
-                        result = sponate.extractLabelFromUri(id.getUri());
-                    }
-                    else if(id.isLiteral()) {
-                        result = '' + id.getLiteralValue();
-                    }
-                    else {
-                        result = '' + id;
-                    }
-                }
-
-                return result;
-            });
-*/
+            var lookupServiceNodeLabels = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService, 20, $scope.langs /* predicates */);
             lookupServiceNodeLabels = new service.LookupServiceCache(lookupServiceNodeLabels);
 
             services.lookupServiceNodeLabels = lookupServiceNodeLabels;
@@ -925,7 +793,19 @@ angular.module('Facete2')
     $scope.ObjectUtils = util.ObjectUtils;
 
 
+//    $scope.$watch(function() {
+//        return $scope.active.geoMode;
+//    }, function(newMode) {
+//        if($scope.active.service && $scope.active.service.mapConfig) {
+//            $scope.active.service.mapConfig.mapFactory = newMode.value.mapFactory;
+//            $scope.active.service.mapConfig.geoConcept = newMode.value.geoConcept;
+//        }
+//        //_.extend($scope.active.service.mapConfig, newMode);
+//        // = newMode;
+//    });
 
+
+    // TODO Below statement does not hold anymore; e.g. the active geo-vocabulary may change dynamically
     // Important: We should only refresh the services if the *reference* to
     // the config object changes - it doesn't make sense to refresh if an internal config
     // parameter changes, as we would keep refreshing
@@ -936,7 +816,6 @@ angular.module('Facete2')
             refresh(config);
         }
     });
-
 
 
     $scope.$watch('ObjectUtils.hashCode(active.targetFacetTreeConfig)', function() {
@@ -959,6 +838,16 @@ angular.module('Facete2')
         }
     }, true);
 
+
+/*
+    $scope.$watchCollection('[active.service.mapConfig.mapFactory, active.service.mapConfig.geoConcept]', function() {
+        var config = $scope.active.service;
+        if(config) {
+            refreshServices(config);
+            refresh(config);
+        }
+    });
+*/
 
 
 
@@ -1030,7 +919,7 @@ angular.module('Facete2')
         if(!$scope.$$phase) {
             $scope.$apply();
         }
-    }
+    };
 
     $scope.unselectGeom = function(data) {
         //alert('Unselect: ' + JSON.stringify(data));
@@ -1038,7 +927,7 @@ angular.module('Facete2')
         if(!$scope.$$phase) {
             $scope.$apply();
         }
-    }
+    };
 
 
 
@@ -1085,26 +974,16 @@ angular.module('Facete2')
     };
 
 
+
+    /**
+     * Export functionality
+     */
+
     $scope.notifications = [];
 
 
-
-    var applyRootScope = function(scope) {
-        var rootScope = scope.$root;
-
-        if(!rootScope.$$phase) {
-            rootScope.$apply()
-        }
-    };
-
-
-
-    var metaPrefixes = {
-        'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
-        'batch': 'http://ns.aksw.org/spring/batch/'
-    };
     var metaSparqlService = new service.SparqlServiceHttp('api/export-status/sparql', []);
-    var metaStore = new sponate.StoreFacade(metaSparqlService, metaPrefixes);
+    var metaStore = new sponate.StoreFacade(metaSparqlService, AppConfig.batch.prefixes);
 
     metaStore.addMap({
         name: 'sparqlExports',
@@ -1122,29 +1001,6 @@ angular.module('Facete2')
         from: '{' + CannedQueries.jobExecutionStatus + '}'
     });
 
-
-    /**
-     * Index the map of a spring batch object
-     * this is for spring batch ~2.2
-     */
-    var indexBatchMapOld = function(map) {
-        var result;
-        var entry = map ? map.entry : null;
-
-        if(!entry) {
-            result = {};
-        }
-        else if(_(entry).isArray()) {
-            result = _(entry).indexBy('string');
-        }
-        else {
-            result = {};
-            var key = entry['string'];
-            result[key] = entry;
-        }
-
-        return result;
-    };
 
 
     var indexBatchMap = function(entries) {
@@ -1316,6 +1172,10 @@ angular.module('Facete2')
     };
 
 
+    /**
+     *  Table Views
+     */
+
     var refreshFacetTables = function(config) {
         // Input: facetTreeConfig, config.tableConfigFacet,
 
@@ -1389,6 +1249,7 @@ angular.module('Facete2')
         $scope.active.tableFacetSelection = createTableConfig(selectionQueryFactory, tableConfigFacet, tableMod);
 
 
+
         var createEssentialTableConfig = function(dataElementFactory, filterConceptFactory, tableMod) {
 
             var filterElementFactory = new facete.ElementFactoryConceptFactory(filterConceptFactory);
@@ -1440,6 +1301,37 @@ angular.module('Facete2')
 
         $scope.active.tableEssentialAll = createEssentialTableConfig(essentialDataElementFactory, tmpFacetConceptFactory, essentialTableMod);
         $scope.active.tableEssentialSelection = createEssentialTableConfig(essentialDataElementFactory, tmpFilterConceptFactory, essentialTableMod);
+
+
+
+        // Resource selection
+        {
+
+            var varMap = new util.HashMap();
+            var vs = rdf.NodeFactory.createVar('s');
+            var viu = rdf.NodeFactory.createVar('subject');
+            varMap.put(vs, viu);
+
+            var tmpFilterConceptFactory = new sparql.ConceptFactoryRename(filterConceptFactory, varMap);
+
+
+            var dataElement = sparql.ElementString.create("?subject ?predicate ?object");
+            var dataElementFactory = new sparql.ElementFactoryConst(dataElement);
+
+
+            var resourceTableMod = new facete.TableMod();
+
+            {
+                var varNames = ['subject', 'predicate', 'object'];
+                _(varNames).each(function(varName) {
+                    resourceTableMod.addColumn(varName);
+                });
+            }
+
+
+            $scope.active.tableResourceSelection = createEssentialTableConfig(dataElementFactory, tmpFilterConceptFactory, resourceTableMod);
+        }
+
     };
 
 }]);

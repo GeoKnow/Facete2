@@ -2,6 +2,12 @@ angular.module('Facete2', ['ui.router', 'ui.bootstrap', 'ui.jassa', 'ngTable', '
     $rootScopeProvider.digestTtl(10);
 }])
 
+.config(['$locationProvider', function($locationProvider) {
+//    $locationProvider
+//        .html5Mode(true)
+//        .hashPrefix('!');
+}])
+
 .config([function() {
     // Setup drop down menu
     jQuery('.dropdown-toggle').dropdown();

@@ -66,7 +66,7 @@ public class WebAppInitializer
         jassaServlet.setLoadOnStartup(1);
 
         ServletRegistration.Dynamic facete2Servlet = servletContext.addServlet("facete2-servlet", new ServletContainer());
-        facete2Servlet.setInitParameter("jersey.config.server.provider.classnames", "org.aksw.facete2.web.api.ServletSparqlProxyCache");
+        facete2Servlet.setInitParameter("jersey.config.server.provider.classnames", "org.aksw.facete2.web.api.ServletSparqlProxyCache org.aksw.facete2.web.api.ServletSparqlCacheCtrl");
         facete2Servlet.addMapping("/cache/*");
         facete2Servlet.setAsyncSupported(true);
         facete2Servlet.setLoadOnStartup(1);

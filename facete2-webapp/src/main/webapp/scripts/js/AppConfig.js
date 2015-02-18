@@ -2,6 +2,40 @@ var AppConfig = {
 
     storeApiUrl: 'api/store',
     exportApiUrl: 'api/export/start',
+    cacheProxyUrl: 'cache/sparql',
+
+    batch: {
+        prefixes: {
+            'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
+            'batch': 'http://ns.aksw.org/spring/batch/'
+        }
+    },
+
+    geoModes: [{
+            label: 'wgs84 with forced conversion of coordinates',
+            value: {
+                mapFactory: jassa.geo.GeoMapFactoryUtils.wgs84MapFactory,
+                geoConcept: jassa.geo.GeoConceptUtils.conceptWgs84
+            }
+        },{
+            label: 'wgs84 with assumed numeric coordinates',
+            value: {
+                mapFactory: jassa.geo.GeoMapFactoryUtils.wgs84CastMapFactory,
+                geoConcept: jassa.geo.GeoConceptUtils.conceptWgs84
+            }
+        }, {
+            label: 'ogc',
+            value: {
+                mapFactory: jassa.geo.GeoMapFactoryUtils.geosparqlMapFactory,
+                geoConcept: jassa.geo.GeoConceptUtils.conceptGeoVocab
+            }
+        }, {
+            label: 'virt',
+            value: {
+                mapFactory: jassa.geo.GeoMapFactoryUtils.ogcVirtMapFactory,
+                geoConcept: jassa.geo.GeoConceptUtils.conceptGeoVocab
+            }
+        }],
 
     resizableConfig: {
         enabled: {
@@ -37,6 +71,99 @@ var AppConfig = {
             handles: 'none', disabled: true
         },
     },
+
+    ui: {
+        search: {
+            show: false,
+            isOpen: false
+        },
+        dataSources: {
+            isOpen: false,
+            showAddDialog: false
+        },
+        data: {
+            isOpen: false,
+            tabs: [{isActive: true}, {isActive: false}, {isActive: false}, {isActive: false}, {isActive: false}],
+            originalBounds: {}, // Bounds to restore size
+            bounds: {} // Bounds for current size; watched and synced by the directive
+        },
+        geoLinks: {
+            isOpen: false
+        },
+        facets: {
+            isOpen: false
+        },
+        baseConceptFilterString: null,
+        baseConceptFilterStringTmp: '',
+    },
+
+    edit: {
+        createDefaults: function() {
+            var r = {
+                id: null,
+                name: '',
+                dataServiceIri: '',
+                dataGraphIris: [],
+                jsServiceIri: '',
+                jsGraphIris: []
+            };
+
+            return r;
+        }
+    },
+
+    tableConfig: {
+        createMenuOptions: function($ctrlScope) {
+
+            var s = function($scope) {
+
+                var r = [];
+
+                var item = $scope.cell;
+                var node = item ? item.node : null;
+                if(node && node.isUri && node.isUri()) {
+                    r.push({
+                        //html: '<a href="' + node.getUri() + '">Show resource in new Browser Tab<a/>',
+                        text: 'Show resource in new browser tab',
+                        linkAttrs: {
+                            href: node.getUri(),
+                            target: '_blank'
+                        }
+                    });
+                }
+
+                r.push({
+                    text: 'Copy to clip board...',
+                    callback: function($itemScope) {
+                        var text;
+                        if(node.isUri()) {
+                            text = node.getUri();
+                        } else {
+                            text = '' + node;
+                        }
+                        prompt('Copy the text below to the clip board', '' + text);
+                    }
+                });
+
+
+                var path = $scope.colDef.path;
+
+                r.push({
+                    text: 'Toggle constraint from this value',
+                    callback: function($itemScope) {
+                        var facetTreeConfig = $ctrlScope.facetTreeConfig;
+
+                        var constraint = new facete.ConstraintEquals(path, node);
+                        facetTreeConfig.getFacetConfig().getConstraintManager().toggleConstraint(constraint);
+                    }
+                });
+
+                return r;
+            };
+
+            return s;
+        }
+    }
 
 };
 
