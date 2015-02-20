@@ -13,7 +13,7 @@ var client = jassa.client;
 
 angular.module('Facete2')
 
-.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', function($scope, $q, $rootScope, $timeout, $location, $http) {
+.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$ddi', function($scope, $q, $rootScope, $timeout, $location, $http, $ddi) {
 
 
     $scope.availableLangs = ['en', 'de', ''];
@@ -27,10 +27,9 @@ angular.module('Facete2')
         });
     };
 
-    /**
-     * Used for progress bar
-     */
-    $scope.Math = Math;
+    $scope.Math = Math; // Used for progress bar
+    $scope.ObjectUtils = jassa.util.ObjectUtils;
+
 
     $scope.geoModes = AppConfig.geoModes;
     $scope.edit = AppConfig.edit.createDefaults();
@@ -663,6 +662,84 @@ angular.module('Facete2')
         $scope.active.tableGeoLink = createTableConfigGeoLink(tableConfigGeoLink, conceptPathFinder, sourceConcept, targetConcept);
     };
 
+    /**
+     * Provider
+     * Default behaviour:
+     * none: Watch this attribute using deep equality
+     * @: Watch this attribute using reference equality (or maybe use @ to denote array)
+     * =: Watch this attribute using deep equality
+     * []: Watch this attribute using $watchCollection
+     *
+     * References can override this behaviour
+     *
+     */
+
+    function initDdi($scope) {
+        var ddi = $ddi($scope);
+
+
+        $scope.serviceIri = 'http://dbpedia.org/sparql';
+        $scope.defaultGraphIris = ['http://dbpedia.org/sparql'];
+        //$scope.cacheProxyUrl = ''
+
+
+        // A function without dependencies will always be rechecked
+        ddi.register('cacheProxyUrl', function() {
+            return AppConfig.cacheProxyUrl;
+        });
+
+        ddi.register('sparqlCacheSupplier', function() {
+            var r = new jassa.service.SparqlCacheSupplier();
+            return r;
+        });
+
+        ddi.register('sparqlService', [ 'serviceIri', '@defaultGraphIris', '?cacheProxyUrl', 'sparqlCacheSupplier',
+            function(serviceIri, defaultGraphIris, cacheProxyUrl, sparqlCacheSupplier) {
+                var base = cacheProxyUrl == null
+                    ? service.SparqlServiceBuilder.http(serviceIri, defaultGraphIris, {type: 'POST'})
+                    : service.SparqlServiceBuilder.http(cacheProxyUrl, defaultGraphIris, {type: 'POST'}, {'service-uri': serviceIri})
+                    ;
+
+                var r = base.cache().virtFix().paginate(1000).pageExpand(100).create();
+
+                console.log('Sparql service', serviceIri);
+                return r;
+            }]);
+
+        // TODO How to deal with the cache
+        ddi.register('lookupServiceNodeLabels', ['sparqlService', 'lookupChunkSize', 'langs',
+            function(sparqlService, lookupChunkSize, langs) {
+                var r = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService, 20, $scope.langs /* predicates */);
+                r = new service.LookupServiceCache(r);
+
+                return r;
+            }]);
+
+        // PathLabels
+        ddi.register('pathLabels', ['lookupServiceNodeLabels',
+            function(lookupServiceNodeLabels) {
+                var r = lookupServicePathLabels = new facete.LookupServicePathLabels(lookupServiceNodeLabels);
+                r = new facete.LookupServiceConstraintLabels(lookupServiceNodeLabels, lookupServicePathLabels);
+                return r;
+            }]);
+
+
+        // Map DataSource
+        ddi.register('mapDataSource', [ 'sparqlService', 'mapFactory', 'geoConceptFactory', 'fillColor',
+            function(sparqlService, mapFactory, geoConceptFactory, fillColor) {
+                var r = createMapDataSource(sparqlService, mapConfig.mapFactory, geoConceptFactory.createConcept(), '#CC0020');
+                return r;
+            }]);
+
+        $scope.serviceIri = 'http://linkedgeodata.org/sparql';
+    };
+
+    var testScope = $scope.$new();
+
+    initDdi(testScope);
+
+
+
     // TODO This mapping of config objects to their services sucks; a different concept such as a IoC container might help: We would then have a context of beans, and services that are instanciated against the beans
     //
     var hashToServices = {};
@@ -789,8 +866,6 @@ angular.module('Facete2')
         alert(JSON.stringify(item));
     };
 
-
-    $scope.ObjectUtils = util.ObjectUtils;
 
 
 //    $scope.$watch(function() {
