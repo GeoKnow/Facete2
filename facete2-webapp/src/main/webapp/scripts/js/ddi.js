@@ -91,6 +91,95 @@ DynamicDi.prototype = {
         // Make the provider take immediate effect
         doChangeAction();
 
+        // Group the watches:
+        // none: All reference watches go into an array that will be watched with $watchCollection
+        // @:
+        // =: All deep watches will go into a function returning a (static) array of all items to be deep watched
+
+        var cmpModeToDeps = {};
+
+        deps.forEach(function(dep) {
+            var group = cmpModeToDeps[dep.cmpMode] = cmpModeToDeps[dep.cmpMode] || [];
+            group.push(dep);
+        });
+
+
+        // Function that returns a watchExpression function.
+        // The latter which will on every call return the same array instance,
+        // however with updated items
+        var createArrFn = function(deps) {
+            var arr = [];
+
+            // Init the array
+            for(var i = 0; i < deps.length; ++i) {
+                var val = deps[i].model;
+                arr.push(val);
+            }
+
+            var result = function() {
+                for(var i = 0; i < deps.length; ++i) {
+                    var model = deps[i].model;
+                    arr[i] = model(self.scope);
+                }
+                return arr;
+            };
+
+            return result;
+        };
+
+        var cmpModes = Object.keys(cmpModeToDeps);
+
+
+        var result = [];
+        cmpModes.forEach(function(cmpMode) {
+            var group = cmpModeToDeps[cmpMode];
+
+            switch(cmpMode) {
+            case '': {
+                var unwatcher;
+                if(group.length === 1) {
+                    unwatcher = self.scope.$watch(group[0], doChangeAction);
+                } else {
+                    var fn = createArrFn(group);
+                    unwatcher = self.scope.$watchCollection(fn, doChangeAction);
+                }
+
+                result.push(unwatcher);
+                break;
+            }
+
+            case '=': {
+                var unwatcher;
+                if(group.length === 1) {
+                    unwatcher = self.scope.$watch(group[0], doChangeAction, true);
+                } else {
+                    var fn = createArrFn(group);
+                    unwatcher = self.scope.$watch(fn, doChangeAction, true);
+                }
+
+                result.push(unwatcher);
+                break;
+            }
+
+            case '@': {
+                var unwatchers = group.map(function(dep) {
+                    var r = scope.$watchCollection(dep.model, doChangeAction);
+                    return r;
+                });
+
+                result.push.apply(result, unwatchers);
+                break;
+            }
+            default:
+                throw new Error('Unsupported watch mode: [' + mode + ']');
+            }
+
+
+        });
+
+        return result;
+
+/*
         // Register all the watchers
         var unwatchFns = deps.map(function(dep) {
             var r = self.watch(self.scope, dep.model, function() {
@@ -101,6 +190,7 @@ DynamicDi.prototype = {
 
         var result = unwatchFns;
         return result;
+        */
     },
 
     /**

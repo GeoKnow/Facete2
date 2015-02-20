@@ -682,19 +682,20 @@ angular.module('Facete2')
         $scope.defaultGraphIris = ['http://dbpedia.org/sparql'];
         //$scope.cacheProxyUrl = ''
 
+        $scope.sparqlCacheSupplier = new jassa.service.SparqlCacheSupplier();
 
         // A function without dependencies will always be rechecked
         ddi.register('cacheProxyUrl', function() {
             return AppConfig.cacheProxyUrl;
         });
 
-        ddi.register('sparqlCacheSupplier', function() {
-            var r = new jassa.service.SparqlCacheSupplier();
-            return r;
-        });
-
-        ddi.register('sparqlService', [ 'serviceIri', '@defaultGraphIris', '?cacheProxyUrl', 'sparqlCacheSupplier',
+        // Note: We use deep watch so that ddi will group the change listening
+        ddi.register('sparqlService', [ '=serviceIri', '=defaultGraphIris', '?=cacheProxyUrl', '?sparqlCacheSupplier',
             function(serviceIri, defaultGraphIris, cacheProxyUrl, sparqlCacheSupplier) {
+                var cache = sparqlCacheSupplier ? sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris) : null;
+
+                console.log('cache: ', cache);
+
                 var base = cacheProxyUrl == null
                     ? service.SparqlServiceBuilder.http(serviceIri, defaultGraphIris, {type: 'POST'})
                     : service.SparqlServiceBuilder.http(cacheProxyUrl, defaultGraphIris, {type: 'POST'}, {'service-uri': serviceIri})
@@ -702,36 +703,52 @@ angular.module('Facete2')
 
                 var r = base.cache().virtFix().paginate(1000).pageExpand(100).create();
 
-                console.log('Sparql service', serviceIri);
+                console.log('Sparql service', serviceIri, defaultGraphIris);
                 return r;
             }]);
 
-        // TODO How to deal with the cache
-        ddi.register('lookupServiceNodeLabels', ['sparqlService', 'lookupChunkSize', 'langs',
-            function(sparqlService, lookupChunkSize, langs) {
-                var r = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService, 20, $scope.langs /* predicates */);
-                r = new service.LookupServiceCache(r);
-
-                return r;
-            }]);
-
-        // PathLabels
-        ddi.register('pathLabels', ['lookupServiceNodeLabels',
-            function(lookupServiceNodeLabels) {
-                var r = lookupServicePathLabels = new facete.LookupServicePathLabels(lookupServiceNodeLabels);
-                r = new facete.LookupServiceConstraintLabels(lookupServiceNodeLabels, lookupServicePathLabels);
-                return r;
-            }]);
+//        // TODO How to deal with the cache
+//        ddi.register('lookupServiceNodeLabels', ['=sparqlService', '=lookupChunkSize', '=langs',
+//            function(sparqlService, lookupChunkSize, langs) {
+//                var r = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService, 20, $scope.langs /* predicates */);
+//                r = new service.LookupServiceCache(r);
+//
+//                return r;
+//            }]);
+//
+//        // PathLabels
+//        ddi.register('pathLabels', ['lookupServiceNodeLabels',
+//            function(lookupServiceNodeLabels) {
+//                var r = lookupServicePathLabels = new facete.LookupServicePathLabels(lookupServiceNodeLabels);
+//                r = new facete.LookupServiceConstraintLabels(lookupServiceNodeLabels, lookupServicePathLabels);
+//                return r;
+//            }]);
 
 
         // Map DataSource
-        ddi.register('mapDataSource', [ 'sparqlService', 'mapFactory', 'geoConceptFactory', 'fillColor',
+        ddi.register('mapDataSource', [ 'sparqlService', 'mapFactory', 'geoConceptFactory', '?fillColor',
             function(sparqlService, mapFactory, geoConceptFactory, fillColor) {
-                var r = createMapDataSource(sparqlService, mapConfig.mapFactory, geoConceptFactory.createConcept(), '#CC0020');
+            console.log('MAP DATASOURCE!');
+
+            fillColor = fillColor || '#CC0020';
+
+            var r = createMapDataSource(sparqlService, mapFactory, geoConceptFactory.createConcept(), fillColor);
                 return r;
             }]);
 
         $scope.serviceIri = 'http://linkedgeodata.org/sparql';
+        $scope.defaultGraphIris = 'http://linkedgeodata.org';
+
+
+        $scope.mapFactory =jassa.geo.GeoMapFactoryUtils.wgs84MapFactory;
+        $scope.geoConceptFactory = new sparql.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+
+        $timeout(function() {
+            //$scope.fillColor = '#aaaaaa';
+            //$scope.serviceIri = 'http://dbpedia.org/sparql';
+            $scope.serviceIri = 'http://linked';
+
+        }, 3000);
     };
 
     var testScope = $scope.$new();
