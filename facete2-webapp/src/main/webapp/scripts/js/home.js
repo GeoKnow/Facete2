@@ -689,21 +689,58 @@ angular.module('Facete2')
             return AppConfig.cacheProxyUrl;
         });
 
-        // Note: We use deep watch so that ddi will group the change listening
-        ddi.register('sparqlService', [ '=serviceIri', '=defaultGraphIris', '?=cacheProxyUrl', '?sparqlCacheSupplier',
-            function(serviceIri, defaultGraphIris, cacheProxyUrl, sparqlCacheSupplier) {
-                var cache = sparqlCacheSupplier ? sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris) : null;
+        // Create a cache object for the given service and graphs
+        /*
+        ddi.register('sparqlCache', [ '=serviceIri', '=defaultGraphIris',
+            function() {
+                var r = sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris);
+                return r;
+            }]);
+        */
 
-                console.log('cache: ', cache);
+        ddi.register('sparqlCache', [ '=serviceIri', '=defaultGraphIris',
+            function(serviceIri, defaultGraphIris) {
+                var r = $scope.sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris);
+                return r;
+            }]);
+
+
+        // We could add a refresh function to force refresh of attributes, such as a reaction
+        // to cache invalidation
+        // Or we make a lastModified stamp for the cache and watch it
+        //ddi.refresh('sparqlService');
+
+
+        // Note: We use deep watch so that ddi will group the change listening
+        ddi.register('sparqlService', [ '=serviceIri', '=defaultGraphIris', '?=cacheProxyUrl', '?sparqlCache',
+            function(serviceIri, defaultGraphIris, cacheProxyUrl, sparqlCache) {
+                //var cache = sparqlCacheSupplier ? sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris) : null;
 
                 var base = cacheProxyUrl == null
-                    ? service.SparqlServiceBuilder.http(serviceIri, defaultGraphIris, {type: 'POST'})
-                    : service.SparqlServiceBuilder.http(cacheProxyUrl, defaultGraphIris, {type: 'POST'}, {'service-uri': serviceIri})
+                    ? jassa.service.SparqlServiceBuilder.http(serviceIri, defaultGraphIris, {type: 'POST'})
+                    : jassa.service.SparqlServiceBuilder.http(cacheProxyUrl, defaultGraphIris, {type: 'POST'}, {'service-uri': serviceIri})
                     ;
 
-                var r = base.cache().virtFix().paginate(1000).pageExpand(100).create();
+                if(sparqlCache) {
+                    // TODO Reuse prior request cache?
+                    var requestCache = new jassa.service.RequestCache(null, sparqlCache);
+                    base = base.cache(requestCache);
+                }
 
-                console.log('Sparql service', serviceIri, defaultGraphIris);
+                var r = base.virtFix().paginate(1000).pageExpand(100).create();
+
+                //console.log('Sparql service', serviceIri, defaultGraphIris);
+                return r;
+            }]);
+
+        // Map DataSource
+        ddi.register('mapDataSource', [ 'sparqlService', 'mapFactory', 'geoConceptFactory', '?fillColor',
+            function(sparqlService, mapFactory, geoConceptFactory, fillColor) {
+            console.log('MAP DATASOURCE!');
+
+            fillColor = fillColor || '#CC0020';
+
+            var r = createMapDataSource(sparqlService, mapFactory, geoConceptFactory.createConcept(), fillColor);
                 return r;
             }]);
 
@@ -725,16 +762,6 @@ angular.module('Facete2')
 //            }]);
 
 
-        // Map DataSource
-        ddi.register('mapDataSource', [ 'sparqlService', 'mapFactory', 'geoConceptFactory', '?fillColor',
-            function(sparqlService, mapFactory, geoConceptFactory, fillColor) {
-            console.log('MAP DATASOURCE!');
-
-            fillColor = fillColor || '#CC0020';
-
-            var r = createMapDataSource(sparqlService, mapFactory, geoConceptFactory.createConcept(), fillColor);
-                return r;
-            }]);
 
         $scope.serviceIri = 'http://linkedgeodata.org/sparql';
         $scope.defaultGraphIris = 'http://linkedgeodata.org';

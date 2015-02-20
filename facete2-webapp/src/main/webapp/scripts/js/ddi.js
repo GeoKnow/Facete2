@@ -42,12 +42,18 @@ var DynamicDi = function(scope, $parse) {
 };
 
 DynamicDi.prototype = {
-    register: function(attr, providerSpec) {
+    register: function(targetExprStr, providerSpec) {
+        var target = this.$parse(targetExprStr);
+        if(!target.assign) {
+            throw new Error('Target is not writeable: ', targetExprStr, providerSpec);
+        }
+
         var provider = DiUtils.processProviderSpec(this.$parse, providerSpec);
 
-        var providerCtrl = this.installProvider(attr, provider);
+        var providerCtrl = this.installProvider(target, provider);
 
-        this.attrToProviderCtrl = providerCtrl;
+        return providerCtrl;
+        //this.attrToProviderCtrl[target] = providerCtrl;
 //        var oldProviderCtrl = this.attrToProviderCtrl[attr];
 //
 //        if(oldProviderCtrl) {
@@ -59,7 +65,7 @@ DynamicDi.prototype = {
 //        }
     },
 
-    installProvider: function(attr, provider) {
+    installProvider: function(target, provider) {
         var self = this;
         var deps = provider.deps;
 
@@ -85,7 +91,8 @@ DynamicDi.prototype = {
             }
 
             var val = valid ? provider.fn.apply(self.scope, args) : null;
-            self.scope[attr] = val;
+            //self.scope[attr] = val;
+            target.assign(self.scope, val);
         };
 
         // Make the provider take immediate effect
@@ -194,6 +201,7 @@ DynamicDi.prototype = {
     },
 
     /**
+     * Not used anymore, as superseded by the grouping approach
      *
      * @param scope
      * @param expr
@@ -201,25 +209,25 @@ DynamicDi.prototype = {
      * @param mode
      * @returns The unregister function of the watch
      */
-    watch: function(scope, expr, listener, mode) {
-        var result;
-
-        switch(mode) {
-        case '':
-            result = scope.$watch(expr, listener);
-            break;
-        case '=':
-            result = scope.$watch(expr, listener, true);
-            break;
-        case '@':
-            result = scope.$watchCollection(expr, listener);
-            break;
-        default:
-            throw new Error('Unsupported watch mode: [' + mode + ']');
-        }
-
-        return result;
-    }
+//    watch: function(scope, expr, listener, mode) {
+//        var result;
+//
+//        switch(mode) {
+//        case '':
+//            result = scope.$watch(expr, listener);
+//            break;
+//        case '=':
+//            result = scope.$watch(expr, listener, true);
+//            break;
+//        case '@':
+//            result = scope.$watchCollection(expr, listener);
+//            break;
+//        default:
+//            throw new Error('Unsupported watch mode: [' + mode + ']');
+//        }
+//
+//        return result;
+//    }
 };
 
 
