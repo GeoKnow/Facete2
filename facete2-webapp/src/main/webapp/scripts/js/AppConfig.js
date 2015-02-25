@@ -152,7 +152,7 @@ var AppConfig = {
                 r.push({
                     text: 'Toggle constraint from this value',
                     callback: function($itemScope) {
-                        var facetTreeConfig = $ctrlScope.facetTreeConfig;
+                        var facetTreeConfig = $ctrlScope.active.config.facetTreeConfig;
 
                         var constraint = new facete.ConstraintEquals(path, node);
                         facetTreeConfig.getFacetConfig().getConstraintManager().toggleConstraint(constraint);
