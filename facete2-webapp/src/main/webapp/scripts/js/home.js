@@ -13,7 +13,7 @@ var client = jassa.client;
 
 angular.module('Facete2')
 
-.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$ddi', function($scope, $q, $rootScope, $timeout, $location, $http, $ddi) {
+.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$dddi', function($scope, $q, $rootScope, $timeout, $location, $http, $dddi) {
 
 
     $scope.availableLangs = ['en', 'de', ''];
@@ -48,7 +48,7 @@ angular.module('Facete2')
         services: {}
     };
 
-    $scope.active.geoMode = $scope.geoModes[0];
+    //$scope.active.config.geoMode = $scope.geoModes[0];
 
 
     $scope.datacatSparqlService = service.SparqlServiceBuilder
@@ -169,12 +169,16 @@ angular.module('Facete2')
                 serviceIri: '',
                 defaultGraphIris: []
             },
-            conceptPathFinderApiUrl: 'api/path-finding',
+
+            sparqlProxyUrl: AppConfig.sparqlProxyUrl,
+            conceptPathFinderApiUrl: AppConfig.pathFindingApiUrl,
 
             facetTreeConfig: facetTreeConfig,
             mapConfig: {
-                mapFactory: geo.GeoMapFactoryUtils.wgs84CastMapFactory,
-                geoConcept: geo.GeoConceptUtils.conceptWgs84,
+                geoMode: {
+                    mapFactory: geo.GeoMapFactoryUtils.wgs84CastMapFactory,
+                    geoConcept: geo.GeoConceptUtils.conceptWgs84,
+                },
                 quadTreeConfig: {
                     maxItemsPerTileCount: 1000,
                     maxGlobalItemCount: 2000
@@ -405,7 +409,9 @@ angular.module('Facete2')
     $scope.tableContext.menuOptions = AppConfig.tableConfig.createMenuOptions($scope);
 
 
-    // TODO RESTORE
+    /**
+     * The facet tree plugin for the linking facets to the result table
+     */
     var visibleControls = new util.HashSet();
     taggerMap.controls = new facete.ItemTaggerMembership(visibleControls);
 
@@ -581,397 +587,368 @@ angular.module('Facete2')
         return result;
     };
 
-    var refresh = function(config) {
-
-        var conceptPathFinderApiUrl = config.conceptPathFinderApiUrl;
-        var sparqlServiceIri = config.dataService.serviceIri;
-        var defaultGraphIris = config.dataService.defaultGraphIris;
-        var joinSummaryServiceIri = config.joinSummaryService.serviceIri;
-        var joinSummaryDefaultGraphIris = config.joinSummaryService.defaultGraphIris;
 
 
-        var geoConcept = config.mapConfig.geoConcept;
-
-        var conceptPathFinder = new client.ConceptPathFinderApi(conceptPathFinderApiUrl, sparqlServiceIri, defaultGraphIris, joinSummaryServiceIri, joinSummaryDefaultGraphIris);
-        $scope.active.conceptPathFinder = conceptPathFinder;
-
-        var facetTreeConfig = config.facetTreeConfig;
-        var conceptFactory = new sparql.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+    dddi = $dddi($scope);
 
 
-        var sourceConcept = conceptFactory.createConcept();
-        var targetConcept = geoConcept;
+    // Objects being wired up here
+    // - sparqlCache
+    // - services.sparqlService
+    // - services.conceptPathFinder
+    // - services.tableGeoLink
+    // - lookupServiceNodeLabels
+    // - lookupServicePathLabels
+    // - lookupServiceConstraintLabels
+    // -
 
+//    dddi.register('sparqlCache', [ '=config.dataService',
+//        function(sparqlService) {
+//            var r = $scope.sparqlCacheSupplier.getCache(sparqlService.serviceIri, sparqlService.defaultGraphIris);
+//            return r;
+//        }]);
 
-        var lookupServicePathLabels = $scope.active.services.lookupServicePathLabels;
+    dddi.register('active.services.sparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?sparqlCache',
+        function(serviceConfig, sparqlProxyUrl, sparqlCache) {
+            //var cache = sparqlCacheSupplier ? sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris) : null;
+//console.log('Recreated sparql service');
 
+            var base = sparqlProxyUrl == null
+                ? jassa.service.SparqlServiceBuilder.http(serviceConfig.serviceIri, serviceConfig.defaultGraphIris, {type: 'POST'})
+                : jassa.service.SparqlServiceBuilder.http(sparqlProxyUrl, serviceConfig.defaultGraphIris, {type: 'POST'}, {'service-uri': serviceConfig.serviceIri})
+                ;
 
-
-        var createTableConfigGeoLink = function(tableConfig, conceptPathFinder, sourceConcept, targetConcept) {
-            return {
-                tableServiceSupplier: function(config) {
-
-                    var services = $scope.active.services;
-
-                    // TODO We should wrap a cache here?
-                    var sparqlService = conceptPathFinder.createSparqlService(config.sourceConcept, config.targetConcept)
-
-                    var tableService = new service.TableServiceQuery(sparqlService, config.query);
-                    tableService = new service.TableServiceFacet(tableService, config.tableConfig, services.lookupServiceNodeLabels, services.lookupServicePathLabels);
-
-                    var pathColId = config.tableConfig.getColIdForPath(new facete.Path());
-                    var labelColId = config.tableConfig.getColIdForPath(facete.Path.parse(vocab.rdfs.label.getUri()));
-
-                    tableService = new service.TableServiceGeoLink(tableService, services.lookupServicePathLabels, pathColId, labelColId);
-
-                    return tableService;
-                },
-                configSupplier: function() {
-
-                    var tableMod = tableConfig.getTableMod();
-                    var conceptFactory = new ConceptFactoryTableConfigFacet(tableConfig);
-                    var elementFactory = new facete.ElementFactoryConceptFactory(conceptFactory);
-                    var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
-
-                    var r = {
-                        query: queryFactory.createQuery(),
-                        tableConfig: tableConfig,
-
-                        conceptPathFinder: conceptPathFinder,
-                        sourceConcept: sourceConcept,
-                        targetConcept: targetConcept
-                    };
-                    return r;
-                },
-                tableMod: tableConfig.getTableMod(),
-                cellRendererSupplier: function() {
-                    var html;
-
-                    if(this.cell.path) {
-                        html = '<a href="" ng-click="context.setGeoPath(cell.path)" title="{{cell.node.toString()}}" ng-bind-html="cell.displayLabel"></a>';
-                    }
-                    else {
-                        html = '<span ng-bind-html="cell.displayLabel"></span>';
-                    }
-
-                    return html;
-                }
+            if(sparqlCache) {
+                // TODO Reuse prior request cache?
+                var requestCache = new jassa.service.RequestCache(null, sparqlCache);
+                base = base.cache(requestCache);
             }
-        };
 
-        $scope.active.tableGeoLink = createTableConfigGeoLink(tableConfigGeoLink, conceptPathFinder, sourceConcept, targetConcept);
-    };
+            var r = base.virtFix().paginate(1000).pageExpand(100).create();
+
+            //console.log('Sparql service', serviceIri, defaultGraphIris);
+            return r;
+        }]);
+
+    dddi.register('active.services.lookupServiceNodeLabels', [ 'active.services.sparqlService',
+        function(sparqlService) {
+            var r = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService, 20, $scope.langs /* predicates */);
+            r = new service.LookupServiceCache(r);
+            return r;
+        }]);
+
+    dddi.register('active.services.lookupServicePathLabels', [ 'active.services.lookupServiceNodeLabels',
+        function(lookupServiceNodeLabels) {
+            var r = new facete.LookupServicePathLabels(lookupServiceNodeLabels);
+            return r;
+        }]);
+
+    dddi.register('active.services.lookupServiceConstraintLabels', [ 'active.services.lookupServiceNodeLabels', 'active.services.lookupServicePathLabels',
+        function(sparqlService, lookupServiceNodeLabels, lookupServicePathLabels) {
+            var r = new facete.LookupServiceConstraintLabels(lookupServiceNodeLabels, lookupServicePathLabels);
+            return r;
+        }]);
+
+    //dddi.register('')
+
+//    dddi.register('active.targetGeoPaths', [
+//        function() {
+//
+//        }]);
+
+
+    var testExpr = 'active.config.geoConceptFactory.createConcept().toString()';
+    $scope.$watch(testExpr, function(val) {
+       console.log('testExpr: ' + testExpr, val);
+    });
+
+    dddi.register('active.dataSources', [ 'active.services.sparqlService', 'active.config.mapConfig.geoMode.mapFactory', 'active.geoConceptFactory.createConcept().toString()',
+        function(sparqlService, mapFactory, geoConceptStr) {
+            var geoConcept = $scope.active.geoConceptFactory.createConcept();
+            // TODO Do caching based on the geoConcept
+
+            var r = [
+                createMapDataSource(sparqlService, mapFactory, geoConcept, '#CC0020')
+            ];
+            return r;
+        }]);
+
+    dddi.register('active.services.conceptPathFinder', [ '=active.config.conceptPathFinderApiUrl', '=active.config.dataService', '?=active.config.joinSummaryService', 'active.config.mapConfig.geoMode.geoConcept',
+        function(conceptPathFinderApiUrl, dataService, jsService, geoConcept) {
+            var r = new client.ConceptPathFinderApi(conceptPathFinderApiUrl, dataService.serviceIri, dataService.defaultGraphIris, jsService.serviceIri, jsService.defaultGraphIris);
+            return r;
+        }]);
+
+    // TODO active.services.sourceConcept may not the best target as a concept is not really a service
+    dddi.register('active.services.sourceConcept', ['ObjectUtils.hashCode(active.config.facetTreeConfig)',
+        function() {
+            var tmp = new sparql.ConceptFactoryFacetTreeConfig($scope.active.config.facetTreeConfig);
+            var r = tmp.createConcept();
+            return r;
+        }]);
+
+    dddi.register('active.tableGeoLink', ['active.services.conceptPathFinder', 'active.services.sourceConcept', 'active.config.mapConfig.geoMode.geoConcept', 'active.services.lookupServicePathLabels',
+        function(conceptPathFinder, sourceConcept, targetConcept, lookupServicePathLabels) {
+
+            // Helper function von the geolink table
+            var createTableConfigGeoLink = function(tableConfig, conceptPathFinder, sourceConcept, targetConcept) {
+                return {
+                    tableServiceSupplier: function(config) {
+
+                        var services = $scope.active.services;
+
+                        // TODO We should wrap a cache here?
+                        var sparqlService = conceptPathFinder.createSparqlService(config.sourceConcept, config.targetConcept)
+
+                        var tableService = new service.TableServiceQuery(sparqlService, config.query);
+                        tableService = new service.TableServiceFacet(tableService, config.tableConfig, services.lookupServiceNodeLabels, services.lookupServicePathLabels);
+
+                        var pathColId = config.tableConfig.getColIdForPath(new facete.Path());
+                        var labelColId = config.tableConfig.getColIdForPath(facete.Path.parse(vocab.rdfs.label.getUri()));
+
+                        tableService = new service.TableServiceGeoLink(tableService, services.lookupServicePathLabels, pathColId, labelColId);
+
+                        return tableService;
+                    },
+                    configSupplier: function() {
+
+                        var tableMod = tableConfig.getTableMod();
+                        var conceptFactory = new ConceptFactoryTableConfigFacet(tableConfig);
+                        var elementFactory = new facete.ElementFactoryConceptFactory(conceptFactory);
+                        var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
+
+                        var r = {
+                            query: queryFactory.createQuery(),
+                            tableConfig: tableConfig,
+
+                            conceptPathFinder: conceptPathFinder,
+                            sourceConcept: sourceConcept,
+                            targetConcept: targetConcept
+                        };
+                        return r;
+                    },
+                    tableMod: tableConfig.getTableMod(),
+                    cellRendererSupplier: function() {
+                        var html;
+
+                        if(this.cell.path) {
+                            html = '<a href="" ng-click="context.setGeoPath(cell.path)" title="{{cell.node.toString()}}" ng-bind-html="cell.displayLabel"></a>';
+                        }
+                        else {
+                            html = '<span ng-bind-html="cell.displayLabel"></span>';
+                        }
+
+                        return html;
+                    }
+                }
+            };
+
+            // Note: tableConfigGeoLink is statically configured
+            var r = createTableConfigGeoLink(tableConfigGeoLink, conceptPathFinder, sourceConcept, targetConcept);
+            return r;
+        }]);
+
+
+    dddi.register('active.pathLabel', [ 'active.path', 'active.services.lookupServicePathLabels',
+        function(path, lookupServicePathLabels) {
+            var promise = lookupServicePathLabels.lookup([path]);
+
+            var r = promise.then(function(map) {//sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(map) {
+                var s = map.get(path);
+                return s;
+            });
+
+            return r;
+            //return $scope.active.pathLabel;
+        }]);
+
+
 
     /**
-     * Provider
-     * Default behaviour:
-     * none: Watch this attribute using deep equality
-     * @: Watch this attribute using reference equality (or maybe use @ to denote array)
-     * =: Watch this attribute using deep equality
-     * []: Watch this attribute using $watchCollection
+     *  Table Views
      *
-     * References can override this behaviour
-     *
+     *  TODO Make use of dddi
      */
+    $scope.$watchCollection('[active.services.sparqlService, ObjectUtils.hashCode(active.config.facetTreeConfig), ObjectUtils.hashCode(active.config.tableConfigFacet), active.services.lookupServiceNodeLabels, active.services.lookupServicePathLabels]',
+        function() {
+            if(!$scope.active || !$scope.active.config || !$scope.active.services) {
+                return;
+            }
 
-    function initDdi($scope) {
-        var ddi = $ddi($scope);
-
-
-        $scope.serviceIri = 'http://dbpedia.org/sparql';
-        $scope.defaultGraphIris = ['http://dbpedia.org/sparql'];
-        //$scope.cacheProxyUrl = ''
-
-        $scope.sparqlCacheSupplier = new jassa.service.SparqlCacheSupplier();
-
-        // A function without dependencies will always be rechecked
-        ddi.register('cacheProxyUrl', function() {
-            return AppConfig.cacheProxyUrl;
-        });
-
-        // Create a cache object for the given service and graphs
-        /*
-        ddi.register('sparqlCache', [ '=serviceIri', '=defaultGraphIris',
-            function() {
-                var r = sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris);
-                return r;
-            }]);
-        */
-
-        ddi.register('sparqlCache', [ '=serviceIri', '=defaultGraphIris',
-            function(serviceIri, defaultGraphIris) {
-                var r = $scope.sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris);
-                return r;
-            }]);
+            var sparqlService = $scope.active.services.sparqlService;
+            var facetTreeConfig = $scope.active.config.facetTreeConfig;
+            var tableConfigFacet = $scope.active.config.tableConfigFacet;
+            var lookupServiceNodeLabels = $scope.active.services.lookupServiceNodeLabels;
+            var lookupServicePathLabels = $scope.active.services.lookupServicePathLabels;
 
 
-        // We could add a refresh function to force refresh of attributes, such as a reaction
-        // to cache invalidation
-        // Or we make a lastModified stamp for the cache and watch it
-        //ddi.refresh('sparqlService');
+            if(!sparqlService || !facetTreeConfig || !tableConfigFacet || !lookupServiceNodeLabels || !lookupServicePathLabels) {
+                return;
+            }
+
+            /*
+             * <- Facet Tree 'Link-Facet-To-Table' Plugin
+             */
+
+            // TODO This could be written with function composition rather than objects
+            // But for this we would first have to convert the factories to operations on functions
+//            var conceptFactory = new sparql.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+//
+//            var facetConfig = facetTreeConfig.getFacetConfig();
+
+            var facetConceptFactory = new sparql.ConceptFactoryFacetTreeConfig(facetTreeConfig);
+            var facetElementFactory = new facete.ElementFactoryConceptFactory(facetConceptFactory);
 
 
-        // Note: We use deep watch so that ddi will group the change listening
-        ddi.register('sparqlService', [ '=serviceIri', '=defaultGraphIris', '?=cacheProxyUrl', '?sparqlCache',
-            function(serviceIri, defaultGraphIris, cacheProxyUrl, sparqlCache) {
-                //var cache = sparqlCacheSupplier ? sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris) : null;
+            var tableMod = tableConfigFacet.getTableMod();
 
-                var base = cacheProxyUrl == null
-                    ? jassa.service.SparqlServiceBuilder.http(serviceIri, defaultGraphIris, {type: 'POST'})
-                    : jassa.service.SparqlServiceBuilder.http(cacheProxyUrl, defaultGraphIris, {type: 'POST'}, {'service-uri': serviceIri})
-                    ;
+            var dataConceptFactory = new ConceptFactoryTableConfigFacet(tableConfigFacet);
+            var dataElementFactory = new facete.ElementFactoryConceptFactory(dataConceptFactory);
+            var filterElementFactory = new facete.ElementFactoryConceptFactory(filterConceptFactory);
 
-                if(sparqlCache) {
-                    // TODO Reuse prior request cache?
-                    var requestCache = new jassa.service.RequestCache(null, sparqlCache);
-                    base = base.cache(requestCache);
+            //var services = $scope.active.services;
+
+
+            var createTableConfig = function(queryFactory, tableConfigFacet, tableMod) {
+                return {
+                    tableServiceSupplier: function(config) {
+                        var query = config.query;
+                        var tableService = new service.TableServiceQuery(sparqlService, query);
+                        var result = new service.TableServiceFacet(tableService, tableConfigFacet, lookupServiceNodeLabels, lookupServicePathLabels);
+
+                        return result;
+                    },
+                    configSupplier: function() {
+                        var r = {
+                            query: queryFactory.createQuery(),
+                            tableConfigFacet: tableConfigFacet
+                        };
+                        return r;
+                    },
+                    tableMod: tableMod,
+                    cellRendererSupplier: function() {
+
+                        var html =
+                            '<span title="{{cell.node.toString()}}" ng-bind-html="cell.displayLabel"></span>' +
+                            '<span style="cursor: pointer;" ng-context-menu="context.menuOptions" class="show-on-hover-child glyphicon glyphicon-asterisk"></span>';
+
+                        return html;
+                    }
+                };
+            };
+
+            var allElementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, facetElementFactory]);
+            var allQueryFactory = new facete.QueryFactoryTableMod(allElementFactory, tableMod);
+
+
+            $scope.active.tableFacetAll = createTableConfig(allQueryFactory, tableConfigFacet, tableMod);
+
+
+            // NOTE We assume the data and filter concept share the same variables
+            var selectionElementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, filterElementFactory]);
+            var selectionQueryFactory = new facete.QueryFactoryTableMod(selectionElementFactory, tableMod);
+
+            $scope.active.tableFacetSelection = createTableConfig(selectionQueryFactory, tableConfigFacet, tableMod);
+
+
+
+            var createEssentialTableConfig = function(dataElementFactory, filterConceptFactory, tableMod) {
+
+                var filterElementFactory = new facete.ElementFactoryConceptFactory(filterConceptFactory);
+
+                var elementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, filterElementFactory]);
+                var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
+
+
+                var result = {
+                    tableServiceSupplier: function(config) {
+                        var query = config.query;
+                        var tableService = new service.TableServiceQuery(sparqlService, query);
+                        tableService = new service.TableServiceNodeLabels(tableService, lookupServiceNodeLabels);
+
+                        //var result = new service.TableServiceFacet(tableService, tableConfigFacet, services.lookupServiceNodeLabels, services.lookupServicePathLabels);
+
+                        return tableService;
+                    },
+                    configSupplier: function() {
+                        var r = {
+                            query: queryFactory.createQuery(),
+                        };
+
+                        //console.log('ESSENTIAL QUERY' + r.query);
+
+                        return r;
+                    },
+                    tableMod: tableMod,
+                    cellRendererSupplier: function() {
+
+                        var html =
+                            '<span title="{{cell.node.toString()}}" ng-bind-html="cell.displayLabel"></span>' +
+                            '<span style="cursor: pointer;" ng-context-menu="context.menuOptions" class="show-on-hover-child glyphicon glyphicon-asterisk"></span>';
+
+                        return html;
+                    }
+                };
+
+                return result;
+            };
+
+            var varMap = new util.HashMap();
+            var vs = rdf.NodeFactory.createVar('s');
+            var viu = rdf.NodeFactory.createVar('instanceUri');
+            varMap.put(vs, viu);
+
+            var tmpFilterConceptFactory = new sparql.ConceptFactoryRename(filterConceptFactory, varMap);
+            var tmpFacetConceptFactory = new sparql.ConceptFactoryRename(facetConceptFactory, varMap);
+
+            $scope.active.tableEssentialAll = createEssentialTableConfig(essentialDataElementFactory, tmpFacetConceptFactory, essentialTableMod);
+            $scope.active.tableEssentialSelection = createEssentialTableConfig(essentialDataElementFactory, tmpFilterConceptFactory, essentialTableMod);
+
+
+
+            // Resource selection
+            {
+
+                var varMap = new util.HashMap();
+                var vs = rdf.NodeFactory.createVar('s');
+                var viu = rdf.NodeFactory.createVar('subject');
+                varMap.put(vs, viu);
+
+                var tmpFilterConceptFactory = new sparql.ConceptFactoryRename(filterConceptFactory, varMap);
+
+
+                var dataElement = sparql.ElementString.create("?subject ?predicate ?object");
+                var dataElementFactory = new sparql.ElementFactoryConst(dataElement);
+
+
+                var resourceTableMod = new facete.TableMod();
+
+                {
+                    var varNames = ['subject', 'predicate', 'object'];
+                    _(varNames).each(function(varName) {
+                        resourceTableMod.addColumn(varName);
+                    });
                 }
 
-                var r = base.virtFix().paginate(1000).pageExpand(100).create();
 
-                //console.log('Sparql service', serviceIri, defaultGraphIris);
-                return r;
-            }]);
-
-        // Map DataSource
-        ddi.register('mapDataSource', [ 'sparqlService', 'mapFactory', 'geoConceptFactory', '?fillColor',
-            function(sparqlService, mapFactory, geoConceptFactory, fillColor) {
-            console.log('MAP DATASOURCE!');
-
-            fillColor = fillColor || '#CC0020';
-
-            var r = createMapDataSource(sparqlService, mapFactory, geoConceptFactory.createConcept(), fillColor);
-                return r;
-            }]);
-
-//        // TODO How to deal with the cache
-//        ddi.register('lookupServiceNodeLabels', ['=sparqlService', '=lookupChunkSize', '=langs',
-//            function(sparqlService, lookupChunkSize, langs) {
-//                var r = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService, 20, $scope.langs /* predicates */);
-//                r = new service.LookupServiceCache(r);
-//
-//                return r;
-//            }]);
-//
-//        // PathLabels
-//        ddi.register('pathLabels', ['lookupServiceNodeLabels',
-//            function(lookupServiceNodeLabels) {
-//                var r = lookupServicePathLabels = new facete.LookupServicePathLabels(lookupServiceNodeLabels);
-//                r = new facete.LookupServiceConstraintLabels(lookupServiceNodeLabels, lookupServicePathLabels);
-//                return r;
-//            }]);
-
-
-
-        $scope.serviceIri = 'http://linkedgeodata.org/sparql';
-        $scope.defaultGraphIris = 'http://linkedgeodata.org';
-
-
-        $scope.mapFactory =jassa.geo.GeoMapFactoryUtils.wgs84MapFactory;
-        $scope.geoConceptFactory = new sparql.ConceptFactoryFacetTreeConfig(facetTreeConfig);
-
-        $timeout(function() {
-            //$scope.fillColor = '#aaaaaa';
-            //$scope.serviceIri = 'http://dbpedia.org/sparql';
-            $scope.serviceIri = 'http://linked';
-
-        }, 3000);
-    };
-
-    var testScope = $scope.$new();
-
-    initDdi(testScope);
-
-
-
-    // TODO This mapping of config objects to their services sucks; a different concept such as a IoC container might help: We would then have a context of beans, and services that are instanciated against the beans
-    //
-    var hashToServices = {};
-
-    var refreshServices = function(config) {
-        if(!config) {
-            return;
-        }
-
-        var dataCnf = config.dataService;
-
-        var facetTreeConfig = config.facetTreeConfig;
-
-        var serviceState = {
-            url: AppConfig.cacheProxyUrl,
-            defaultGraphIris: dataCnf.defaultGraphIris,
-            ajaxOptions: {
-                type: 'POST'
-            },
-            httpOptions: {
-                'service-uri': dataCnf.serviceIri
+                $scope.active.tableResourceSelection = createEssentialTableConfig(dataElementFactory, tmpFilterConceptFactory, resourceTableMod);
             }
-        };
 
-        var serviceHash = util.ObjectUtils.hashCode(serviceState);
-        var services = hashToServices[serviceHash];
-
-        if(!services) {
-
-            services = hashToServices[serviceHash] = {};
-
-            // Init Sparql Service
-            var sparqlService = service.SparqlServiceBuilder.http(AppConfig.cacheProxyUrl, dataCnf.defaultGraphIris, {type: 'POST'}, {'service-uri': dataCnf.serviceIri})
-                .cache().virtFix().paginate(1000).pageExpand(100).create();
-
-//            sparqlService = new service.SparqlServiceHttp('cache/sparql', dataCnf.defaultGraphIris, {}, {'service-uri': dataCnf.serviceIri});
-
-            services.sparqlService = sparqlService;
+        });
 
 
-            // Init Lookup Service
-            var lookupServiceNodeLabels = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService, 20, $scope.langs /* predicates */);
-            lookupServiceNodeLabels = new service.LookupServiceCache(lookupServiceNodeLabels);
-
-            services.lookupServiceNodeLabels = lookupServiceNodeLabels;
-
-
-            // Init Lookup Service for Path Labels
-            var lookupServicePathLabels = new facete.LookupServicePathLabels(lookupServiceNodeLabels);
-
-            services.lookupServicePathLabels = lookupServicePathLabels;
-
-            services.lookupServiceConstraintLabels = new facete.LookupServiceConstraintLabels(lookupServiceNodeLabels, lookupServicePathLabels);
-
-
-            //services.tableService = new service.TableServiceFacet(services.sparqlService, tableConfigFacet, services.lookupServiceNodeLabels, services.lookupServicePathLabels, 3000, 1000);
-        }
-        else {
-            console.log('Service reused: ', serviceHash);
-        }
+//    $scope.setDataSource = function(item) {
+//        alert(JSON.stringify(item));
+//    };
 
 
 
-        $scope.active.services = services;//.sparqlService;
-        //$scope.active.lookupServiceNodeLabels = lookupServiceNodeLabels;
-        $scope.active.facetTreeConfig = facetTreeConfig;
-        $scope.active.targetFacetTreeConfig = targetFacetTreeConfig;
-
-
-        refreshFacetTables(config);
-        //refreshEssentialTables();
-
-
-
-        var mapConfig = config.mapConfig;
-        //var mapFactory = config.mapFactory;
-
-
-
-        $scope.active.dataSources = [
-            createMapDataSource(sparqlService, mapConfig.mapFactory, geoConceptFactory.createConcept(), '#CC0020')
-        ];
-//             $scope.active.dataSources = [{
-//              sparqlService: sparqlService,
-//              mapFactory: mapConfig.mapFactory,
-//              conceptFactory: geoConceptFactory,
-//              quadTreeConfig: mapConfig.quadTreeConfig
-//          }];
-
-
-        updateFacetValuePath();
-
-    };
 
     $scope.active.dataSources = [];
 
-    $scope.$watch('ObjectUtils.hashCode(active.geoConceptFactory.createConcept())', function() {
-        var geoConcept = $scope.active.geoConceptFactory.createConcept();
-        //alert('' + geoConcept);
-        var service = $scope.active.service;
-        var mapConfig = service ? service.mapConfig : null;
-
-        if(mapConfig) {
-            var mapFactory = mapConfig.mapFactory; //$scope.active.mapFactory;
-            var sparqlService = $scope.active.services.sparqlService;
-
-            console.log('GEO CONCEPT: ', geoConcept, mapFactory, sparqlService);
-
-            var dataSources = [];
-
-            if(sparqlService && mapFactory && geoConcept) {
-                var dataSource = createMapDataSource(sparqlService, mapFactory, geoConcept, '#CC0020')
-                dataSources.push(dataSource);
-
-                console.log('MapDataSource updated');
-            }
-
-            $scope.active.dataSources = dataSources;
-        }
-    });
-
-
-    $scope.setDataSource = function(item) {
-        alert(JSON.stringify(item));
-    };
-
-
-
-//    $scope.$watch(function() {
-//        return $scope.active.geoMode;
-//    }, function(newMode) {
-//        if($scope.active.service && $scope.active.service.mapConfig) {
-//            $scope.active.service.mapConfig.mapFactory = newMode.value.mapFactory;
-//            $scope.active.service.mapConfig.geoConcept = newMode.value.geoConcept;
-//        }
-//        //_.extend($scope.active.service.mapConfig, newMode);
-//        // = newMode;
-//    });
-
-
-    // TODO Below statement does not hold anymore; e.g. the active geo-vocabulary may change dynamically
-    // Important: We should only refresh the services if the *reference* to
-    // the config object changes - it doesn't make sense to refresh if an internal config
-    // parameter changes, as we would keep refreshing
-    $scope.$watch('active.service', function() {
-        var config = $scope.active.service;
-        if(config) {
-            refreshServices(config);
-            refresh(config);
-        }
-    });
-
-
-    $scope.$watch('ObjectUtils.hashCode(active.targetFacetTreeConfig)', function() {
-        var sourceConceptFactory = new sparql.ConceptFactoryFacetTreeConfig(facetTreeConfig);
-        var sourceConcept = sourceConceptFactory.createConcept();
-
-        var targetConceptFactory = new sparql.ConceptFactoryFacetTreeConfig(targetFacetTreeConfig);
-        var targetConcept = targetConceptFactory.createConcept();
-
-        findConceptPaths(sourceConcept, targetConcept).then(function(tmp) {
-            $scope.active.targetGeoPaths = tmp;
-        });
-
-    });
-
-    $scope.$watch('ObjectUtils.hashCode(active.facetTreeConfig)', function() {
-        var config = $scope.active.service;
-        if(config) {
-            refresh(config);
-        }
-    }, true);
-
-
-/*
-    $scope.$watchCollection('[active.service.mapConfig.mapFactory, active.service.mapConfig.geoConcept]', function() {
-        var config = $scope.active.service;
-        if(config) {
-            refreshServices(config);
-            refresh(config);
-        }
-    });
-*/
-
-
 
     var serviceConfigs = $scope.active.serviceConfigs
-    $scope.active.service = serviceConfigs.length === 0 ? null : serviceConfigs[0];
+    $scope.active.config = serviceConfigs.length === 0 ? null : serviceConfigs[0];
 
 
 
@@ -979,30 +956,6 @@ angular.module('Facete2')
     $scope.selectFacet = function(path) {
         $scope.active.path = path;
     };
-
-
-    var updateFacetValuePath = function() {
-        var active = $scope.active;
-        var services = active ? active.services : null;
-
-        var path = active.path;
-
-        if(!path || !services || !services.lookupServicePathLabels) {
-            return;
-        }
-
-
-        var promise = services.lookupServicePathLabels.lookup([path]);
-
-        $q.when(promise).then(function(map) {//sponate.angular.bridgePromise(promise, $q.defer(), $scope, function(map) {
-            active.pathLabel = map.get(path);
-        });
-    };
-
-    $scope.$watch('active.path', function() {
-        updateFacetValuePath();
-    });
-
 
     $scope.selectTargetFacet = function(path) {
         $scope.active.targetPath = path;
@@ -1285,7 +1238,7 @@ angular.module('Facete2')
      *
      */
     $scope.exportQuery = function(query, varMap) {
-        var ds = $scope.active.service.dataService;
+        var ds = $scope.active.config.dataService;
 
         var status = {
             msg: 'Export started.',
@@ -1310,169 +1263,6 @@ angular.module('Facete2')
             //throw e;
         });
 
-
-    };
-
-
-    /**
-     *  Table Views
-     */
-
-    var refreshFacetTables = function(config) {
-        // Input: facetTreeConfig, config.tableConfigFacet,
-
-
-        /*
-         * <- Facet Tree 'Link-Facet-To-Table' Plugin
-         */
-
-        var sparqlService = $scope.active.services.sparqlService;
-
-        // TODO This could be written with function composition rather than objects
-        // But for this we would first have to convert the factories to operations on functions
-        var facetTreeConfig = $scope.active.facetTreeConfig;
-        var conceptFactory = new sparql.ConceptFactoryFacetTreeConfig(facetTreeConfig);
-
-        var facetConfig = facetTreeConfig.getFacetConfig();
-
-        var facetConceptFactory = new sparql.ConceptFactoryFacetTreeConfig(facetTreeConfig);
-        var facetElementFactory = new facete.ElementFactoryConceptFactory(facetConceptFactory);
-
-
-        var tableConfigFacet = config.tableConfigFacet;
-        var tableMod = tableConfigFacet.getTableMod();
-
-        var dataConceptFactory = new ConceptFactoryTableConfigFacet(tableConfigFacet);
-        var dataElementFactory = new facete.ElementFactoryConceptFactory(dataConceptFactory);
-        var filterElementFactory = new facete.ElementFactoryConceptFactory(filterConceptFactory);
-
-        var services = $scope.active.services;
-
-
-        var createTableConfig = function(queryFactory, tableConfigFacet, tableMod) {
-            return {
-                tableServiceSupplier: function(config) {
-                    var query = config.query;
-                    var tableService = new service.TableServiceQuery(sparqlService, query);
-                    var result = new service.TableServiceFacet(tableService, tableConfigFacet, services.lookupServiceNodeLabels, services.lookupServicePathLabels);
-
-                    return result;
-                },
-                configSupplier: function() {
-                    var r = {
-                        query: queryFactory.createQuery(),
-                        tableConfigFacet: tableConfigFacet
-                    };
-                    return r;
-                },
-                tableMod: tableMod,
-                cellRendererSupplier: function() {
-
-                    var html =
-                        '<span title="{{cell.node.toString()}}" ng-bind-html="cell.displayLabel"></span>' +
-                        '<span style="cursor: pointer;" ng-context-menu="context.menuOptions" class="show-on-hover-child glyphicon glyphicon-asterisk"></span>';
-
-                    return html;
-                }
-            };
-        };
-
-        var allElementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, facetElementFactory]);
-        var allQueryFactory = new facete.QueryFactoryTableMod(allElementFactory, tableMod);
-
-
-        $scope.active.tableFacetAll = createTableConfig(allQueryFactory, tableConfigFacet, tableMod);
-
-
-        // NOTE We assume the data and filter concept share the same variables
-        var selectionElementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, filterElementFactory]);
-        var selectionQueryFactory = new facete.QueryFactoryTableMod(selectionElementFactory, tableMod);
-
-        $scope.active.tableFacetSelection = createTableConfig(selectionQueryFactory, tableConfigFacet, tableMod);
-
-
-
-        var createEssentialTableConfig = function(dataElementFactory, filterConceptFactory, tableMod) {
-
-            var filterElementFactory = new facete.ElementFactoryConceptFactory(filterConceptFactory);
-
-            var elementFactory = new sparql.ElementFactoryCombine(true, [dataElementFactory, filterElementFactory]);
-            var queryFactory = new facete.QueryFactoryTableMod(elementFactory, tableMod);
-
-
-            var result = {
-                tableServiceSupplier: function(config) {
-                    var query = config.query;
-                    var tableService = new service.TableServiceQuery(sparqlService, query);
-                    tableService = new service.TableServiceNodeLabels(tableService, services.lookupServiceNodeLabels);
-
-                    //var result = new service.TableServiceFacet(tableService, tableConfigFacet, services.lookupServiceNodeLabels, services.lookupServicePathLabels);
-
-                    return tableService;
-                },
-                configSupplier: function() {
-                    var r = {
-                        query: queryFactory.createQuery(),
-                    };
-
-                    //console.log('ESSENTIAL QUERY' + r.query);
-
-                    return r;
-                },
-                tableMod: tableMod,
-                cellRendererSupplier: function() {
-
-                    var html =
-                        '<span title="{{cell.node.toString()}}" ng-bind-html="cell.displayLabel"></span>' +
-                        '<span style="cursor: pointer;" ng-context-menu="context.menuOptions" class="show-on-hover-child glyphicon glyphicon-asterisk"></span>';
-
-                    return html;
-                }
-            };
-
-            return result;
-        };
-
-        var varMap = new util.HashMap();
-        var vs = rdf.NodeFactory.createVar('s');
-        var viu = rdf.NodeFactory.createVar('instanceUri');
-        varMap.put(vs, viu);
-
-        var tmpFilterConceptFactory = new sparql.ConceptFactoryRename(filterConceptFactory, varMap);
-        var tmpFacetConceptFactory = new sparql.ConceptFactoryRename(facetConceptFactory, varMap);
-
-        $scope.active.tableEssentialAll = createEssentialTableConfig(essentialDataElementFactory, tmpFacetConceptFactory, essentialTableMod);
-        $scope.active.tableEssentialSelection = createEssentialTableConfig(essentialDataElementFactory, tmpFilterConceptFactory, essentialTableMod);
-
-
-
-        // Resource selection
-        {
-
-            var varMap = new util.HashMap();
-            var vs = rdf.NodeFactory.createVar('s');
-            var viu = rdf.NodeFactory.createVar('subject');
-            varMap.put(vs, viu);
-
-            var tmpFilterConceptFactory = new sparql.ConceptFactoryRename(filterConceptFactory, varMap);
-
-
-            var dataElement = sparql.ElementString.create("?subject ?predicate ?object");
-            var dataElementFactory = new sparql.ElementFactoryConst(dataElement);
-
-
-            var resourceTableMod = new facete.TableMod();
-
-            {
-                var varNames = ['subject', 'predicate', 'object'];
-                _(varNames).each(function(varName) {
-                    resourceTableMod.addColumn(varName);
-                });
-            }
-
-
-            $scope.active.tableResourceSelection = createEssentialTableConfig(dataElementFactory, tmpFilterConceptFactory, resourceTableMod);
-        }
 
     };
 

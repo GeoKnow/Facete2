@@ -2,7 +2,8 @@ var AppConfig = {
 
     storeApiUrl: 'api/store',
     exportApiUrl: 'api/export/start',
-    cacheProxyUrl: 'cache/sparql',
+    pathFindingApiUrl: 'api/path-finding',
+    sparqlProxyUrl: 'cache/sparql',
 
     batch: {
         prefixes: {

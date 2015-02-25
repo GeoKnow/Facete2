@@ -28,11 +28,11 @@
 
 
                 <div class="form-group">
-                    <label>Available Data Sources:<select ng-model="active.service" ng-options="item.name for item in active.serviceConfigs" class="form-control"></select></label>
+                    <label>Available Data Sources:<select ng-model="active.config" ng-options="item.name for item in active.serviceConfigs" class="form-control"></select></label>
                 </div>
                 <div class="form-group">
                     <button class="btn btn-primary" ng-class="{'active': app.dataSources.showAddDialog}" ng-click="app.dataSources.showAddDialog=!app.dataSources.showAddDialog" class="form-control">Add Data Source</button>
-                    <button ng-if="active.service" class="btn" ng-click="deleteDataSource(active.service.id)" class="form-control">Delete Selected Data Source</button>
+                    <button ng-if="active.config" class="btn" ng-click="deleteDataSource(active.service.id)" class="form-control">Delete Selected Data Source</button>
                 </div>
             </accordion-group>
 
@@ -60,7 +60,7 @@
                 </accordion-heading>
 
 <!-- ng-options="option.value as option.label for option in geoModes" -->
-                <select class="form-control" ng-model="active.geoMode" ng-options="option.label for option in geoModes"></select>
+                <select class="form-control" ng-model="active.config.mapConfig.geoMode" ng-options="option.value as option.label for option in geoModes"></select>
 
 <!--                <tabset> -->
                         <sparql-table table-service-supplier="active.tableGeoLink.tableServiceSupplier" config-supplier="active.tableGeoLink.configSupplier" table-mod="active.tableGeoLink.tableMod" context="tableContext" cell-renderer-supplier="active.tableGeoLink.cellRendererSupplier"></sparql-table>
@@ -114,7 +114,7 @@
                         Facets
                     </div>
                     <div class="panel-body">
-                       <facet-list ui-model="active.breadcrumb" sparql-service="active.services.sparqlService" facet-tree-config="active.facetTreeConfig" select="selectFacet(path)" plugins="facetTreePlugins" plugin-context="facetTreePluginContext"></facet-list>
+                       <facet-list ui-model="active.breadcrumb" sparql-service="active.services.sparqlService" facet-tree-config="active.config.facetTreeConfig" select="selectFacet(path)" plugins="facetTreePlugins" plugin-context="facetTreePluginContext"></facet-list>
                     </div>
                 </div>
 

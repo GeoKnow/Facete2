@@ -2,6 +2,7 @@
   "name": "facete2",
   "version": "0.0.1",
   "dependencies": {
+    "dddi-angular": "1.0.0",
     "jassa-ui-angular": "0.9.0-SNAPSHOT",
     "jassa-ui-angular-openlayers": "0.9.0-SNAPSHOT",
     "bluebird": "2.3.5",
