@@ -263,3 +263,44 @@ dist:org.aksw.linked-spending_linked-spending_2015_1
     .
 
 
+
+data:org.linkedgeodata_linkedgeodata-germany-parking_2015
+    a dcat:Dataset ;
+    dcat:theme theme:primary ;
+    o:group "org.linkedgeodata" ;
+    o:artifact "linkedgeodata-parking" ;
+    o:version "2015" ;
+    rdfs:label "LinkedGeoData Parking" ;
+    rdfs:comment "Parking places in Germany from LinkedGeoData" ;
+    foaf:depiction <http://linkedgeodata.org/files/lgdlogo.png> ;
+    .
+
+dist:org.linkedgeodata_linkedgeodata-germany-parking_2015_1
+    a dcat:Distribution ;
+    o:priority 1 ;
+    o:distributionOf data:org.linkedgeodata_linkedgeodata-germany-parking_2015 ;
+    dcat:accessURL <http://akswnc3.informatik.uni-leipzig.de/data/conti/sparql> ;
+    o:graph <http://linkedgeodata.org/2015-02-26/parking> ;
+    .
+
+
+data:com.eccenca.opdle_odple-core_2015
+    a dcat:Dataset ;
+    dcat:theme theme:primary ;
+    o:group "com.eccenca.odple" ;
+    o:artifact "odple-core" ;
+    o:version "2015" ;
+    rdfs:label "Leaders of public services in Leipzig" ;
+    rdfs:comment "Leaders of public services in Leipzig" ;
+    foaf:depiction <http://www.eccenca.com/static/img/logo-www.eccenca.com.png> ;
+    .
+
+dist:com.eccenca.opdle_odple-core_2015
+    a dcat:Distribution ;
+    o:priority 1 ;
+    o:distributionOf data:com.eccenca.opdle_odple-core_2015 ;
+    dcat:accessURL <http://odple-virtuoso.eccenca.com/> ;
+    o:graph <https://odple-ckan.eccenca.com/> ;
+    .
+
+
