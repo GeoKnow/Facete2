@@ -12,26 +12,26 @@ var AppConfig = {
         }
     },
 
-    geoModes: [{
-            label: 'wgs84 with forced conversion of coordinates',
-            value: {
-                mapFactory: jassa.geo.GeoMapFactoryUtils.wgs84MapFactory,
-                geoConcept: jassa.geo.GeoConceptUtils.conceptWgs84
-            }
-        },{
-            label: 'wgs84 with assumed numeric coordinates',
+    geoModes: [ {
+            label: 'WGS84 with numeric coordinates',
             value: {
                 mapFactory: jassa.geo.GeoMapFactoryUtils.wgs84CastMapFactory,
                 geoConcept: jassa.geo.GeoConceptUtils.conceptWgs84
             }
         }, {
-            label: 'ogc',
+            label: 'WGS84 with string and/or numeric coordinates',
+            value: {
+                mapFactory: jassa.geo.GeoMapFactoryUtils.wgs84MapFactory,
+                geoConcept: jassa.geo.GeoConceptUtils.conceptWgs84
+            }
+        }, {
+            label: 'Standard GeoSPARQL vocabulary',
             value: {
                 mapFactory: jassa.geo.GeoMapFactoryUtils.geosparqlMapFactory,
                 geoConcept: jassa.geo.GeoConceptUtils.conceptGeoVocab
             }
         }, {
-            label: 'virt',
+            label: 'Virtuoso GeoSPARQL dialect',
             value: {
                 mapFactory: jassa.geo.GeoMapFactoryUtils.ogcVirtMapFactory,
                 geoConcept: jassa.geo.GeoConceptUtils.conceptGeoVocab

@@ -175,10 +175,7 @@ angular.module('Facete2')
 
             facetTreeConfig: facetTreeConfig,
             mapConfig: {
-                geoMode: {
-                    mapFactory: geo.GeoMapFactoryUtils.wgs84CastMapFactory,
-                    geoConcept: geo.GeoConceptUtils.conceptWgs84,
-                },
+                geoMode:AppConfig.geoModes[0].value,
                 quadTreeConfig: {
                     maxItemsPerTileCount: 1000,
                     maxGlobalItemCount: 2000
@@ -608,6 +605,7 @@ angular.module('Facete2')
 //            return r;
 //        }]);
 
+
     dddi.register('active.services.sparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?sparqlCache',
         function(serviceConfig, sparqlProxyUrl, sparqlCache) {
             //var cache = sparqlCacheSupplier ? sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris) : null;
@@ -687,26 +685,26 @@ angular.module('Facete2')
             return r;
         }]);
 
-    dddi.register('active.tableGeoLink', ['active.services.conceptPathFinder', 'active.services.sourceConcept', 'active.config.mapConfig.geoMode.geoConcept', 'active.services.lookupServicePathLabels',
-        function(conceptPathFinder, sourceConcept, targetConcept, lookupServicePathLabels) {
+    dddi.register('active.tableGeoLink', ['active.services.conceptPathFinder', 'active.services.sourceConcept', 'active.config.mapConfig.geoMode.geoConcept', 'active.services.lookupServiceNodeLabels', 'active.services.lookupServicePathLabels',
+        function(conceptPathFinder, sourceConcept, targetConcept, lookupServiceNodeLabels, lookupServicePathLabels) {
 
             // Helper function von the geolink table
             var createTableConfigGeoLink = function(tableConfig, conceptPathFinder, sourceConcept, targetConcept) {
                 return {
                     tableServiceSupplier: function(config) {
 
-                        var services = $scope.active.services;
+                        //var services = $scope.active.services;
 
                         // TODO We should wrap a cache here?
                         var sparqlService = conceptPathFinder.createSparqlService(config.sourceConcept, config.targetConcept)
 
                         var tableService = new service.TableServiceQuery(sparqlService, config.query);
-                        tableService = new service.TableServiceFacet(tableService, config.tableConfig, services.lookupServiceNodeLabels, services.lookupServicePathLabels);
+                        tableService = new service.TableServiceFacet(tableService, config.tableConfig, lookupServiceNodeLabels, lookupServicePathLabels);
 
                         var pathColId = config.tableConfig.getColIdForPath(new facete.Path());
                         var labelColId = config.tableConfig.getColIdForPath(facete.Path.parse(vocab.rdfs.label.getUri()));
 
-                        tableService = new service.TableServiceGeoLink(tableService, services.lookupServicePathLabels, pathColId, labelColId);
+                        tableService = new service.TableServiceGeoLink(tableService, lookupServicePathLabels, pathColId, labelColId);
 
                         return tableService;
                     },
