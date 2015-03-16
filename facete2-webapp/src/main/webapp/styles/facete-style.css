@@ -3,7 +3,11 @@
     overflow: auto;
 }
 
-
+/* Code mirror auto height */
+.CodeMirror {
+  border: 1px solid #eee;
+  height: auto;
+}
 
 
 /* TODO The section below should only contain overrides of bootstrap, but not our own definitions */

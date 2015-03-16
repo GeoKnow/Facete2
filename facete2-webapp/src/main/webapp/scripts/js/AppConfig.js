@@ -122,7 +122,9 @@ var AppConfig = {
 
                 var item = $scope.cell;
                 var node = item ? item.node : null;
-                if(node && node.isUri && node.isUri()) {
+
+                var isUri = node && node.isUri && node.isUri();
+                if(isUri) {
                     r.push({
                         //html: '<a href="' + node.getUri() + '">Show resource in new Browser Tab<a/>',
                         text: 'Show resource in new browser tab',
@@ -158,6 +160,16 @@ var AppConfig = {
                         facetTreeConfig.getFacetConfig().getConstraintManager().toggleConstraint(constraint);
                     }
                 });
+
+                if(isUri) {
+                    r.push({
+                        text: 'Show in editor',
+                        callback: function($itemScope) {
+                            $ctrlScope.editResource = node.getUri();
+                            $ctrlScope.$location.path('/edit');
+                        }
+                    });
+                }
 
                 return r;
             };

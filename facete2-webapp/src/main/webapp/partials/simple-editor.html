@@ -1,0 +1,85 @@
+<div
+    ng-init="state={}"
+    class="alert alert-info"
+    role="alert"
+    rex-context
+    rex-prefix
+    rex-sparql-service="active.services.sparqlService"
+    rex-lookup="true">
+
+    <h3>Resource Editor</h3>
+
+    <form role="form">
+        <div class="form-group" >
+            <div class="input-group">
+                <span class="input-group-addon">IRI: </span>
+                <input type="text" class="form-control" ng-model="editResource" ng-model-options="defaultNgModelOptions">
+            </div>
+        </div>
+    </form>
+
+    <form role="form" name="forms.edit" rex-subject="editResource">
+        <div class="repeat-item" ng-repeat="(property, propertyData) in rexContext.json[rexSubject] track by property" rex-predicate="property">
+<!-- <div ng-if="property == 'http://xmlns.com/foaf/0.1/homepage'"> -->
+            {{rexPrefixMapping.shortForm(property)}}:
+
+            <div class="repeat-item" ng-repeat="(object, objectData) in propertyData track by $index" rex-object ng-init="term={}" rex-deleted="deleted">
+                <div class="form-group">
+                  <div class="input-group">
+                    <span class="input-group-addon">{{$index + 1}}</span>
+                    <rdf-term-input replace ng-model="term" ng-model-options="defaultNgModelOptions" rex-value="term.value" rex-termtype="term.type" rex-datatype="term.datatype" rex-lang="term.lang"></rdf-term-input>
+
+                    <div class="input-group-btn">
+                      <button type="button" ng-click="deleted=!deleted" ng-class="deleted ? 'btn-danger' : 'btn-default'" style="line-height: 1.5;" class="btn margin-left-2"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+                      <button type="button" style="line-height: 1.5;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                        <li><a ng-click="copy(rexContext.json[rexSubject][rexPredicate][$index], term)" href="">Reset Value</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div ng-if="property === 'http://www.w3.org/2003/01/geo/wgs84_pos#geometry' || property === 'http://www.opengis.net/ont/geosparql#asWKT'">
+                    <geometry-input ng-model="term.value" ng-model-options="defaultNgModelOptions" geocoding-services="mGeocodingServices"></geometry-input>
+                  </div>
+<!--                     <input type="text" logo="{{$index + 1}}" ng-model="term.type" ng-model-options="defaultNgModelOptions" rex-termtype="term.type"> -->
+<!--                     <input type="text" logo="{{$index + 1}}" ng-model="term.value" ng-model-options="defaultNgModelOptions" rex-value="term.value"> -->
+<!--                     <input type="text" logo="{{$index + 1}}" ng-model="term.lang" ng-model-options="defaultNgModelOptions" rex-lang="term.lang"> -->
+<!--                     <input type="text" logo="{{$index + 1}}" ng-model="term.datatype" ng-model-options="defaultNgModelOptions" rex-datatype="term.datatype"> -->
+
+
+                </div>
+            </div>
+            <button class="btn btn-primary" ng-click="propertyData.push(null)">Add Object</button>
+        </div>
+<!-- </div> -->
+    </form>
+
+    Status:
+    <div
+        ui-codemirror="editorOptions.ttl"
+        ng-model="turtle"
+        sync-template="{{graphToTurtle(rexContext.graph, rexPrefixMapping)}}"
+    ></div>
+
+    <hr />
+    Added:
+    <div
+        ui-codemirror="editorOptions.ttl"
+        ng-model="turtle"
+        sync-template="{{UpdateUtils.createInsertRequest(rexContext.diff.added, rexPrefixMapping)}}"
+    ></div>
+
+    <hr />
+    Removed:
+    <div
+        ui-codemirror="editorOptions.ttl"
+        ng-model="turtle"
+        sync-template="{{UpdateUtils.createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
+    ></div>
+
+    isPristine: {{forms.edit.$pristine}}
+    <button class="btn btn-primary" ng-class="{'disabled': !rexContext.diff.removed.size() && !rexContext.diff.added.size() }" ng-click="performUpdate(rexContext, rexPrefixMapping, forms.edit)">Perform Update</button>
+
+</div>

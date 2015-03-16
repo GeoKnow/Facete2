@@ -27,8 +27,77 @@ angular.module('Facete2')
         });
     };
 
+    $scope.$location = $location; // Used by the context menu
+
     $scope.Math = Math; // Used for progress bar
     $scope.ObjectUtils = jassa.util.ObjectUtils;
+
+    $scope.UpdateUtils = jassa.service.UpdateUtils; // Used by simple-editor.html
+    $scope.copy = angular.copy; // Used by simple-editor.html
+
+    $scope.editResource = null;
+
+    $scope.defaultNgModelOptions = {
+        //updateOn: 'default blur',
+        debounce: {
+            'default': 300,
+            'blur': 0
+        }
+    };
+
+    // Code mirror setup
+    $scope.editorOptions = {
+        ttl: {
+            lineWrapping : true,
+            lineNumbers: true,
+            tabMode: 'indent',
+            matchBrackets: true,
+            mode: 'text/turtle',
+            readOnly: true
+        }
+    };
+
+    // Used to set pristine on the edit form via forms.edit
+    $scope.forms = {};
+
+    // Changing the edit counter invalidates caches and creates a fresh sparql service object
+    // so that components will update themselves
+    $scope.editCounter = 0;
+
+    $scope.performUpdate = function(rexContext, prefixMapping, form) {
+        var updateService = $scope.active.service.updateService;
+
+        var p = jassa.service.UpdateUtils.performUpdate(updateService, rexContext.diff, prefixMapping);
+        var x = p.then(function() {
+            //var r = $http.post('cache/ctrl/clear');
+            var r = Promise.resolve(jQuery.post('cache/ctrl/clear'));
+
+            return r;
+        }).then(function() {
+            // TODO Reset the sparql cache before calling reset
+
+            form.$setPristine();
+            var r = rexContext.reset();
+            return r;
+        });
+
+        // Note: Only when the update is successful do we reset the form to pristine
+        // This will retain edits in case of failure
+        $q.when(x).then(function() {
+            ++$scope.editCounter;
+            //alert('Update successful');
+        }, function(e) {
+            ++$scope.editCounter;
+            //alert('Update failed with reason: ' + e.responseText);
+        });
+    };
+
+    // TODO Move graphToTurtle to a utility object
+    $scope.graphToTurtle = function(graph, prefixMapping) {
+        var talis = graph ? jassa.io.TalisRdfJsonUtils.triplesToTalisRdfJson(graph) : null;
+        var r = talis ? jassa.io.TalisRdfJsonUtils.talisRdfJsonToTurtle(talis, prefixMapping) : '';
+        return r;
+    };
 
 
     $scope.geoModes = AppConfig.geoModes;
@@ -369,7 +438,7 @@ angular.module('Facete2')
                         new rdf.Triple(vs, vocab.rdfs.label, vo)
                     ]),
                     new sparql.ElementFilter(
-                        new sparql.E_Function('<bif:contains>', [evo, eno])
+                        new sparql.E_Function('bif:contains', [evo, eno])
                     )
                 ]);
 
@@ -606,7 +675,15 @@ angular.module('Facete2')
 //        }]);
 
 
-    dddi.register('active.services.sparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?sparqlCache',
+    //  '=editCounter',
+    dddi.register('active.service.updateService', [ '=active.config.dataService',
+        function(serviceConfig) {
+            var r = new jassa.service.SparqlUpdateHttp(serviceConfig.serviceIri, serviceConfig.defaultGraphIris);
+            return r;
+        }]);
+
+
+    dddi.register('active.services.sparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?sparqlCache', '=editCounter',
         function(serviceConfig, sparqlProxyUrl, sparqlCache) {
             //var cache = sparqlCacheSupplier ? sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris) : null;
 //console.log('Recreated sparql service');
@@ -616,11 +693,11 @@ angular.module('Facete2')
                 : jassa.service.SparqlServiceBuilder.http(sparqlProxyUrl, serviceConfig.defaultGraphIris, {type: 'POST'}, {'service-uri': serviceConfig.serviceIri})
                 ;
 
-            if(sparqlCache) {
+            //if(sparqlCache) {
                 // TODO Reuse prior request cache?
-                var requestCache = new jassa.service.RequestCache(null, sparqlCache);
-                base = base.cache(requestCache);
-            }
+                var requestCache = null; //new jassa.service.RequestCache(null, sparqlCache);
+                //base = base.cache(requestCache);
+            //}
 
             var r = base.virtFix().paginate(1000).pageExpand(100).create();
 

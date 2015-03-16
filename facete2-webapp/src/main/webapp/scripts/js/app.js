@@ -1,4 +1,17 @@
-angular.module('Facete2', ['ui.router', 'ui.bootstrap', 'ui.jassa', 'ngTable', 'ui.jassa.openlayers', 'ngSanitize', 'dddi' /* get rid of these modules rest -> 'luegg.directives', 'ui.jassa.facet-list', 'ui.jassa.jassa-list', 'ui.jassa.breadcrumb' */], ['$rootScopeProvider', function($rootScopeProvider) {
+angular.module('Facete2', [
+        'ngSanitize',
+        'ngAnimate',
+        'ui.router',
+        'ui.bootstrap',
+        'ui.jassa',
+        'ui.jassa.edit',
+        'ui.jassa.edit.tpls',
+        'ui.codemirror',
+        'ui.jassa.openlayers',
+        'ui.jassa.rex',
+        'dddi'
+   ], [
+        '$rootScopeProvider', function($rootScopeProvider) {
     $rootScopeProvider.digestTtl(10);
 }])
 
@@ -33,6 +46,10 @@ angular.module('Facete2', ['ui.router', 'ui.bootstrap', 'ui.jassa', 'ngTable', '
         .state('config', {
             url: "/config",
             templateUrl: "partials/config.html",
+        })
+        .state('edit', {
+            url: "/edit",
+            templateUrl: "partials/simple-editor.html",
         })
         ;
 

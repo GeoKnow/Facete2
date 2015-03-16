@@ -32,7 +32,7 @@
                 </div>
                 <div class="form-group">
                     <button class="btn btn-primary" ng-class="{'active': app.dataSources.showAddDialog}" ng-click="app.dataSources.showAddDialog=!app.dataSources.showAddDialog" class="form-control">Add Data Source</button>
-                    <button ng-if="active.config" class="btn" ng-click="deleteDataSource(active.service.id)" class="form-control">Delete Selected Data Source</button>
+                    <button ng-if="active.config" class="btn" ng-click="deleteDataSource(active.config.id)" class="form-control">Delete Selected Data Source</button>
                 </div>
             </accordion-group>
 
