@@ -64,6 +64,10 @@ angular.module('Facete2')
     // so that components will update themselves
     $scope.editCounter = 0;
 
+    //$scope.datasetToEditCounter = new jassa.util.Map();
+
+
+
     $scope.performUpdate = function(rexContext, prefixMapping, form) {
         var updateService = $scope.active.service.updateService;
 
@@ -471,6 +475,14 @@ angular.module('Facete2')
         $scope.active.geoConceptFactory.setPath(path);
     };
 
+    $scope.tableContext.isGeoPathActive = function(path) {
+        var p = $scope.active.geoConceptFactory.getPath();
+
+        var result = p ? p.equals(path) : false;
+        return result;
+        //$scope.active.geoConceptFactory.setPath(path);
+    };
+
 
     $scope.tableContext.menuOptions = AppConfig.tableConfig.createMenuOptions($scope);
 
@@ -520,7 +532,7 @@ angular.module('Facete2')
     // TODO: Whenever the facet selection changes, we need to recreate the map data source service for the modified concept
     var createMapDataSource = function(sparqlService, geoMapFactory, concept, fillColor) {
 
-        console.log('Concept: ' + concept, geoMapFactory)
+        console.log('Concept: ' + concept, geoMapFactory);
 
         //Factory = geo.GeoMapFactoryUtils.createWktMapFactory('http://www.w3.org/2003/01/geo/wgs84_pos#Geometry', '<bif:st_intersects>', '<bif:st_geomFromText>');
 
@@ -530,7 +542,7 @@ angular.module('Facete2')
 
         // Wrap this service for augmenting (enriching) it with labels
         // TODO Make dependent on scope.langs
-        var lookupServiceLabels = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService, null, $scope.langs);
+        var lookupServiceLabels = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService, new sparql.LiteralPreference($scope.langs));
 //        lookupServiceLabels = new service.LookupServiceTransform(lookupServiceLabels, function(doc, id) {
 //            var result = {
 //                shortLabel: doc
@@ -668,11 +680,13 @@ angular.module('Facete2')
     // - lookupServiceConstraintLabels
     // -
 
-//    dddi.register('sparqlCache', [ '=config.dataService',
-//        function(sparqlService) {
-//            var r = $scope.sparqlCacheSupplier.getCache(sparqlService.serviceIri, sparqlService.defaultGraphIris);
-//            return r;
-//        }]);
+    dddi.register('active.service.sparqlCache', [ '=config.dataService', '=editCounter',
+        function(sparqlService) {
+            sparqlCacheSupplier.invalidate();
+
+            var r = $scope.sparqlCacheSupplier.getCache(sparqlService.serviceIri, sparqlService.defaultGraphIris);
+            return r;
+        }]);
 
 
     //  '=editCounter',
@@ -683,7 +697,7 @@ angular.module('Facete2')
         }]);
 
 
-    dddi.register('active.services.sparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?sparqlCache', '=editCounter',
+    dddi.register('active.services.sparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?active.service.sparqlCache',
         function(serviceConfig, sparqlProxyUrl, sparqlCache) {
             //var cache = sparqlCacheSupplier ? sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris) : null;
 //console.log('Recreated sparql service');
@@ -693,11 +707,11 @@ angular.module('Facete2')
                 : jassa.service.SparqlServiceBuilder.http(sparqlProxyUrl, serviceConfig.defaultGraphIris, {type: 'POST'}, {'service-uri': serviceConfig.serviceIri})
                 ;
 
-            //if(sparqlCache) {
+            if(sparqlCache) {
                 // TODO Reuse prior request cache?
                 var requestCache = null; //new jassa.service.RequestCache(null, sparqlCache);
-                //base = base.cache(requestCache);
-            //}
+                base = base.cache(requestCache);
+            }
 
             var r = base.virtFix().paginate(1000).pageExpand(100).create();
 
@@ -707,8 +721,9 @@ angular.module('Facete2')
 
     dddi.register('active.services.lookupServiceNodeLabels', [ 'active.services.sparqlService',
         function(sparqlService) {
-            var r = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService, 20, $scope.langs /* predicates */);
-            r = new service.LookupServiceCache(r);
+            var literalPreference = new sparql.LiteralPreference($scope.langs);
+            var r = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService, literalPreference, 20 /* predicates */);
+            //r = new service.LookupServiceCache(r);
             return r;
         }]);
 
@@ -807,7 +822,7 @@ angular.module('Facete2')
                         var html;
 
                         if(this.cell.path) {
-                            html = '<a href="" ng-click="context.setGeoPath(cell.path)" title="{{cell.node.toString()}}" ng-bind-html="cell.displayLabel"></a>';
+                            html = '<a href="" ng-class="context.isGeoPathActive(cell.path) ? \'label label-primary\' : \'\'" ng-click="context.setGeoPath(cell.path)" title="{{cell.node.toString()}}" ng-bind-html="cell.displayLabel"></a>';
                         }
                         else {
                             html = '<span ng-bind-html="cell.displayLabel"></span>';

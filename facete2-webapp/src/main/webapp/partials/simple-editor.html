@@ -79,7 +79,7 @@
         sync-template="{{UpdateUtils.createDeleteRequest(rexContext.diff.removed, rexPrefixMapping)}}"
     ></div>
 
-    isPristine: {{forms.edit.$pristine}}
+<!--     isPristine: {{forms.edit.$pristine}} -->
     <button class="btn btn-primary" ng-class="{'disabled': !rexContext.diff.removed.size() && !rexContext.diff.added.size() }" ng-click="performUpdate(rexContext, rexPrefixMapping, forms.edit)">Perform Update</button>
 
 </div>
