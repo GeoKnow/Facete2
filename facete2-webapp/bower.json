@@ -9,7 +9,8 @@
     "underscore.string": "2.3.2",
     "jscache": "",
     "ng-table": "0.3.2",
-    "angular-ui-router": "0.2.10"
+    "angular-ui-router": "0.2.10",
+    "angular-translate": ""
   },
   "devDependencies": {},
   "resolutions": {
