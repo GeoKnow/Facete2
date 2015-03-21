@@ -7,7 +7,7 @@
             <accordion-group style="pointer-events: auto;" ng-if="app.search.show" is-open="app.search.isOpen">
                 <accordion-heading>
                     <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.search.isOpen, 'glyphicon-chevron-right': !app.search.isOpen}"></i>
-                    Search Results
+                    {{'SEARCH_RESULTS' | translate}}
                     <a href="" ng-click="app.search.show = false"><span class="glyphicon glyphicon-remove-circle"></span></a>
                 </accordion-heading>
 
@@ -23,16 +23,16 @@
             <accordion-group style="pointer-events: auto;" is-open="app.dataSources.isOpen">
                 <accordion-heading>
                     <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.dataSources.isOpen, 'glyphicon-chevron-right': !app.dataSources.isOpen}"></i>
-                    Data Sources {{active.service ? '[' + active.service.name + ']': ''}}
+                    {{'DATA_SOURCES' | translate}} {{active.service ? '[' + active.service.name + ']': ''}}
                 </accordion-heading>
 
 
                 <div class="form-group">
-                    <label>Available Data Sources:<select ng-model="active.service" ng-options="item.name for item in active.serviceConfigs" class="form-control"></select></label>
+                    <label>{{'DS_AVAILABLE_DATA_SOURCES' | translate}}:<select ng-model="active.service" ng-options="item.name for item in active.serviceConfigs" class="form-control"></select></label>
                 </div>
                 <div class="form-group">
-                    <button class="btn btn-primary" ng-class="{'active': app.dataSources.showAddDialog}" ng-click="app.dataSources.showAddDialog=!app.dataSources.showAddDialog" class="form-control">Add Data Source</button>
-                    <button ng-if="active.service" class="btn" ng-click="deleteDataSource(active.service.id)" class="form-control">Delete Selected Data Source</button>
+                    <button class="btn btn-primary" ng-class="{'active': app.dataSources.showAddDialog}" ng-click="app.dataSources.showAddDialog=!app.dataSources.showAddDialog" class="form-control">{{'DS_ADD_DATA_SOURCE' | translate}}</button>
+                    <button ng-if="active.service" class="btn" ng-click="deleteDataSource(active.service.id)" class="form-control">{{'DS_DELETE_DATA_SOURCE' | translate}}</button>
                 </div>
             </accordion-group>
 
@@ -56,7 +56,7 @@
             <accordion-group class="portlet" style="pointer-events: auto;" is-open="app.geoLinks.isOpen">
                 <accordion-heading>
                     <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.geoLinks.isOpen, 'glyphicon-chevron-right': !app.geoLinks.isOpen}"></i>
-                    GeoLinks
+                    {{'GEO_LINKS' | translate}}
                 </accordion-heading>
 
 <!-- ng-options="option.value as option.label for option in geoModes" -->
@@ -81,12 +81,12 @@
             <accordion-group style="pointer-events: auto;" is-open="app.facets.isOpen">
                 <accordion-heading>
                     <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.facets.isOpen, 'glyphicon-chevron-right': !app.facets.isOpen}"></i>
-                    Facets
+                    {{'FACETS' | translate}}
                 </accordion-heading>
 
                 <div class="panel panel-info">
                     <div class="panel-heading portlet-heading">
-                        Full Text Filter
+                        {{'FACETS_FULL_TEXT_FILTER' | translate}}
                     </div>
                     <div class="panel-body">
 
@@ -96,14 +96,14 @@
     <!--                                 <label>Base concept: -->
                                     <input ng-model="app.baseConceptFilterStringTmp" type="text" class="form-control"></input>
                                     <span class="input-group-btn">
-                                        <button type="submit" ng-click="setBaseConcept(app.baseConceptFilterStringTmp)" class="btn btn-default" type="button">Set filter</button>
+                                        <button type="submit" ng-click="setBaseConcept(app.baseConceptFilterStringTmp)" class="btn btn-default" type="button">{{'FACETS_SET_FILTER' | translate}}</button>
                                     </span>
     <!--                                 </label> -->
                                 </div>
                             </form>
                         </div>
                         <div ng-show="app.baseConceptFilterString != null">
-                            Filter: {{app.baseConceptFilterString}}
+                            {{'FACETS_FILTER' | translate}}: {{app.baseConceptFilterString}}
                             <a href="" ng-click="setBaseConcept(null)"><span class="glyphicon glyphicon-remove-circle"></span></a>
                         </div>
                     </div>
@@ -111,7 +111,7 @@
 
                 <div class="panel panel-info">
                     <div class="panel-heading portlet-heading">
-                        Facets
+                        {{'FACETS' | translate}}
                     </div>
                     <div class="panel-body">
                        <facet-list ui-model="active.breadcrumb" sparql-service="active.services.sparqlService" facet-tree-config="active.facetTreeConfig" select="selectFacet(path)" plugins="facetTreePlugins" plugin-context="facetTreePluginContext"></facet-list>
@@ -160,45 +160,45 @@
             <accordion-group is-open="app.data.isOpen">
                 <accordion-heading>
                     <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.data.isOpen, 'glyphicon-chevron-right': !app.data.isOpen}"></i>
-                    Data
+                    {{'DATA' | translate}}
                 </accordion-heading>
 
                 <tabset>
-                    <tab heading="All" active="app.data.tabs[0].isActive">
+                    <tab heading="{{'DATA_ALL' | translate}}" active="app.data.tabs[0].isActive">
                         <div class="well well-sm">
-                            <button class="btn btn-primary" ng-click="exportFacetTable(active.tableFacetAll.configSupplier())">Export</button>
+                            <button class="btn btn-primary" ng-click="exportFacetTable(active.tableFacetAll.configSupplier())">{{'DATA_EXPORT' | translate}}</button>
                         </div>
 
                         <sparql-table table-service-supplier="active.tableFacetAll.tableServiceSupplier" config-supplier="active.tableFacetAll.configSupplier" table-mod="active.tableFacetAll.tableMod" cell-renderer-supplier="active.tableFacetAll.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
                     </tab>
 
-                    <tab heading="Selection" active="app.data.tabs[1].isActive">
+                    <tab heading="{{'DATA_Selection' | translate}}Selection" active="app.data.tabs[1].isActive">
                         <div class="well well-sm">
-                            <button class="btn btn-primary" ng-click="exportFacetTable(active.tableFacetSelection.configSupplier())">Export</button>
+                            <button class="btn btn-primary" ng-click="exportFacetTable(active.tableFacetSelection.configSupplier())">{{'DATA_EXPORT' | translate}}</button>
                         </div>
 
                         <sparql-table table-service-supplier="active.tableFacetSelection.tableServiceSupplier" config-supplier="active.tableFacetSelection.configSupplier" table-mod="active.tableFacetSelection.tableMod" cell-renderer-supplier="active.tableFacetSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[1].isActive"></sparql-table>
                     </tab>
 
-                    <tab heading="Essential (All)" active="app.data.tabs[2].isActive">
+                    <tab heading="{{'DATA_ESSENTIAL_ALL' | translate}}" active="app.data.tabs[2].isActive">
                         <div class="well well-sm">
-                            <button class="btn btn-primary" ng-click="exportQuery(active.tableEssentialAll.configSupplier().query)">Export</button>
+                            <button class="btn btn-primary" ng-click="exportQuery(active.tableEssentialAll.configSupplier().query)">{{'DATA_EXPORT' | translate}}</button>
                         </div>
 
                         <sparql-table table-service-supplier="active.tableEssentialAll.tableServiceSupplier" config-supplier="active.tableEssentialAll.configSupplier" table-mod="active.tableEssentialAll.tableMod" cell-renderer-supplier="active.tableEssentialAll.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[2].isActive"></sparql-table>
                     </tab>
 
-                    <tab heading="Essential (Selection)" active="app.data.tabs[3].isActive">
+                    <tab heading="{{'DATA_ESSENTIAL_SELECTION' | translate}}" active="app.data.tabs[3].isActive">
                         <div class="well well-sm">
-                            <button class="btn btn-primary" ng-click="exportQuery(active.tableEssentialSelection.configSupplier().query)">Export</button>
+                            <button class="btn btn-primary" ng-click="exportQuery(active.tableEssentialSelection.configSupplier().query)">{{'DATA_EXPORT' | translate}}</button>
                         </div>
 
                         <sparql-table table-service-supplier="active.tableEssentialSelection.tableServiceSupplier" config-supplier="active.tableEssentialSelection.configSupplier" table-mod="active.tableEssentialSelection.tableMod" cell-renderer-supplier="active.tableEssentialSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[3].isActive"></sparql-table>
                     </tab>
 
-                    <tab heading="Resource (Selection)" active="app.data.tabs[4].isActive">
+                    <tab heading="{{'DATA_RESOURCE_SELECTION' | translate}}" active="app.data.tabs[4].isActive">
                         <div class="well well-sm">
-                            <button class="btn btn-primary" ng-click="exportQuery(active.tableResourceSelection.configSupplier().query)">Export</button>
+                            <button class="btn btn-primary" ng-click="exportQuery(active.tableResourceSelection.configSupplier().query)">{{'DATA_EXPORT' | translate}}</button>
                         </div>
 
                         <sparql-table table-service-supplier="active.tableResourceSelection.tableServiceSupplier" config-supplier="active.tableResourceSelection.configSupplier" table-mod="active.tableResourceSelection.tableMod" cell-renderer-supplier="active.tableResourceSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[4].isActive"></sparql-table>
@@ -265,30 +265,30 @@
 
     <div style="position: absolute; margin: 0px; top: 50px; left: 530px; top: 50px; overflow: auto; pointer-events: none;">
         <tabset style="pointer-events: auto;">
-            <tab ng-if="app.dataSources.showAddDialog" heading="Data Source" style="width: 500px;">
+            <tab ng-if="app.dataSources.showAddDialog" heading="{{'DS_HEADING' | translate}}" style="width: 500px;">
 
                 <div class="row" style="border-style:solid; background-color:#ffffff; #eeeeee; border-width: 1px; margin: 5px; padding: 5px;">
                     <div class="col-md-6">
 
                         <form class="well form-horizontal">
                             <div class="form-group">
-                                <label>Title: <input ng-model="edit.name" type="text" class="form-control"></input></label>
+                                <label>{{'DS_ADD_TITLE' | translate}}: <input ng-model="edit.name" type="text" class="form-control"></input></label>
                             </div>
                             <div class="form-group">
-                                <label>Sparql Service Iri: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label>
+                                <label>{{'DS_ADD_SPARQL_IRI' | translate}}: <input ng-model="edit.dataServiceIri" type="text" class="form-control"></input></label>
                             </div>
                             <div class="form-group">
-                                <label>Named Graphs (Separate entries with white space): <input ng-model="edit.dataGraphIris" ng-list=" " ng-trim="false" type="text" class="form-control"></input></label>
+                                <label>{{'DS_ADD_NAMED_GRAPHS' | translate}}: <input ng-model="edit.dataGraphIris" ng-list=" " ng-trim="false" type="text" class="form-control"></input></label>
                             </div>
                             <div class="form-group">
-                                <label>Join Summary Service: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>
+                                <label>{{'DS_ADD_JOIN_SUMMARY_SERVICE' | translate}}: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>
                             </div>
                             <div class="form-group">
-                                <label>Join Summary Graphs (Separate entries with white space): <input ng-model="edit.jsGraphIris" ng-list=" " ng-trim="false" type="text" class="form-control"></input></label>
+                                <label>{{'DS_ADD_JOIN_SUMMARY_GRAPHS' | translate}}: <input ng-model="edit.jsGraphIris" ng-list=" " ng-trim="false" type="text" class="form-control"></input></label>
                             </div>
 
-                            <button class="btn btn-primary" ng-click="app.dataSources.showAddDialog=false">Cancel</button>
-                            <button class="btn btn-primary" ng-click="addDataSource()">Confirm</button>
+                            <button class="btn btn-primary" ng-click="app.dataSources.showAddDialog=false">{{'CANCEL' | translate}}</button>
+                            <button class="btn btn-primary" ng-click="addDataSource()">{{'CONFIRM' | translate}}</button>
                         </form>
                     </div>
                     <div class="col-md-6" style="max-height: 500px; overflow: auto">

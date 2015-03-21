@@ -1,4 +1,4 @@
-angular.module('Facete2', ['ui.router', 'ui.bootstrap', 'ui.jassa', 'ngTable', 'ui.jassa.openlayers', 'ngSanitize', /* get rid of these modules rest -> 'luegg.directives', 'ui.jassa.facet-list', 'ui.jassa.jassa-list', 'ui.jassa.breadcrumb' */ 'pascalprecht.translate'], ['$rootScopeProvider', function($rootScopeProvider) {
+angular.module('Facete2', ['ui.router', 'ui.bootstrap', 'ui.jassa', 'ngTable', 'ui.jassa.openlayers', 'ngSanitize', 'pascalprecht.translate'/* get rid of these modules rest -> 'luegg.directives', 'ui.jassa.facet-list', 'ui.jassa.jassa-list', 'ui.jassa.breadcrumb' */], ['$rootScopeProvider', function($rootScopeProvider) {
     $rootScopeProvider.digestTtl(10);
 }])
 
