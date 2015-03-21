@@ -2,10 +2,16 @@ angular.module('Facete2', ['ui.router', 'ui.bootstrap', 'ui.jassa', 'ngTable', '
     $rootScopeProvider.digestTtl(10);
 }])
 
-.config(['$locationProvider', function($locationProvider) {
-//    $locationProvider
-//        .html5Mode(true)
-//        .hashPrefix('!');
+.config(['$locationProvider', '$translateProvider', function($locationProvider, $translateProvider) {
+	//$locationProvider
+	//    .html5Mode(true)
+	//    .hashPrefix('!');
+	
+	// add translation tables
+  	$translateProvider.translations('en', translationsEN);
+  	$translateProvider.translations('de', translationsDE);
+  	$translateProvider.preferredLanguage('en');
+  	$translateProvider.fallbackLanguage('en');
 }])
 
 .config([function() {
@@ -16,14 +22,6 @@ angular.module('Facete2', ['ui.router', 'ui.bootstrap', 'ui.jassa', 'ngTable', '
     jQuery('.dropdown input, .dropdown label').click(function(e) {
       e.stopPropagation();
     });
-}])
-
-.config(['$translateProvider', function ($translateProvider) {
-  // add translation tables
-  $translateProvider.translations('en', translationsEN);
-  $translateProvider.translations('de', translationsDE);
-  $translateProvider.preferredLanguage('en');
-  $translateProvider.fallbackLanguage('en');
 }])
 
 .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
@@ -43,5 +41,4 @@ angular.module('Facete2', ['ui.router', 'ui.bootstrap', 'ui.jassa', 'ngTable', '
             templateUrl: "partials/config.html",
         })
         ;
-
 }]);
