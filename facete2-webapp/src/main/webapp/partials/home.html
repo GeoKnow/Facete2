@@ -114,7 +114,18 @@
                         Facets
                     </div>
                     <div class="panel-body">
-                       <facet-list ui-model="active.breadcrumb" sparql-service="active.services.sparqlService" facet-tree-config="active.config.facetTreeConfig" select="selectFacet(path)" plugins="facetTreePlugins" plugin-context="facetTreePluginContext"></facet-list>
+                       <facet-list
+                           ui-model="active.breadcrumb"
+                           constraint-manager="active.config.facetTreeConfig.getFacetConfig().getConstraintManager()"
+                           lookup-service="active.services.lookupServiceNodeLabels"
+                           facet-service="active.services.facetService"
+                           facet-value-service="active.services.facetValueService"
+                           select="selectFacet(path)"
+                           plugins="facetTreePlugins"
+                           plugin-context="facetTreePluginContext"
+                       ></facet-list>
+
+<!--                        <facet-list ui-model="active.breadcrumb" sparql-service="active.services.sparqlService" facet-tree-config="active.config.facetTreeConfig" select="selectFacet(path)" plugins="facetTreePlugins" plugin-context="facetTreePluginContext"></facet-list> -->
                     </div>
                 </div>
 

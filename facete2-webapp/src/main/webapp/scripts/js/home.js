@@ -15,9 +15,10 @@ angular.module('Facete2')
 
 .controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$dddi', function($scope, $q, $rootScope, $timeout, $location, $http, $dddi) {
 
-
     $scope.availableLangs = ['en', 'de', ''];
     $scope.langs = ['en', 'de', ''];
+
+    $scope.uiLangs = ['en'];
 
     $scope.clearServerSideSparqlCache = function() {
         $http.post('cache/ctrl/clear').then(function() {
@@ -680,7 +681,13 @@ angular.module('Facete2')
     // - lookupServiceConstraintLabels
     // -
 
-    dddi.register('active.service.sparqlCache', [ '=config.dataService', '=editCounter',
+    dddi.register('active.services.labelLiteralPreference', [ '=langs',
+        function(langs) {
+            var r = new sparql.LiteralPreference(langs);
+            return r;
+        }]);
+
+    dddi.register('active.services.sparqlCache', [ '=config.dataService', '=editCounter',
         function(sparqlService) {
             sparqlCacheSupplier.invalidate();
 
@@ -690,14 +697,14 @@ angular.module('Facete2')
 
 
     //  '=editCounter',
-    dddi.register('active.service.updateService', [ '=active.config.dataService',
+    dddi.register('active.services.updateService', [ '=active.config.dataService',
         function(serviceConfig) {
             var r = new jassa.service.SparqlUpdateHttp(serviceConfig.serviceIri, serviceConfig.defaultGraphIris);
             return r;
         }]);
 
 
-    dddi.register('active.services.sparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?active.service.sparqlCache',
+    dddi.register('active.services.sparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?active.services.sparqlCache',
         function(serviceConfig, sparqlProxyUrl, sparqlCache) {
             //var cache = sparqlCacheSupplier ? sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris) : null;
 //console.log('Recreated sparql service');
@@ -719,9 +726,9 @@ angular.module('Facete2')
             return r;
         }]);
 
-    dddi.register('active.services.lookupServiceNodeLabels', [ 'active.services.sparqlService',
-        function(sparqlService) {
-            var literalPreference = new sparql.LiteralPreference($scope.langs);
+    dddi.register('active.services.lookupServiceNodeLabels', [ 'active.services.sparqlService', 'active.services.labelLiteralPreference',
+        function(sparqlService, literalPreference) {
+            //var literalPreference = active.services.labelLiteralPreference; //new sparql.LiteralPreference($scope.langs);
             var r = sponate.LookupServiceUtils.createLookupServiceNodeLabels(sparqlService, literalPreference, 20 /* predicates */);
             //r = new service.LookupServiceCache(r);
             return r;
@@ -734,10 +741,103 @@ angular.module('Facete2')
         }]);
 
     dddi.register('active.services.lookupServiceConstraintLabels', [ 'active.services.lookupServiceNodeLabels', 'active.services.lookupServicePathLabels',
-        function(sparqlService, lookupServiceNodeLabels, lookupServicePathLabels) {
+        function(lookupServiceNodeLabels, lookupServicePathLabels) {
             var r = new facete.LookupServiceConstraintLabels(lookupServiceNodeLabels, lookupServicePathLabels);
             return r;
         }]);
+
+    dddi.register('active.services.listServiceConstraintLabels', ['active.services.lookupServiceConstraintLabels', 'ObjectUtils.hashCode(active.config.facetTreeConfig.getFacetConfig().getConstraintManager())',
+        function(lookupServiceConstraintLabels) {
+
+            var cm = $scope.active.config.facetTreeConfig.getFacetConfig().getConstraintManager();
+            var constraints = cm != null ? cm.getConstraints() : [];
+
+            var promise = lookupServiceConstraintLabels.lookup(constraints).then(function(map) {
+
+                var entries = constraints.map(function(constraint) {
+                    var label = map.get(constraint);
+
+                    var r = {
+                        key: constraint,
+                        val: {
+                            constraint: constraint,
+                            label: label
+                        }
+                    };
+
+                    return r;
+                });
+
+                var filterSupplierFn = function(searchString) {
+                    var result;
+
+                    if(searchString != null) {
+                        var re = new RegExp(searchString, 'mi');
+
+                        result = function(entry) {
+                            var m1 = re.test(entry.val.label);
+                            return m1;
+                        };
+                    } else {
+                        result = function(entry) { return true; };
+                    }
+
+                    return result;
+                };
+
+                var r = new jassa.service.ListServiceArray(entries, filterSupplierFn);
+                return r;
+            });
+
+            promise.then(function(ls) {
+               ls.fetchItems().then(function(entries) {
+                   console.log('WEEE: ', entries);
+               });
+            });
+            return promise;
+        }]);
+
+
+//    dddi.register('active.config.constraintManager', ['active.config.facetConfig',
+//        function() {
+//
+//        }]);
+
+
+    dddi.register('active.services.facetService', [ 'active.services.sparqlService', 'ObjectUtils.hashCode(active.config.facetTreeConfig.getFacetConfig())', 'active.services.labelLiteralPreference',
+        function(sparqlService, facetConfigHash, labelLiteralPreference) {
+            var facetConfig = $scope.active.config.facetTreeConfig.getFacetConfig();
+
+            var r = jassa.facete.FacetServiceBuilder
+                .core(sparqlService, facetConfig)
+                .labelConfig(labelLiteralPreference)
+                .index()
+                //.pathToTags(pathToTags)
+                //.tagFn(tagFn)
+                .create();
+
+            return r;
+        }]);
+
+    // TODO We could actually depend on the nodeLabel lookupService
+    // But maybe its ok to just depend on the labelLiteralPreference
+    dddi.register('active.services.facetValueService', [ 'active.services.sparqlService', 'ObjectUtils.hashCode(active.config.facetTreeConfig.getFacetConfig())', 'active.services.labelLiteralPreference',
+        function(sparqlService, facetConfigHash, labelLiteralPreference) {
+            var facetConfig = $scope.active.config.facetTreeConfig.getFacetConfig();
+
+            var facetValueServiceRowLimit = 5000000;
+
+            //var constraintManager = facetConfig.getConstraintManager();
+
+            var r = jassa.facete.FacetValueServiceBuilder
+                .core(sparqlService, facetConfig, facetValueServiceRowLimit)
+                .labelConfig(labelLiteralPreference)
+                .constraintTagging()
+                .create();
+
+            return r;
+        }]);
+
 
     //dddi.register('')
 
@@ -747,10 +847,10 @@ angular.module('Facete2')
 //        }]);
 
 
-    var testExpr = 'active.config.geoConceptFactory.createConcept().toString()';
-    $scope.$watch(testExpr, function(val) {
-       console.log('testExpr: ' + testExpr, val);
-    });
+//    var testExpr = 'active.config.geoConceptFactory.createConcept().toString()';
+//    $scope.$watch(testExpr, function(val) {
+//       console.log('testExpr: ' + testExpr, val);
+//    });
 
     dddi.register('active.dataSources', [ 'active.services.sparqlService', 'active.config.mapConfig.geoMode.mapFactory', 'active.geoConceptFactory.createConcept().toString()',
         function(sparqlService, mapFactory, geoConceptStr) {
