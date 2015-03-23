@@ -15,9 +15,9 @@ angular.module('Facete2')
 
 .controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$translate', function($scope, $q, $rootScope, $timeout, $location, $http, $translate) {
 
-	$scope.changeLanguage = function (langKey) {
-	    $translate.use(langKey);
-	};
+    $scope.changeLanguage = function (langKey) {
+        $translate.use(langKey);
+    };
 
     $scope.availableLangs = ['en', 'de', ''];
     $scope.langs = ['en', 'de', ''];

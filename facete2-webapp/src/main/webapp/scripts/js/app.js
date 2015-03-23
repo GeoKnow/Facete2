@@ -2,11 +2,13 @@ angular.module('Facete2', ['ui.router', 'ui.bootstrap', 'ui.jassa', 'ngTable', '
     $rootScopeProvider.digestTtl(10);
 }])
 
-.config(['$locationProvider', '$translateProvider', function($locationProvider, $translateProvider) {
+.config(['$locationProvider', function($locationProvider) {
 	//$locationProvider
 	//    .html5Mode(true)
 	//    .hashPrefix('!');
-	
+}])
+
+.config(['$translateProvider', function($translateProvider) {
 	// add translation tables
   	$translateProvider.translations('en', translationsEN);
   	$translateProvider.translations('de', translationsDE);
