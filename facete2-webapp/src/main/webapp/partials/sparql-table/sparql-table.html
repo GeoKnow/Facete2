@@ -55,7 +55,7 @@
 <pagination class="pagination-small" page="pagingOptions.currentPage" total-items="totalServerItems" items-per-page="pagingOptions.pageSize" max-Size="maxSize" boundary-links="true" rotate="false" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
 <br />
 
-<span>Showing {{myData.length || 0}} entries in the positions {{pagingOptions.currentPage ? (pagingOptions.currentPage - 1) * pagingOptions.pageSize + 1 : 0}} - {{(pagingOptions.currentPage - 1) * pagingOptions.pageSize + myData.length}} out of {{totalServerItems || 0}} items in total.</span>
+<span translate="PAGINATION_SUB" translate-values="{ nr: {{myData.length || 0}}, pos: {{pagingOptions.currentPage ? (pagingOptions.currentPage - 1) * pagingOptions.pageSize + 1 : 0}}, cur: {{(pagingOptions.currentPage - 1) * pagingOptions.pageSize + myData.length}}, total: {{totalServerItems || 0}} }"></span>
 
 <!-- <span>{{totalServerItems}} items in the table.</span> -->
 <!-- <span>Showing {{myData.length || 0}} entries in the positions {{myData.length ? (pagingOptions.currentPage - 1) * pagingOptions.pageSize + 1 : 0}} - {{(pagingOptions.currentPage - 1) * pagingOptions.pageSize + myData.length}} out of {{totalServerItems || 0}} items in total.</span> -->
