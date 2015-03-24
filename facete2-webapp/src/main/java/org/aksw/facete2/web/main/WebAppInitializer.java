@@ -12,6 +12,7 @@ import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.tuckey.web.filters.urlrewrite.UrlRewriteFilter;
 
@@ -30,6 +31,15 @@ public class WebAppInitializer
 //        // Manage the lifecycle of the root application context
         servletContext.addListener(new ContextLoaderListener(rootContext));
         servletContext.addListener(new RequestContextListener());
+
+        // !!! Force UTF8 encoding !!!
+        {
+            FilterRegistration.Dynamic fr = servletContext.addFilter("CharacterEncodingFilter", new CharacterEncodingFilter());
+            fr.setInitParameter("encoding", "UTF-8");
+            fr.setInitParameter("forceEncoding", "true");
+            fr.addMappingForUrlPatterns(null, true, "/*");
+            fr.setAsyncSupported(true);
+        }
 
 
         {

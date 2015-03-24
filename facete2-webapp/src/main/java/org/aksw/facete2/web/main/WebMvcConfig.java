@@ -1,6 +1,8 @@
 package org.aksw.facete2.web.main;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
@@ -32,6 +36,21 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
 public class WebMvcConfig
     extends WebMvcConfigurerAdapter
 {
+
+    /* Did not solve the non-UTF8 encoding of json files
+     * Using the CharacterEncodingFilter worked
+    private static final Charset UTF8 = Charset.forName("UTF-8");
+
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+      StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
+      stringConverter.setSupportedMediaTypes(Arrays.asList(new MediaType("text", "plain", UTF8)));
+      converters.add(stringConverter);
+
+      // Add other converters ...
+    }
+    */
+
     @Autowired
     private ServletContext servletContext;
 

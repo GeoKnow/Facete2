@@ -27,7 +27,7 @@
                 </accordion-heading>
 
                 <div class="form-group">
-                    <label>{{'DS_AVAILABLE_DATA_SOURCES' | translate}}:<select ng-model="active.service" ng-options="item.name for item in active.serviceConfigs" class="form-control"></select></label>
+                    <label>{{'DS_AVAILABLE_DATA_SOURCES' | translate}}:<select ng-model="active.config" ng-options="item.name for item in active.serviceConfigs" class="form-control"></select></label>
                 </div>
                 <div class="form-group">
                     <button class="btn btn-primary" ng-class="{'active': app.dataSources.showAddDialog}" ng-click="app.dataSources.showAddDialog=!app.dataSources.showAddDialog" class="form-control">{{'DS_ADD_DATA_SOURCE' | translate}}</button>
