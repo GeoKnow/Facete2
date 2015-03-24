@@ -15,6 +15,14 @@
 
 <table class="table table-striped">
     <tr>
+        <td>User Interface Language Preferences</td>
+        <td>
+                <li><button ng-click="changeLanguage('de')" style="margin-bottom: 15px; margin-top: 15px;" translate="BUTTON_LANG_DE"></button></li>
+                <li><button ng-click="changeLanguage('en')" style="margin-bottom: 15px; margin-top: 15px;" translate="BUTTON_LANG_EN"></button></li>
+        </td>
+<!--         <td><lang-select langs="langs" available-langs="availableLangs"></lang-select></td> -->
+    </tr>
+    <tr>
         <td>{{'CONFIG_DATASET_LANGS' | translate}}</td>
         <td><lang-select langs="langs" available-langs="availableLangs"></lang-select></td>
     </tr>
