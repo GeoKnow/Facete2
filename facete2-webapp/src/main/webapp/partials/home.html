@@ -12,7 +12,7 @@
                 </accordion-heading>
 
                 <ul>
-                <li ng-show="!(searchResults.length > 0)">(this list is empty)</li>
+                <li ng-show="!(searchResults.length > 0)">({{'_THIS_LIST_EMPTY' | translate}})</li>
                 <li ng-repeat="item in searchResults">
                     <a href="" ng-click="selectSearchResult(item)"><b>{{item.primaryName}}</b></a>
                     <span>{{item.description}}</span>
@@ -171,7 +171,7 @@
                         <sparql-table table-service-supplier="active.tableFacetAll.tableServiceSupplier" config-supplier="active.tableFacetAll.configSupplier" table-mod="active.tableFacetAll.tableMod" cell-renderer-supplier="active.tableFacetAll.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
                     </tab>
 
-                    <tab heading="{{'DATA_Selection' | translate}}Selection" active="app.data.tabs[1].isActive">
+                    <tab heading="{{'DATA_Selection' | translate}}" active="app.data.tabs[1].isActive">
                         <div class="well well-sm">
                             <button class="btn btn-primary" ng-click="exportFacetTable(active.tableFacetSelection.configSupplier())">{{'DATA_EXPORT' | translate}}</button>
                         </div>
