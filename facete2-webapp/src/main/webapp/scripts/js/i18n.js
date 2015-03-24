@@ -89,7 +89,7 @@ var translationsDE= {
   CONFIG_HEADING: 'Facete2 Control Panel',
   CONFIG_UI_LANGS: 'Präferierte Benutzeroberflächensprache',
   CONFIG_DATASET_LANGS: 'Datensatz Sprachen',
-  CONFIG_SSS_CACHE: 'erverseitiger SPARQL Zwischenspeicher',
+  CONFIG_SSS_CACHE: 'Serverseitiger SPARQL Zwischenspeicher',
   CONFIG_CLEAR_CACHE: 'Zwischenspeicher löschen',
   DS_AVAILABLE_DATA_SOURCES: 'Verfügbare Datenquellen',
   DS_ADD_DATA_SOURCE: 'Datenquelle hinzufügen',
