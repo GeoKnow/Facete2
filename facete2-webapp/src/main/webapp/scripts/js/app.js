@@ -9,16 +9,24 @@ angular.module('Facete2', [
         'ui.codemirror',
         'ui.jassa.openlayers',
         'ui.jassa.rex',
-        'dddi'
-   ], [
-        '$rootScopeProvider', function($rootScopeProvider) {
-    $rootScopeProvider.digestTtl(10);
+        'dddi',
+        'pascalprecht.translate'
+   ], [ '$rootScopeProvider', function($rootScopeProvider) {
+     $rootScopeProvider.digestTtl(10);
 }])
 
 .config(['$locationProvider', function($locationProvider) {
-//    $locationProvider
-//        .html5Mode(true)
-//        .hashPrefix('!');
+    //$locationProvider
+    //    .html5Mode(true)
+    //    .hashPrefix('!');
+}])
+
+.config(['$translateProvider', function($translateProvider) {
+    // add translation tables
+      $translateProvider.translations('en', translationsEN);
+      $translateProvider.translations('de', translationsDE);
+      $translateProvider.preferredLanguage('en');
+      $translateProvider.fallbackLanguage('en');
 }])
 
 .config([function() {
@@ -52,5 +60,4 @@ angular.module('Facete2', [
             templateUrl: "partials/simple-editor.html",
         })
         ;
-
 }]);

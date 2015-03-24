@@ -13,8 +13,11 @@ var client = jassa.client;
 
 angular.module('Facete2')
 
-.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$dddi', function($scope, $q, $rootScope, $timeout, $location, $http, $dddi) {
+.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$dddi', '$translate', function($scope, $q, $rootScope, $timeout, $location, $http, $dddi, $translate) {
 
+    $scope.changeLanguage = function (langKey) {
+        $translate.use(langKey);
+    };
 
     $scope.availableLangs = ['en', 'de', ''];
     $scope.langs = ['en', 'de', ''];

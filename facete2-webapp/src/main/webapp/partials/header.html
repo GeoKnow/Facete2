@@ -10,8 +10,8 @@
                 <span class="icon-bar"></span>
             </button>
 
-            <a class="navbar-brand" style="padding: 3px 15px;" href=""><img style="height: 42px;" src="images/logo-eccenca-plain.png" alt=""></img></a>
-            <a class="navbar-brand" href="">Facete II</a>
+            <a class="navbar-brand" style="padding: 3px 15px;" href="#"><img style="height: 42px;" src="images/logo-eccenca-plain.png" alt=""></img></a>
+            <a class="navbar-brand" href="#">{{'TITLE' | translate}}</a>
         </div>
 
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -19,12 +19,14 @@
                 <div class="form-group">
                     <input type="text" ng-model="app.searchString" class="form-control" placeholder="Find Place...">
                 </div>
-                <button type="submit" ng-click="doSearch(app.searchString)" class="btn btn-default">Submit</button>
+                <button type="submit" ng-click="doSearch(app.searchString)" class="btn btn-default">{{'SUBMIT' | translate}}</button>
             </form>
             <ul class="nav nav-pills navbar-nav">
-                <li><a ui-sref="home">Main</a></li>
-                <li><a ui-sref="edit">Edit</a></li>
-                <li><a ui-sref="config">Config</a></li>
+                <li><a ui-sref="home">{{'MAIN' | translate}}</a></li>
+                <li><a ui-sref="edit">{{'EDIT' | translate}}</a></li>
+                <li><a ui-sref="config">{{'CONFIG' | translate}}</a></li>
+                <li><button ng-click="changeLanguage('de')" translate="BUTTON_LANG_DE"></button></li>
+                <li><button ng-click="changeLanguage('en')" translate="BUTTON_LANG_EN"></button></li>
             </ul>
 
 <!--                <ul class="nav navbar-nav"> -->
@@ -38,9 +40,9 @@
 
             <ul class="nav nav-pills navbar-nav navbar-right">
                 <li class="dropdown" ng-class="{'active': (notifications.length > 0)}">
-                    <a href="" class="dropdown-toggle" data-toggle="dropdown">Notifications <span class="badge">{{notifications.length}}</span> <b class="caret"></b></a>
+                    <a href="" class="dropdown-toggle" data-toggle="dropdown">{{'NOTIFICATIONS' | translate}} <span class="badge">{{notifications.length}}</span> <b class="caret"></b></a>
                     <ul class="dropdown-menu" style="overflow: auto; max-height: 500px;">
-                        <li ng-if="!(notifications.length > 0)">(empty list)</li>
+                        <li ng-if="!(notifications.length > 0)">({{'_EMPTY_LIST' | translate}})</li>
                         <li ng-repeat="item in notifications | reverse" class="well well-sm" style="margin: 5px;">
                             <div style="border-style:solid; border-color: #eeeeee; border-width: 1px; margin: 5px; padding: 5px; width: 250px;">
                                 <b ng-if="item.jobStatus.isCounting">Preparing export (counting)...</b>

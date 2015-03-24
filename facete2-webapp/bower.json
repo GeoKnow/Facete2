@@ -12,7 +12,14 @@
     "underscore": "1.7.0",
     "underscore.string": "2.3.2",
     "jscache": "",
+<<<<<<< HEAD
     "angular-ui-router": "0.2.10"
+=======
+    "ng-table": "0.3.2",
+    "angular-ui-router": "0.2.10",
+    "angular-translate": "2.6.1",
+    "dddi-angular": "1.0.0"
+>>>>>>> feature/i18n
   },
   "devDependencies": {},
   "resolutions": {

@@ -1,4 +1,4 @@
-<h3>Facete2 Control Panel</h3>
+<h3>{{'CONFIG_HEADING' | translate}}</h3>
 
 <!-- <form role="form"> -->
 <!--     <div class="form-group"> -->
@@ -15,14 +15,14 @@
 
 <table class="table table-striped">
     <tr>
-        <td>Dataset languages</td>
+        <td>{{'CONFIG_DATASET_LANGS' | translate}}</td>
         <td><lang-select langs="langs" available-langs="availableLangs"></lang-select></td>
     </tr>
     <tr>
-        <td>Server side SPARQL Cache</td>
+        <td>{{'CONFIG_SSS_CACHE' | translate}}</td>
         <td>
             <div class="input-group">
-                <button class="btn btn-warning" ng-click="clearServerSideSparqlCache()">Clear Cache</button>
+                <button class="btn btn-warning" ng-click="clearServerSideSparqlCache()">{{'CONFIG_CLEAR_CACHE' | translate}}</button>
             </div>
         </td>
     </tr>
