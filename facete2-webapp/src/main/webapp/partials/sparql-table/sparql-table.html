@@ -32,7 +32,7 @@
     </thead>
     <tbody>
     <td ng-show="!(myData.length > 0)" colspan="{{schema.colDefs.length}}" style="text-align:center">
-        This table is empty.
+      {{'_TABLE_EMPTY' | translate}}
     </td>
 
     <tr ng-repeat="row in myData">
@@ -61,4 +61,3 @@
 <!-- <span>Showing {{myData.length || 0}} entries in the positions {{myData.length ? (pagingOptions.currentPage - 1) * pagingOptions.pageSize + 1 : 0}} - {{(pagingOptions.currentPage - 1) * pagingOptions.pageSize + myData.length}} out of {{totalServerItems || 0}} items in total.</span> -->
 <!-- Num pages is {{numPages}} -->
 </div>
-
