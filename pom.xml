@@ -329,6 +329,9 @@
                         </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
             </plugin>
 
             <plugin>
