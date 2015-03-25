@@ -13,7 +13,8 @@
     "underscore.string": "2.3.2",
     "jscache": "",
     "angular-ui-router": "0.2.10",
-    "angular-translate": "2.6.1"
+    "angular-translate": "2.6.1",
+    "angular-translate-loader-static-files": "2.6.1"
   },
   "devDependencies": {},
   "resolutions": {

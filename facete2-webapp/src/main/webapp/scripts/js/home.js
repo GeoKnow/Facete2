@@ -15,14 +15,9 @@ angular.module('Facete2')
 
 .controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$dddi', '$translate', function($scope, $q, $rootScope, $timeout, $location, $http, $dddi, $translate) {
 
-    $scope.changeLanguage = function (langKey) {
-        $translate.use(langKey);
-    };
-
     $scope.availableLangs = ['en', 'de', ''];
     $scope.langs = ['en', 'de', ''];
 
-    $scope.uiLangs = ['en'];
 
     $scope.clearServerSideSparqlCache = function() {
         $http.post('cache/ctrl/clear').then(function() {
@@ -793,11 +788,11 @@ angular.module('Facete2')
                 return r;
             });
 
-            promise.then(function(ls) {
-               ls.fetchItems().then(function(entries) {
-                   console.log('WEEE: ', entries);
-               });
-            });
+//            promise.then(function(ls) {
+//               ls.fetchItems().then(function(entries) {
+//                   console.log('WEEE: ', entries);
+//               });
+//            });
             return promise;
         }]);
 

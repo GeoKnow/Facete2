@@ -22,11 +22,13 @@ angular.module('Facete2', [
 }])
 
 .config(['$translateProvider', function($translateProvider) {
-    // add translation tables
-      $translateProvider.translations('en', translationsEN);
-      $translateProvider.translations('de', translationsDE);
-      $translateProvider.preferredLanguage('en');
-      $translateProvider.fallbackLanguage('en');
+    $translateProvider.useStaticFilesLoader({
+        prefix: 'data/ui/i18n/',
+        suffix: '.json'
+    });
+
+    $translateProvider.preferredLanguage('en');
+    $translateProvider.fallbackLanguage('en');
 }])
 
 .config([function() {
@@ -42,8 +44,6 @@ angular.module('Facete2', [
 .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
     $urlRouterProvider.otherwise("/home");
 
-
-    //
     // Now set up the states
     $stateProvider
         .state('home', {
@@ -60,4 +60,20 @@ angular.module('Facete2', [
             templateUrl: "partials/simple-editor.html",
         })
         ;
-}]);
+}])
+
+.run(['$rootScope', '$translate', function($rootScope, $translate) {
+    var global = $rootScope.global = $rootScope.global || {};
+    var ui = global.ui = global.ui || {};
+
+    ui.availableLangs = ['en', 'de'];
+    ui.lang = 'en';
+
+    $rootScope.$watch('global.ui.lang', function(lang) {
+        $translate.use(lang);
+    });
+
+}])
+
+;
+
