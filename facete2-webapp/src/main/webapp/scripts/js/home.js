@@ -765,7 +765,7 @@ angular.module('Facete2')
                         key: constraint,
                         val: {
                             constraint: constraint,
-                            label: label
+                            displayLabel: label
                         }
                     };
 
@@ -779,7 +779,7 @@ angular.module('Facete2')
                         var re = new RegExp(searchString, 'mi');
 
                         result = function(entry) {
-                            var m1 = re.test(entry.val.label);
+                            var m1 = re.test(entry.val.displayLabel);
                             return m1;
                         };
                     } else {
