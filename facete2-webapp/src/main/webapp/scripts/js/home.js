@@ -19,6 +19,9 @@ angular.module('Facete2')
     $scope.langs = ['en', 'de', ''];
 
 
+    $scope.experimental=false;
+
+
     $scope.clearServerSideSparqlCache = function() {
         $http.post('cache/ctrl/clear').then(function() {
             alert('Cache successfully cleared');
