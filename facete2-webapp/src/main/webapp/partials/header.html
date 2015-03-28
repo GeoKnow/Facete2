@@ -23,7 +23,7 @@
             </form>
             <ul class="nav nav-pills navbar-nav">
                 <li><a ui-sref="home">{{'MAIN' | translate}}</a></li>
-                <li><a ui-sref="edit">{{'EDIT' | translate}}</a></li>
+                <li ng-if="experimental"><a ui-sref="edit">{{'EDIT' | translate}}</a></li>
                 <li><a ui-sref="config">{{'CONFIG' | translate}}</a></li>
 
 <!--                 <li><button ng-click="changeLanguage('de')" style="margin-bottom: 15px; margin-top: 15px;" translate="BUTTON_LANG_DE"></button></li> -->

@@ -161,7 +161,7 @@ var AppConfig = {
                     }
                 });
 
-                if(isUri) {
+                if(isUri && $ctrlScope.experimental) {
                     r.push({
                         text: 'Show in editor',
                         callback: function($itemScope) {
