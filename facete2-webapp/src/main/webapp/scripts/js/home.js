@@ -716,11 +716,11 @@ angular.module('Facete2')
                 : jassa.service.SparqlServiceBuilder.http(sparqlProxyUrl, serviceConfig.defaultGraphIris, {type: 'POST'}, {'service-uri': serviceConfig.serviceIri})
                 ;
 
-            if(sparqlCache) {
+            //if(sparqlCache) {
                 // TODO Reuse prior request cache?
                 var requestCache = null; //new jassa.service.RequestCache(null, sparqlCache);
                 base = base.cache(requestCache);
-            }
+            //}
 
             var r = base.virtFix().paginate(1000).pageExpand(100).create();
 
