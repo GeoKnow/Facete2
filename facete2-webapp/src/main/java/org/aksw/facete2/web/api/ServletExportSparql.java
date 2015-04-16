@@ -408,7 +408,7 @@ public class ServletExportSparql {
             @Override
             public void write(OutputStream output) throws IOException,
                     WebApplicationException {
-                resultSetToCsv(resultSetSupplier, output);
+                resultSetToXlsx(resultSetSupplier, output);
             }
         };
 
@@ -546,7 +546,8 @@ public class ServletExportSparql {
     public static void resultSetToXlsx(Supplier<? extends ResultSet> resultSetSupplier, OutputStream out) throws IOException
     {
         XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet sheet = workbook.getSheetAt(0);
+        XSSFSheet sheet = workbook.createSheet();
+        //XSSFSheet sheet = workbook.getSheetAt(0);
         RowWriter rowWriter = new RowWriterXlsx(sheet);
 
         try {
