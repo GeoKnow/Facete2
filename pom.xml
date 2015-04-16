@@ -84,6 +84,12 @@
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-ooxml</artifactId>
                 <version>3.11</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>stax</groupId>
+                        <artifactId>stax-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- <dependency> <groupId>org.aksw.sparqlify</groupId> <artifactId>sparqlify-jpa</artifactId>
@@ -402,18 +408,18 @@
         </repository>
     </repositories>
 
-	<profiles>
-	  <profile>
-	    <id>doclint-java8-disable</id>
-	    <activation>
-	      <jdk>[1.8,)</jdk>
-	    </activation>
-	
-	    <build>
-	      <plugins>
-	        <plugin>
-	          <groupId>org.apache.maven.plugins</groupId>
-	          <artifactId>maven-javadoc-plugin</artifactId>
+    <profiles>
+      <profile>
+        <id>doclint-java8-disable</id>
+        <activation>
+          <jdk>[1.8,)</jdk>
+        </activation>
+
+        <build>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.9.1</version>
                 <executions>
                     <execution>
@@ -426,12 +432,12 @@
                         </configuration>
                     </execution>
                 </executions>
-	          <configuration>
-	            <additionalparam>-Xdoclint:none</additionalparam>
-	          </configuration>
-	        </plugin>
-	      </plugins>
-	    </build>
-	  </profile>
-	</profiles>
+              <configuration>
+                <additionalparam>-Xdoclint:none</additionalparam>
+              </configuration>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
+    </profiles>
 </project>
