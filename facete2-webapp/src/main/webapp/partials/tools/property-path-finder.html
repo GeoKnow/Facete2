@@ -1,0 +1,48 @@
+<div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <span class="input-group-addon">Source Variable</span>
+            <input class="form-control" type="text" ng-model="sourceVarName"></input>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <span class="input-group-addon">Source graph pattern</span>
+            <textarea class="form-control" ui-codemirror="editorOptions.sparql" ng-model="sourceElementStr">
+            </textarea>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <span class="input-group-addon">Target Variable</span>
+            <input class="form-control" type="text" ng-model="targetVarName"></input>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <span class="input-group-addon">Target graph pattern</span>
+            <textarea class="form-control" ui-codemirror="editorOptions.sparql" ng-model="targetElementStr">
+            </textarea>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <button class="btn btn-primary" ng-click="updateCustomPaths(sourceElementStr, sourceVarName, targetElementStr, targetVarName)">Fetch candidates</button>
+        </div>
+    </div>
+
+<!-- ng-bind-html="pathSearch.error | trustAsHtml" -->
+    <div ng-show="pathSearch.error" class="alert alert-danger" ng-bind-html="pathSearch.error | trustAsHtml">
+    </div>
+
+    <ul>
+        <li ng-repeat="path in pathSearch.paths">
+            {{path.name}}
+        </li>
+    </ul>
+</div>

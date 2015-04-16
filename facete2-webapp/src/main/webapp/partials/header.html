@@ -11,7 +11,7 @@
             </button>
 
             <a class="navbar-brand" style="padding: 3px 15px;" href="#"><img style="height: 42px;" src="images/logo-eccenca-plain.png" alt=""></img></a>
-            <a class="navbar-brand" href="#">{{'TITLE' | translate}}</a>
+            <a class="navbar-brand" href="#">Facete II</a>
         </div>
 
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -24,6 +24,7 @@
             <ul class="nav nav-pills navbar-nav">
                 <li><a ui-sref="home">{{'MAIN' | translate}}</a></li>
                 <li ng-if="experimental"><a ui-sref="edit">{{'EDIT' | translate}}</a></li>
+                <li ng-if="experimental"><a ui-sref="tools">{{'TOOLS' | translate}}</a></li>
                 <li><a ui-sref="config">{{'CONFIG' | translate}}</a></li>
 
 <!--                 <li><button ng-click="changeLanguage('de')" style="margin-bottom: 15px; margin-top: 15px;" translate="BUTTON_LANG_DE"></button></li> -->
@@ -54,6 +55,9 @@
                                    <tr>
                                        <td style="padding: 5px;">
                                            <a ng-if="item.jobStatus.isSucceeded" class="btn btn-primary btn-large" style="width: 100%;" target="_blank" href="api/export/retrieve?id={{item.jobStatus.id}}&format=csv&rename={{item.rename}}">CSV</a>
+                                       </td>
+                                       <td style="padding: 5px;">
+                                           <a ng-if="item.jobStatus.isSucceeded" class="btn btn-primary btn-large" style="width: 100%;" target="_blank" href="api/export/retrieve?id={{item.jobStatus.id}}&format=xlsx&rename={{item.rename}}">Excel</a>
                                        </td>
                                        <td style="padding: 5px;">
                                            <a ng-if="item.jobStatus.isSucceeded" class="btn btn-primary btn-large" style="width: 100%;" target="_blank" href="api/export/retrieve?id={{item.jobStatus.id}}&format=xml&rename={{item.rename}}">XML</a>

@@ -13,6 +13,13 @@ var client = jassa.client;
 
 angular.module('Facete2')
 
+.filter('trustAsHtml', ['$sce', function($sce) {
+    return function(text) {
+        return $sce.trustAsHtml(text);
+    };
+}])
+
+
 .controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$dddi', '$translate', function($scope, $q, $rootScope, $timeout, $location, $http, $dddi, $translate) {
 
     $scope.availableLangs = ['en', 'de', ''];
@@ -69,10 +76,73 @@ angular.module('Facete2')
 
     //$scope.datasetToEditCounter = new jassa.util.Map();
 
+    $scope.updateCustomPaths = function(sourceElementStr, sourceVarName, targetElementStr, targetVarName) {
+        var promise = $scope.findCustomPaths(sourceElementStr, sourceVarName, targetElementStr, targetVarName);
+
+        $q.when(promise).then(function(paths) {
+            $scope.pathSearch = {
+                paths: paths,
+                error: null
+            };
+        }, function(e) {
+            $scope.pathSearch = {
+                paths: null,
+                error: e.responseText
+            };
+        });
+    };
+
+    $scope.findCustomPaths = function(sourceElementStr, sourceVarName, targetElementStr, targetVarName) {
+        var conceptPathFinder = $scope.active.services.conceptPathFinder;
+
+        var sourceConcept = new jassa.sparql.Concept(
+            jassa.sparql.ElementString.create(sourceElementStr || ''),
+            new jassa.rdf.NodeFactory.createVar(sourceVarName || '')
+        );
+
+        var targetConcept = new jassa.sparql.Concept(
+            jassa.sparql.ElementString.create(targetElementStr || ''),
+            new jassa.rdf.NodeFactory.createVar(targetVarName || '')
+        );
+
+
+        var promise = conceptPathFinder.findPaths(sourceConcept, targetConcept).then(function(paths) {
+            //console.log('Paths' + JSON.stringify(paths) + ' Source: ' + sourceConcept + ' Target: ' + targetConcept);
+            var tmp = _(paths).map(function(path) {
+
+                var pathName = path.toString();
+                if(pathName === '') {
+                    pathName = '(empty path)';
+                }
+
+                var r = {
+                    name: pathName,
+                    path: path
+                };
+                return r;
+            });
+
+            return tmp;
+
+        });
+
+        return promise;
+    };
+
+    /*
+    var conceptPathFinder = $scope.active.conceptPathFinder;
+    if(!conceptPathFinder) {
+        var deferred = jQuery.Deferred();
+        deferred.resolve([]);
+        return deferred.promise();
+    }
+
+    var promise = conceptPathFinder.findPaths(sourceConcept, targetConcept);
+     */
 
 
     $scope.performUpdate = function(rexContext, prefixMapping, form) {
-        var updateService = $scope.active.service.updateService;
+        var updateService = $scope.active.services.updateService;
 
         var p = jassa.service.UpdateUtils.performUpdate(updateService, rexContext.diff, prefixMapping);
         var x = p.then(function() {
@@ -635,7 +705,7 @@ angular.module('Facete2')
 
 
     var findConceptPaths = function(sourceConcept, targetConcept) {
-        var conceptPathFinder = $scope.active.conceptPathFinder;
+        var conceptPathFinder = $scope.active.services.conceptPathFinder;
         if(!conceptPathFinder) {
             var deferred = jQuery.Deferred();
             deferred.resolve([]);
@@ -690,10 +760,10 @@ angular.module('Facete2')
         }]);
 
     dddi.register('active.services.sparqlCache', [ '=config.dataService', '=editCounter',
-        function(sparqlService) {
+        function(dataServiceConfig) {
             sparqlCacheSupplier.invalidate();
 
-            var r = $scope.sparqlCacheSupplier.getCache(sparqlService.serviceIri, sparqlService.defaultGraphIris);
+            var r = $scope.sparqlCacheSupplier.getCache(dataServiceConfig.serviceIri, dataServiceConfig.defaultGraphIris);
             return r;
         }]);
 

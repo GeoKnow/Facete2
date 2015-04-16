@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.aksw.facete2</groupId>
@@ -39,9 +40,9 @@
 
         <!-- Dependency Versions -->
         <!-- facete2 only works with jena-sparql-api version 2.10.0-27 and onwards -->
-        <jena-sparql-api.version>2.12.1-6</jena-sparql-api.version>
-        <sparqlify.version>0.6.15</sparqlify.version>
-<!--		<jassa.version>0.0.4</jassa.version> -->
+        <jena-sparql-api.version>2.12.1-8</jena-sparql-api.version>
+        <sparqlify.version>0.6.16</sparqlify.version>
+        <!-- <jassa.version>0.0.4</jassa.version> -->
 
         <spring.version>4.1.4.RELEASE</spring.version>
         <spring.batch.version>3.0.3.RELEASE</spring.batch.version>
@@ -79,53 +80,38 @@
                 <type>war</type>
             </dependency>
 
-<!--
             <dependency>
-                <groupId>org.aksw.sparqlify</groupId>
-                <artifactId>sparqlify-jpa</artifactId>
-                <version>0.6.6-SNAPSHOT</version>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>3.11</version>
             </dependency>
--->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-orm</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
 
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <version>4.2.3.Final</version>
-        </dependency>
+            <!-- <dependency> <groupId>org.aksw.sparqlify</groupId> <artifactId>sparqlify-jpa</artifactId>
+                <version>0.6.6-SNAPSHOT</version> </dependency> -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-orm</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-entitymanager</artifactId>
+                <version>4.2.3.Final</version>
+            </dependency>
 
 
             <!-- Jena SPARQL API -->
-<!--
-            <dependency>
-                <groupId>org.aksw.jena-sparql-api</groupId>
-                <artifactId>jena-sparql-api-core</artifactId>
-                <version>${jena-sparql-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.aksw.jena-sparql-api</groupId>
-                <artifactId>jena-sparql-api-servlets</artifactId>
-                <version>${jena-sparql-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.aksw.jena-sparql-api</groupId>
-                <artifactId>jena-sparql-api-server</artifactId>
-                <version>${jena-sparql-api.version}</version>
-            </dependency>
--->
+            <!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-core</artifactId>
+                <version>${jena-sparql-api.version}</version> </dependency> <dependency>
+                <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-servlets</artifactId>
+                <version>${jena-sparql-api.version}</version> </dependency> <dependency>
+                <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-server</artifactId>
+                <version>${jena-sparql-api.version}</version> </dependency> -->
 
             <!-- Jassa API -->
-<!--
-            <dependency>
-                <groupId>org.aksw.jassa</groupId>
-                <artifactId>jassa-servlets</artifactId>
-                <version>${jassa.version}</version>
-            </dependency>
--->
+            <!-- <dependency> <groupId>org.aksw.jassa</groupId> <artifactId>jassa-servlets</artifactId>
+                <version>${jassa.version}</version> </dependency> -->
 
 
             <dependency>
@@ -140,22 +126,22 @@
                 <version>${jena-sparql-api.version}</version>
             </dependency>
 
-<!--             <dependency> -->
-<!--                 <groupId>org.aksw.jena-sparql-api</groupId> -->
-<!--                 <artifactId>jena-sparql-api-cache-h2</artifactId> -->
-<!--                 <version>${jena-sparql-api.version}</version> -->
-<!--             </dependency> -->
+            <!-- <dependency> -->
+            <!-- <groupId>org.aksw.jena-sparql-api</groupId> -->
+            <!-- <artifactId>jena-sparql-api-cache-h2</artifactId> -->
+            <!-- <version>${jena-sparql-api.version}</version> -->
+            <!-- </dependency> -->
 
-<!--                         <dependency> -->
-<!--                                 <groupId>org.aksw.jena-sparql-api</groupId> -->
-<!--                                 <artifactId>jena-sparql-api-servlets</artifactId> -->
-<!--                                 <version>${jena-sparql-api.version}</version> -->
-<!--                         </dependency> -->
+            <!-- <dependency> -->
+            <!-- <groupId>org.aksw.jena-sparql-api</groupId> -->
+            <!-- <artifactId>jena-sparql-api-servlets</artifactId> -->
+            <!-- <version>${jena-sparql-api.version}</version> -->
+            <!-- </dependency> -->
 
             <dependency>
                 <groupId>org.aksw.sparqlify</groupId>
                 <artifactId>sparqlify-core</artifactId>
-<!--                 <version>0.6.12</version> -->
+                <!-- <version>0.6.12</version> -->
                 <version>${sparqlify.version}</version>
             </dependency>
 
@@ -186,19 +172,19 @@
             </dependency>
 
             <dependency>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring-jdbc</artifactId>
-                    <version>${spring.version}</version>
-                    <exclusions>
-                            <exclusion>
-                                    <groupId>commons-logging</groupId>
-                                    <artifactId>commons-logging</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>aopalliance</groupId>
-                                <artifactId>aopalliance</artifactId>
-                            </exclusion>
-                    </exclusions>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-jdbc</artifactId>
+                <version>${spring.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>aopalliance</groupId>
+                        <artifactId>aopalliance</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -234,9 +220,9 @@
 
             <!-- Spring Batch dependencies -->
             <dependency>
-                    <groupId>org.springframework.batch</groupId>
-                    <artifactId>spring-batch-core</artifactId>
-                    <version>${spring.batch.version}</version>
+                <groupId>org.springframework.batch</groupId>
+                <artifactId>spring-batch-core</artifactId>
+                <version>${spring.batch.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>aopalliance</groupId>
@@ -245,9 +231,9 @@
                 </exclusions>
             </dependency>
             <dependency>
-                    <groupId>org.springframework.batch</groupId>
-                    <artifactId>spring-batch-infrastructure</artifactId>
-                    <version>${spring.batch.version}</version>
+                <groupId>org.springframework.batch</groupId>
+                <artifactId>spring-batch-infrastructure</artifactId>
+                <version>${spring.batch.version}</version>
             </dependency>
 
         </dependencies>
@@ -390,7 +376,7 @@
                     <excludes>
                         <exclude>postgresql-</exclude>
                         <exclude>commons-beanutils-</exclude>
-            <exclude>xmlpull-</exclude>
+                        <exclude>xmlpull-</exclude>
 
                         <!-- TODO These conflicts should be resolved -->
                         <!-- <exclude>stax-api-</exclude> -->

@@ -59,6 +59,10 @@ angular.module('Facete2', [
             url: "/edit",
             templateUrl: "partials/simple-editor.html",
         })
+        .state('tools', {
+            url: "/tools",
+            templateUrl: "partials/tools.html",
+        })
         ;
 }])
 

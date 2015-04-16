@@ -9,6 +9,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,6 +35,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.aksw.facete2.web.main.SparqlExportManager;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
+import org.aksw.jena_sparql_api.core.ResultSetCloseable;
 import org.aksw.jena_sparql_api.core.ResultSetRename;
 import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
 import org.aksw.sparqlify.algebra.sql.exprs2.S_ColumnRef;
@@ -40,6 +43,10 @@ import org.aksw.sparqlify.core.cast.SqlValue;
 import org.aksw.sparqlify.inverse.SparqlSqlInverseMap;
 import org.aksw.sparqlify.inverse.SparqlSqlInverseMapper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +57,8 @@ import org.springframework.util.Assert;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
+import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.google.common.base.Supplier;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -68,6 +77,148 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.vocabulary.RDF;
+
+interface RowWriter {
+    void writeRow(Object[] row);
+}
+
+class RowWriterCsvWriter
+    implements RowWriter
+{
+    private CSVWriter csvWriter;
+    private Function<Object, String> stringConverter;
+
+    public RowWriterCsvWriter(CSVWriter csvWriter) {
+        this(csvWriter, Functions.toStringFunction());
+    }
+
+    public RowWriterCsvWriter(CSVWriter csvWriter, Function<Object, String> stringConverter) {
+        this.csvWriter = csvWriter;
+        this.stringConverter = stringConverter;
+    }
+
+    @Override
+    public void writeRow(Object[] row) {
+        String[] strs = new String[row.length];
+        for(int i = 0; i < row.length; ++i) {
+            Object obj = row[i];
+            String str = stringConverter.apply(obj);
+            strs[i] = str;
+        }
+
+        csvWriter.writeNext(strs);
+    }
+
+}
+
+class CellUtils {
+    public static void setCellValue(Cell cell, Object obj) {
+        if(obj == null) {
+            cell.setCellValue((String)null);
+        }
+        else if (obj instanceof String) {
+            cell.setCellValue((String) obj);
+        }
+        else if (obj instanceof Boolean) {
+            cell.setCellValue((Boolean) obj);
+        }
+        else if (obj instanceof Date) {
+            cell.setCellValue((Date) obj);
+        }
+        else if (obj instanceof Calendar) {
+            cell.setCellValue((Calendar) obj);
+        }
+        else if (obj instanceof Double) {
+            cell.setCellValue((Double) obj);
+        }
+        else {
+            cell.setCellValue("" + obj);
+        }
+    }
+}
+
+
+class RowWriterXlsx
+    implements RowWriter
+{
+    public XSSFSheet sheet;
+    private int nextRowId = 0;
+
+    public RowWriterXlsx(XSSFSheet sheet) {
+        this.sheet = sheet;
+    }
+
+    @Override
+    public void writeRow(Object[] data) {
+
+        int rowId = nextRowId++;
+        Row row = sheet.createRow(rowId);
+
+        for(int j = 0; j < data.length; ++j) {
+            Object obj = data[j];
+            Cell cell = row.createCell(j);
+            CellUtils.setCellValue(cell, obj);
+        }
+    }
+}
+
+
+
+
+class CsvHeaderInfo {
+    public String[] headings;
+    public boolean[] usesLangTag;
+
+
+    public CsvHeaderInfo(String[] headings, boolean[] usesLangTag) {
+        this.headings = headings;
+        this.usesLangTag = usesLangTag;
+    }
+
+
+    public String[] getHeadings() {
+        return headings;
+    }
+
+
+    public boolean[] getUsesLangTag() {
+        return usesLangTag;
+    }
+
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(headings);
+        result = prime * result + Arrays.hashCode(usesLangTag);
+        return result;
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        CsvHeaderInfo other = (CsvHeaderInfo) obj;
+        if (!Arrays.equals(headings, other.headings))
+            return false;
+        if (!Arrays.equals(usesLangTag, other.usesLangTag))
+            return false;
+        return true;
+    }
+
+
+    @Override
+    public String toString() {
+        return "CsvHeaderInfo [headings=" + Arrays.toString(headings)
+                + ", usesLangTag=" + Arrays.toString(usesLangTag) + "]";
+    }
+}
 
 
 @Service
@@ -234,23 +385,52 @@ public class ServletExportSparql {
     }
     */
 
+    public Response retrieveExportCsv(String id, final Map<Var, Var> varMap, String fileName) {
 
-    public Response retrieveExportCsv(String id, final Map<Var, Var> varMap) {
+        final Supplier<ResultSetCloseable> resultSetSupplier = createResultSetSupplier(id, varMap);
 
-//        Gson gson = new Gson();
-//        Type t = new TypeToken<Map<String, String>>(){}.getType();
-//        varMapStr = varMapStr == null || varMapStr.isEmpty() ? "{}" : varMapStr;
-//        final Map<String, String> varMap = gson.fromJson(varMapStr, t);
+        StreamingOutput out = new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException,
+                    WebApplicationException {
+                resultSetToCsv(resultSetSupplier, output);
+            }
+        };
+
+        Response result = createResponse(out, fileName);
+        return result;
+    }
+
+    public Response retrieveExportXlsx(String id, final Map<Var, Var> varMap, String fileName) {
+        final Supplier<ResultSetCloseable> resultSetSupplier = createResultSetSupplier(id, varMap);
+
+        StreamingOutput out = new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException,
+                    WebApplicationException {
+                resultSetToCsv(resultSetSupplier, output);
+            }
+        };
+
+        Response result = createResponse(out, fileName);
+        return result;
+    }
+
+    public Supplier<ResultSetCloseable> createResultSetSupplier(String id, final Map<Var, Var> varMap) {
 
         final Long jobExecutionId = getExportJobExecutionId(id);
-        StreamingOutput out;
 
-        final Supplier<InputStream> inputStreamSupplier = new Supplier<InputStream>() {
+        final Supplier<ResultSetCloseable> resultSetSupplier = new Supplier<ResultSetCloseable>() {
             @Override
-            public InputStream get() {
-                InputStream result;
+            public ResultSetCloseable get() {
+                ResultSetCloseable result;
                 try {
-                    result = sparqlExportManager.getTargetInputStream(jobExecutionId);
+                    InputStream xmlInputStream = sparqlExportManager.getTargetInputStream(jobExecutionId);
+                    result = ResultSetCloseable.fromXml(xmlInputStream);
+                    if(varMap != null) {
+                        ResultSet tmp = new ResultSetRename(result, varMap);
+                        result = new ResultSetCloseable(tmp, result);
+                    }
                 } catch (FileNotFoundException e) {
                     throw new RuntimeException("Failed to get input stream", e);
                 }
@@ -258,22 +438,17 @@ public class ServletExportSparql {
             }
         };
 
-        out = new StreamingOutput() {
-            @Override
-            public void write(OutputStream output) throws IOException,
-                    WebApplicationException {
-                resultSetToCsv(inputStreamSupplier, varMap, output);
-            }
-        };
+        return resultSetSupplier;
+    }
 
+    public Response createResponse(StreamingOutput out, String fileName) {
         ContentDisposition contentDisposition = ContentDisposition.type("attachment")
-                .fileName("export.csv").creationDate(new Date()).build();
+                .fileName(fileName).creationDate(new Date()).build();
 
         Response result = Response.ok(out).header("Content-Disposition", contentDisposition).build();
 
 
         return result;
-
     }
 
 
@@ -309,9 +484,14 @@ public class ServletExportSparql {
         Response result;
         if(format.equals("xml")) {
             result = retrieveExportXml(id, varMap);
-        } else if(format.equals("csv")) {
-            result = retrieveExportCsv(id, varMap);
-        } else {
+        }
+        else if(format.equals("csv")) {
+            result = retrieveExportCsv(id, varMap, "export.csv");
+        }
+        else if(format.equals("xlsx")) {
+            result = retrieveExportXlsx(id, varMap, "export.xlsx");
+        }
+        else {
             throw new RuntimeException("Invalid format: " + format);
         }
 
@@ -363,24 +543,33 @@ public class ServletExportSparql {
     }
 
 
-//    @javax.ws.rs.Path("/retrieveCsv")
-//    @GET
-//    @Produces({ MediaType.APPLICATION_OCTET_STREAM })
-    public static void resultSetToCsv(Supplier<InputStream> xmlSparqlResultSetStreamSupplier, Map<Var, Var> varMap, OutputStream out) {
-        // Map<String, String> varMap
-        // varMap = varMap == null ? new HashMap<String, String>() : varMap;
+    public static void resultSetToXlsx(Supplier<? extends ResultSet> resultSetSupplier, OutputStream out) throws IOException
+    {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.getSheetAt(0);
+        RowWriter rowWriter = new RowWriterXlsx(sheet);
+
+        try {
+            resultSetToTable(resultSetSupplier, rowWriter, out);
+            workbook.write(out);
+        } finally {
+            workbook.close();
+        }
+    }
 
 
-        InputStream firstPass = xmlSparqlResultSetStreamSupplier.get();
-
-        ResultSet rs = ResultSetFactory.fromXML(firstPass);
-        rs = ResultSetRename.wrapIfNeeded(rs, varMap);
-
-        List<Var> vars = new ArrayList<Var>(rs.getResultVars().size());
+    public static List<Var> getResultVars(ResultSet rs) {
+        List<Var> result = new ArrayList<Var>(rs.getResultVars().size());
 
         for(String varName : rs.getResultVars()) {
-            vars.add(Var.alloc(varName));
+            result.add(Var.alloc(varName));
         }
+
+        return result;
+    }
+
+    public static CsvHeaderInfo createHeaders(ResultSet rs) {
+        List<Var> vars = getResultVars(rs);
 
         // Figure out which variables use a language tag so we can create columns for them in the CSV
         //Set<Var> usesLangTag = new HashSet<Var>();
@@ -411,11 +600,7 @@ public class ServletExportSparql {
             }
         }
 
-
-        Writer writer = new OutputStreamWriter(out);
-        CSVWriter csvWriter = new CSVWriter(writer);
-
-        String row[] = new String[vars.size() + langTagColCount];
+        String headers[] = new String[vars.size() + langTagColCount];
 
         // Write headers
         {
@@ -428,20 +613,57 @@ public class ServletExportSparql {
                 //String varName = mappedName == null ? baseName : mappedName;
                 String varName = baseName;
 
-                row[o++] = varName;
+                headers[o++] = varName;
 
                 if(usesLangTag[i]) {
-                    row[o++] = varName + "_lang";
+                    headers[o++] = varName + "_lang";
                 }
 
                 ++i;
             }
-            csvWriter.writeNext(row);
         }
 
-        InputStream secondPass = xmlSparqlResultSetStreamSupplier.get();
-        rs = ResultSetFactory.fromXML(secondPass);
-        rs = ResultSetRename.wrapIfNeeded(rs, varMap);
+        CsvHeaderInfo result = new CsvHeaderInfo(headers, usesLangTag);
+        return result;
+    }
+
+
+    public static void resultSetToCsv(Supplier<? extends ResultSet> resultSetSupplier, OutputStream out) throws IOException {
+
+        Writer writer = new OutputStreamWriter(out);
+        CSVWriter csvWriter = new CSVWriter(writer);
+
+        RowWriter rowWriter = new RowWriterCsvWriter(csvWriter);
+
+        try {
+            resultSetToTable(resultSetSupplier, rowWriter, out);
+
+            csvWriter.flush();
+        } finally {
+            csvWriter.close();
+        }
+
+    }
+            //csvWriter.writeNext(header.getHeadings());
+
+
+//    @javax.ws.rs.Path("/retrieveCsv")
+//    @GET
+//    @Produces({ MediaType.APPLICATION_OCTET_STREAM })
+    public static void resultSetToTable(Supplier<? extends ResultSet> resultSetSupplier, RowWriter rowWriter, OutputStream out) {
+        ResultSet firstPass = resultSetSupplier.get();
+        CsvHeaderInfo header = createHeaders(firstPass);
+
+        rowWriter.writeRow(header.getHeadings());
+
+        ResultSet rs = resultSetSupplier.get();
+
+        List<Var> vars = getResultVars(rs);
+
+        int n = header.getHeadings().length;
+        boolean usesLangTag[] = header.getUsesLangTag();
+
+        String row[] = new String[n];
 
         while(rs.hasNext()) {
             Binding binding = rs.nextBinding();
@@ -465,21 +687,7 @@ public class ServletExportSparql {
                 ++i;
             }
 
-            csvWriter.writeNext(row);
-        }
-
-
-        try {
-            csvWriter.flush();
-        } catch (IOException e) {
-            logger.error("Failed to flush a stream", e);
-        }
-
-
-        try {
-            csvWriter.close();
-        } catch (IOException e) {
-            logger.error("Failed to close a stream", e);
+            rowWriter.writeRow(row);
         }
     }
 
@@ -492,7 +700,8 @@ public class ServletExportSparql {
             result = node.getURI();
         }
         else if(node.isLiteral()) {
-            result = "" + node.getLiteralValue();
+            //result = "" + node.getLiteralValue();
+            result = "" + node.getLiteralLexicalForm();
         }
         else if(node.isBlank()) {
             result = node.getBlankNodeLabel();
