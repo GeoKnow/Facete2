@@ -56,5 +56,10 @@
   "TOGGLE_NAVIGATION": "Toggle navigation",
 
   "BUTTON_LANG_DE": "de",
-  "BUTTON_LANG_EN": "en"
+  "BUTTON_LANG_EN": "en",
+
+  "CONFIG_EXPORT_HEADING_USE_LABELS": "Use labels instead of IRIs",
+  "CONFIG_EXPORT_HEADING_EMPTY": "Root path label",
+  "CONFIG_EXPORT_HEADING_INVERT": "Invert step pattern",
+  "CONFIG_EXPORT_HEADING_SEPARATOR": "Step eparator string"
 }

@@ -26,7 +26,7 @@ angular.module('Facete2')
     $scope.langs = ['en', 'de', ''];
 
 
-    $scope.experimental=false;
+    $scope.experimental = false;
 
 
     $scope.clearServerSideSparqlCache = function() {
@@ -66,6 +66,17 @@ angular.module('Facete2')
             readOnly: true
         }
     };
+
+    $scope.config = $scope.config || {};
+    $scope.config['export'] = {
+        separator: '-->',
+        invert: '-1',
+        empty: 'Items',
+        //invertPattern: '/<'
+        useLabels: true
+    };
+
+
 
     // Used to set pristine on the edit form via forms.edit
     $scope.forms = {};
@@ -812,6 +823,28 @@ angular.module('Facete2')
             return r;
         }]);
 
+    dddi.register('active.services.lookupServiceNodeLabelsExport', [ '?config.export.useLabels', '?active.services.lookupServiceNodeLabels',
+        function(useLabels, lookupServiceNodeLabels) {
+            var r = useLabels
+                ? lookupServiceNodeLabels
+                : new jassa.service.LookupServiceFn(function(node) {
+                      var s = {
+                          displayLabel: jassa.rdf.NodeUtils.getValue(node)
+                      };
+                      return s;
+                  });
+
+            return r;
+        }]);
+
+
+    dddi.register('active.services.lookupServicePathLabelsExport', [ 'active.services.lookupServiceNodeLabelsExport', '?config.export.empty', '?config.export.invert', '?config.export.separator',
+        function(lookupServiceNodeLabelsExport, empty, invert, separator) {
+            var labelFn = jassa.facete.PathUtils.createLabelFn(empty, invert, separator);
+            var r = new facete.LookupServicePathLabels(lookupServiceNodeLabelsExport, labelFn);
+            return r;
+        }]);
+
     dddi.register('active.services.lookupServiceConstraintLabels', [ 'active.services.lookupServiceNodeLabels', 'active.services.lookupServicePathLabels',
         function(lookupServiceNodeLabels, lookupServicePathLabels) {
             var r = new facete.LookupServiceConstraintLabels(lookupServiceNodeLabels, lookupServicePathLabels);
@@ -1467,7 +1500,7 @@ angular.module('Facete2')
         var query = config.query;
         var tableConfigFacet = config.tableConfigFacet;
 
-        var lookupServicePathLabels = $scope.active.services.lookupServicePathLabels;
+        var lookupServicePathLabels = $scope.active.services.lookupServicePathLabelsExport;
 
         var paths = tableConfigFacet.getPaths();
 
