@@ -54,3 +54,4 @@ This project is built on these of our other projects:
 * [jena-sparql-api](https://github.com/AKSW/jena-sparql-api)
 * [Sparqlify](https://github.com/AKSW/Sparqlify)
 
+
