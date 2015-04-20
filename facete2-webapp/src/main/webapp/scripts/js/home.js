@@ -70,7 +70,7 @@ angular.module('Facete2')
     $scope.config = $scope.config || {};
     $scope.config['export'] = {
         separator: '>>>',
-        invert: '-1:',
+        invert: '^-1:',
         empty: 'Items',
         //invertPattern: '/<'
         useLabels: true
