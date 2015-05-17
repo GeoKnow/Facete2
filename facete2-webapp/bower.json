@@ -14,7 +14,8 @@
     "jscache": "",
     "angular-ui-router": "0.2.10",
     "angular-translate": "2.6.1",
-    "angular-translate-loader-static-files": "2.6.1"
+    "angular-translate-loader-static-files": "2.6.1",
+    "Wicket": "v1.3"
   },
   "devDependencies": {},
   "resolutions": {

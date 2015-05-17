@@ -20,13 +20,13 @@ angular.module('Facete2')
 }])
 
 
-.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$dddi', '$translate', function($scope, $q, $rootScope, $timeout, $location, $http, $dddi, $translate) {
+.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$dddi', '$translate', 'ngContextMenuFactory', function($scope, $q, $rootScope, $timeout, $location, $http, $dddi, $translate, ngContextMenuFactory) {
 
     $scope.availableLangs = ['en', 'de', ''];
     $scope.langs = ['en', 'de', ''];
 
 
-    $scope.experimental = false;
+    $scope.experimental = true;
 
 
     $scope.clearServerSideSparqlCache = function() {
@@ -957,14 +957,47 @@ angular.module('Facete2')
 //       console.log('testExpr: ' + testExpr, val);
 //    });
 
-    dddi.register('active.dataSources', [ 'active.services.sparqlService', 'active.config.mapConfig.geoMode.mapFactory', 'active.geoConceptFactory.createConcept().toString()',
+
+    $scope.active.customData = [{
+        key: 'http://test.org/foo',
+        val: {
+            id: 'http://test.org/foo',
+            wkt: 'POINT(0 0)',
+            labelInfo: {
+                displayLabel: 'foobar'
+            }
+        }
+    }];
+
+    dddi.register('active.customDataSource', [ '@active.customData ',
+        function(customData) {
+            var dataService = new jassa.service.DataServiceArray(customData);
+            dataService = new jassa.service.DataServiceTransformEntry(dataService, function(entry) {
+                entry.val.config = {
+                    type: 'custom',
+                    //dataSource: dataService
+                };
+                return entry;
+            })
+            return dataService;
+        }]);
+
+    dddi.register('active.geoDataSource', [ 'active.services.sparqlService', 'active.config.mapConfig.geoMode.mapFactory', 'active.geoConceptFactory.createConcept().toString()',
         function(sparqlService, mapFactory, geoConceptStr) {
             var geoConcept = $scope.active.geoConceptFactory.createConcept();
             // TODO Do caching based on the geoConcept
 
-            var r = [
-                createMapDataSource(sparqlService, mapFactory, geoConcept, '#CC0020')
-            ];
+            var r = createMapDataSource(sparqlService, mapFactory, geoConcept, '#CC0020');
+
+            return r;
+        }]);
+
+    dddi.register('active.dataSources', [ '?active.geoDataSource', '?active.customDataSource',
+        function(geoDataSource, customDataSource) {
+            var r = [];
+            geoDataSource && r.push(geoDataSource);
+            customDataSource && r.push(customDataSource);
+
             return r;
         }]);
 
@@ -1256,8 +1289,12 @@ angular.module('Facete2')
         $scope.active.targetPath = path;
     };
 
-    $scope.selectGeom = function(data) {
-        console.log('Data selected: ', data);
+    $scope.selectGeom = function(data, event) {
+        if(data.config && data.config.type === 'custom') {
+            ngContextMenuFactory([{text: 'test'}], $scope, event);
+        }
+
+        console.log('Data selected: ', data, event);
 
         var geoConceptFactory = data.config.conceptFactory;
 
@@ -1301,6 +1338,45 @@ angular.module('Facete2')
     $scope.searchResults = [];
 
     $scope.doSearch = function(searchString) {
+        if(!$scope.tryDoGeomInsert(searchString)) {
+            $scope.doPlaceSearch(searchString);
+        }
+    };
+
+//    var f = vectorLayerForHoleMarkers.getFeatureFromEvent(e);
+    // popup = new OpenLayers.Popup("chicken", new OpenLayers.LonLat(f.geometry.x,f.geometry.y), new OpenLayers.Size(200,200),true);
+//    popup.closeOnMove = true;
+    //myMap.addPopup(popup);
+
+    $scope.tryDoGeomInsert = function(searchString) {
+        var result;
+        try {
+            var wkt = new Wkt.Wkt();
+
+            // Try to parse the searchString as a WKT
+            wkt.read(searchString);
+
+            $scope.active.customData = [{
+                key: 'http://test.org/foo',
+                val: {
+                    id: 'http://test.org/foo',
+                    wkt: searchString,
+                    labelInfo: {
+                        displayLabel: 'foobar'
+                    }
+                }
+            }];
+            result = true;
+
+        } catch(e) {
+            result = false;
+        };
+
+        return result;
+    };
+
+    $scope.doPlaceSearch = function(searchString) {
+
         $scope.app.search.show = true;
         $scope.app.search.isOpen = true;
 
