@@ -63,5 +63,12 @@
   "CONFIG_EXPORT_HEADING_USE_LABELS": "Bezeichner statt IRIs verwenden",
   "CONFIG_EXPORT_HEADING_EMPTY": "Bezeichner für Root-Pfade",
   "CONFIG_EXPORT_HEADING_INVERT": "Muster für inverse Pfad-Schritte",
-  "CONFIG_EXPORT_HEADING_SEPARATOR": "Trennzeichen zwischen Schritten"
+  "CONFIG_EXPORT_HEADING_SEPARATOR": "Trennzeichen zwischen Schritten",
+
+  "USERNAME": "Benutzername",
+  "PASSWORD": "Passwort",
+
+  "AUTH": "Authentifizierung",
+  "AUTH_NONE": "Keine Authentifizierung",
+  "AUTH_HTTP_BASIC": "HTTP Basic authentication"
 }

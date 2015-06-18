@@ -27,6 +27,9 @@ var DataSourceManager = Class.create({
                 spec.dataService = spec.dataService || {};
                 spec.dataService.serviceIri = item.dataServiceIri;
                 spec.dataService.defaultGraphIris = item.dataGraphIris;
+
+                spec.dataService.auth = item.auth;
+
                 spec.joinSummaryService = spec.joinSummaryService || {};
                 spec.joinSummaryService.serviceIri = item.jsServiceIri;
                 spec.joinSummaryService. defaultGraphIris = item.jsGraphIris;

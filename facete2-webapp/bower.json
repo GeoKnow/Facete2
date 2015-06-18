@@ -2,7 +2,7 @@
   "name": "facete2",
   "version": "0.0.1",
   "dependencies": {
-    "dddi-angular": "1.0.0",
+    "dddi-angular": "1.0.1",
     "jassa-ui-angular": "0.9.0-SNAPSHOT",
     "jassa-ui-angular-edit": "0.9.0-SNAPSHOT",
     "jassa-ui-angular-openlayers": "0.9.0-SNAPSHOT",
@@ -15,10 +15,11 @@
     "angular-ui-router": "0.2.10",
     "angular-translate": "2.6.1",
     "angular-translate-loader-static-files": "2.6.1",
-    "Wicket": "v1.3"
+    "Wicket": "v1.3",
+    "angular-base64": "2.0.5"
   },
-  "devDependencies": {},
   "resolutions": {
-    "angular": "1.3.5-build.3630+sha.30694c8"
+    "angular": "1.3.5-build.3630+sha.30694c8",
+    "dddi-angular": "1.0.1"
   }
 }

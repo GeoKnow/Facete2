@@ -7,6 +7,7 @@ import java.security.ProtectionDomain;
 import javax.servlet.ServletException;
 
 import org.aksw.commons.util.slf4j.LoggerCount;
+import org.aksw.facete2.web.config.WebAppInitializer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;

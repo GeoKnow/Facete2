@@ -33,8 +33,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.aksw.facete2.web.main.SparqlExportManager;
-import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
+import org.aksw.jena_sparql_api.batch.SparqlExportManager;
 import org.aksw.jena_sparql_api.core.ResultSetCloseable;
 import org.aksw.jena_sparql_api.core.ResultSetRename;
 import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
@@ -65,17 +64,12 @@ import com.google.gson.reflect.TypeToken;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetFormatter;
-import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.sparql.core.Quad;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
-import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 interface RowWriter {
@@ -253,31 +247,6 @@ public class ServletExportSparql {
 
     }
 
-    public static long countQuery(Query query, QueryExecutionFactory qef) {
-        Var outputVar = Var.alloc("c");
-
-        if(query.isConstructType()) {
-
-            Element element = query.getQueryPattern();
-            query = new Query();
-            query.setQuerySelectType();
-            query.setQueryResultStar(true);
-            query.setQueryPattern(element);
-        }
-
-        Query countQuery = QueryFactory.create("Select (Count(*) As ?c) { {" + query + "} }", Syntax.syntaxSPARQL_11);
-
-
-        QueryExecution qe = qef.createQueryExecution(countQuery);
-        ResultSet rs = qe.execSelect();
-        Binding binding = rs.nextBinding();
-        Node node = binding.get(outputVar);
-        Number numeric = (Number)node.getLiteralValue();
-        long result = numeric.longValue();
-
-
-        return result;
-    }
 
     /**
      * Starts an export of the given query

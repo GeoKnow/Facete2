@@ -106,7 +106,10 @@ var AppConfig = {
                 dataServiceIri: '',
                 dataGraphIris: [],
                 jsServiceIri: '',
-                jsGraphIris: []
+                jsGraphIris: [],
+                auth: {
+                    type: 'AUTH_NONE'
+                }
             };
 
             return r;
@@ -179,4 +182,36 @@ var AppConfig = {
     }
 
 };
+
+/**
+ * Initialize authenticators of the AppConfig
+ */
+
+angular.module('Facete2')
+.run(['$base64', function($base64) {
+    AppConfig.authenticators = {
+        ids: ['AUTH_NONE', 'AUTH_HTTP_BASIC'],
+        defs: {
+            'AUTH_NONE': {
+            },
+            'AUTH_HTTP_BASIC': {
+                template: 'partials/auth/http-basic.html',
+                createAjaxSpecModifier: function(auth) {
+                    var r = function(ajaxSpec) {
+
+                        ajaxSpec.headers = ajaxSpec.headers || {};
+                        // might switch to plain btoa at some point
+                        var rawStr = auth.username + ':' + auth.password;
+                        var base64 = $base64.encode(rawStr);
+
+                        ajaxSpec.headers.Authorization = 'Basic ' + base64;
+                    };
+                    return r;
+                }
+            }
+        }
+    };
+}])
+
+;
 

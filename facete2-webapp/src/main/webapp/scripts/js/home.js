@@ -28,6 +28,15 @@ angular.module('Facete2')
 
     $scope.experimental = true;
 
+    /*
+    $http({
+        method: "GET",
+        url: "http://localhost:8176/devices/",
+        headers: {"Authorization": "Basic " + btoa("admin:p@ssw0rd")},
+    })...
+    */
+
+
 
     $scope.clearServerSideSparqlCache = function() {
         $http.post('cache/ctrl/clear').then(function() {
@@ -152,6 +161,83 @@ angular.module('Facete2')
      */
 
 
+    $scope.createChangeset = function(rexContext, prefixMapping, form) {
+
+        var ChangesetUtils = {
+            /**
+             * If the graph is null, an empty array is returned.
+             */
+            graphToChangesetTriples: function(graph) {
+                var result;
+                if(!graph) {
+                    result = [];
+                } else {
+                    result = graph.map(function(triple) {
+                        var r = {
+                            subject: '' + triple.getSubject(),
+                            predicate: '' + triple.getPredicate(),
+                            'object': '' + triple.getObject()
+                        };
+                        return r;
+                    });
+                }
+                return result;
+            },
+
+            diffToChangesets: function(diff) {
+                var subjectToAdditions = jassa.rdf.GraphUtils.indexBySubject(diff.added);
+                var subjectToRemovals = jassa.rdf.GraphUtils.indexBySubject(diff.removed);
+
+                var subjects = new jassa.util.HashSet();
+                subjects.addAll(subjectToAdditions.keys());
+                subjects.addAll(subjectToRemovals.keys());
+
+                var result = subjects.map(function(subject) {
+                    var r = {
+                        'subject': '' + subject,
+                        'additions': ChangesetUtils.graphToChangesetTriples(subjectToAdditions.get(subject)),
+                        'removals': ChangesetUtils.graphToChangesetTriples(subjectToAdditions.get(subject)),
+                    };
+                    return r;
+                });
+
+                return result;
+            }
+        };
+
+        // convert the diff into a request to the changeset api
+        var changesets = ChangesetUtils.diffToChangesets(rexContext.diff);
+        // Enricht the changesets with metadata
+//        changesets.forEach(function(changeset) {
+//            jassa.util.ObjectUtils.extend(changeset, changesetMetadata);
+//        });
+
+        alert(JSON.stringify(changesets));
+
+//        var payload = {
+//            "subject": "string",
+//            "reason": "string",
+//            "createdDate": "string",
+//            "author": "string",
+//            "verified": "boolean",
+//            "removals": [
+//              {
+//                "predicate": "string",
+//                "subject": "string",
+//                "object": "string"
+//              }
+//            ],
+//            "additions": [
+//              {
+//                "predicate": "string",
+//                "subject": "string",
+//                "object": "string"
+//              }
+//            ],
+//            "context": "string"
+//          }
+    };
+
     $scope.performUpdate = function(rexContext, prefixMapping, form) {
         var updateService = $scope.active.services.updateService;
 
@@ -189,6 +275,9 @@ angular.module('Facete2')
 
 
     $scope.geoModes = AppConfig.geoModes;
+
+    $scope.authenticators = AppConfig.authenticators;
+
     $scope.edit = AppConfig.edit.createDefaults();
 
     /* Application UI state */
@@ -786,15 +875,34 @@ angular.module('Facete2')
             return r;
         }]);
 
+    var applyAuth = function(ajaxSpec, auth) {
+        if(auth) {
+            var authDef = AppConfig.authenticators.defs[auth.type];
+            if(authDef && authDef.createAjaxSpecModifier) {
+                var fn = authDef.createAjaxSpecModifier(auth);
+                if(fn) {
+                    //ajaxSpec = ajaxSpec || {};
+                    fn(ajaxSpec);
+                }
+            }
+        }
+        return ajaxSpec;
+    };
 
     dddi.register('active.services.sparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?active.services.sparqlCache',
         function(serviceConfig, sparqlProxyUrl, sparqlCache) {
             //var cache = sparqlCacheSupplier ? sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris) : null;
 //console.log('Recreated sparql service');
 
+            ajaxParams = {
+                type: 'POST'
+            };
+
+            ajaxParams = applyAuth(ajaxParams, serviceConfig.auth);
+
             var base = sparqlProxyUrl == null
-                ? jassa.service.SparqlServiceBuilder.http(serviceConfig.serviceIri, serviceConfig.defaultGraphIris, {type: 'POST'})
-                : jassa.service.SparqlServiceBuilder.http(sparqlProxyUrl, serviceConfig.defaultGraphIris, {type: 'POST'}, {'service-uri': serviceConfig.serviceIri})
+                ? jassa.service.SparqlServiceBuilder.http(serviceConfig.serviceIri, serviceConfig.defaultGraphIris, ajaxParams)
+                : jassa.service.SparqlServiceBuilder.http(sparqlProxyUrl, serviceConfig.defaultGraphIris, ajaxParams, {'service-uri': serviceConfig.serviceIri})
                 ;
 
             //if(sparqlCache) {
@@ -1001,9 +1109,12 @@ angular.module('Facete2')
             return r;
         }]);
 
-    dddi.register('active.services.conceptPathFinder', [ '=active.config.conceptPathFinderApiUrl', '=active.config.dataService', '?=active.config.joinSummaryService', 'active.config.mapConfig.geoMode.geoConcept',
-        function(conceptPathFinderApiUrl, dataService, jsService, geoConcept) {
-            var r = new client.ConceptPathFinderApi(conceptPathFinderApiUrl, dataService.serviceIri, dataService.defaultGraphIris, jsService.serviceIri, jsService.defaultGraphIris);
+    // TODO Auth
+    dddi.register('active.services.conceptPathFinder', [ '=active.config.dataService.auth', '=active.config.conceptPathFinderApiUrl', '=active.config.dataService', '?=active.config.joinSummaryService', 'active.config.mapConfig.geoMode.geoConcept',
+        function(auth, conceptPathFinderApiUrl, dataService, jsService, geoConcept) {
+            var ajaxOptions = applyAuth({ type: 'POST'}, auth);
+
+            var r = new client.ConceptPathFinderApi(conceptPathFinderApiUrl, dataService.serviceIri, dataService.defaultGraphIris, jsService.serviceIri, jsService.defaultGraphIris, ajaxOptions);
             return r;
         }]);
 

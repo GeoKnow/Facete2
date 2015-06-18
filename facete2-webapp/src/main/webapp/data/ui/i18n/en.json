@@ -61,5 +61,12 @@
   "CONFIG_EXPORT_HEADING_USE_LABELS": "Use labels instead of IRIs",
   "CONFIG_EXPORT_HEADING_EMPTY": "Root path label",
   "CONFIG_EXPORT_HEADING_INVERT": "Invert step pattern",
-  "CONFIG_EXPORT_HEADING_SEPARATOR": "Step eparator string"
+  "CONFIG_EXPORT_HEADING_SEPARATOR": "Step eparator string",
+
+  "USERNAME": "Username",
+  "PASSWORD": "Password",
+
+  "AUTH": "Authentication",
+  "AUTH_NONE": "No authentication",
+  "AUTH_HTTP_BASIC": "HTTP Basic authentication"
 }

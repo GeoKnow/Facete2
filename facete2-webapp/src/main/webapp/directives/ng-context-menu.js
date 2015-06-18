@@ -29,21 +29,75 @@ var ContextMenuUtils = {
         }
     },
 
-    renderContextMenu: function(fetchContentFn, event) {
-        if (!$) { var $ = angular.element; }
-        $(event.target).addClass('context');
+    /*
+    installCloseHandler: function() {
+        var $body = $(document).find('body');
 
-        var $overlay = $('<div>');
-        $overlay.addClass('dropdown clearfix');
-        $overlay.css({
-            width: '100%',
-            height: '100%',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            zIndex: 9999
+        $body.click(function() {
+
+        });
+    },
+    */
+    globalHandlerInitialized: false,
+    openMenus: [],
+    counter: 0,
+
+    hideAll: function() {
+        console.log('got event');
+        ContextMenuUtils.openMenus.forEach(function(item) {
+            try {
+                item.destroy();
+            } catch(e) {
+                console.log('[ERROR] ', e);
+            }
         });
 
+        while(ContextMenuUtils.openMenus.length) {
+            ContextMenuUtils.openMenus.pop();
+        }
+    },
+
+    renderContextMenu: function(fetchContentFn, event) {
+        this.hideAll();
+
+        if (!$) {
+            var $ = angular.element;
+        }
+
+        var selector = '*';
+        var $els = $(document).find(selector);
+
+        var ns = '.ngcontextmenu';
+
+        ContextMenuUtils.renderContextMenuCore(fetchContentFn, event).then(function($content) {
+            $(event.target).addClass('context');
+            var c = ContextMenuUtils.counter++;
+            var eventName = 'click' + ns + c;
+
+            var destroy = function() {
+                $els.off(eventName);
+                $content.remove();
+                $(event.target).removeClass('context');
+            };
+
+            //console.log('Enabled event on ' + $els.length + ' elements');
+            $els.on(eventName, function() {
+                destroy();
+            });
+
+            var $body = $(document).find('body');
+            $body.append($content);
+            ContextMenuUtils.openMenus.push({
+                event: event,
+                $content: $content,
+                destroy: destroy
+            });
+
+
+        });
+    },
+
+    renderContextMenuCore: function(fetchContentFn, event) {
         return fetchContentFn()
             .then(function($content) {
 
@@ -53,26 +107,11 @@ var ContextMenuUtils = {
                     left: event.pageX + 'px',
                     top: event.pageY + 'px'
                 });
-                $overlay.append($content);
 
-                var $body = $(document).find('body');
-                $body.append($overlay);
-
-                $overlay
-                    .on("click", function (e) {
-                        $(event.target).removeClass('context');
-                        $overlay.remove();
-                    })
-                    .on('contextmenu', function (event) {
-                        $(event.target).removeClass('context');
-                        event.preventDefault();
-                        $overlay.remove();
-                    });
-
-                return $overlay;
+                return $content;
             }, function (err) {
                 console.log('Cannot load template: ' + contentUrl);
-            });
+        });
     }
 };
 
@@ -115,7 +154,14 @@ angular.module('Facete2')
         };
     };
 
-    return function(options, scope, event) {
+    return function(options, scope, event, suppressStopPropagation) {
+        // If event propagation continues, it may lead to immediate hiding of
+        // just rendered menus
+        if(!suppressStopPropagation) {
+            event.stopPropagation();
+        }
+
+
         if(typeof(options) === 'function') {
             options = options(scope);
         }
@@ -158,3 +204,83 @@ angular.module('Facete2')
 }])
 
 ;
+
+
+// Other approaches which did not work properly
+///**
+// * Kept for reference, but the overlay approach turned out to be limiting
+// * @param fetchContentFn
+// * @param event
+// * @returns
+// */
+//renderContextMenuWithOverlay: function(fetchContentFn, event) {
+//    return fetchContentFn()
+//        .then(function($content) {
+//
+//            var $overlay = $('<div></div>');
+//            $overlay.addClass('dropdown clearfix');
+//            $overlay.css({
+//                width: '100%',
+//                height: '100%',
+//                position: 'absolute',
+//                top: 0,
+//                left: 0,
+//                zIndex: 9999
+//            });
+//
+//            $content.css({
+//                display: 'block',
+//                position: 'absolute',
+//                left: event.pageX + 'px',
+//                top: event.pageY + 'px'
+//            });
+//            $overlay.append($content);
+//
+//            $overlay
+//                .on('click', function (e) {
+//                    $(event.target).removeClass('context');
+//                    $overlay.remove();
+//                })
+//                .on('contextmenu', function (event) {
+//                    $(event.target).removeClass('context');
+//                    //event.preventDefault();
+//                    $overlay.remove();
+//                });
+//
+//            return $overlay;
+//        }, function (err) {
+//            console.log('Cannot load template: ' + contentUrl);
+//        });
+//}
+//
+//renderContextMenuBuggy: function(fetchContentFn, event) {
+//    if (!$) {
+//        var $ = angular.element;
+//    }
+//
+//    this.hideAll();
+//
+//    var $document = $(document);
+//    var $body = $(document).find('body');
+//    $(event.target).addClass('context');
+//
+//    if(!ContextMenuUtils.globalHandlerInitialized) {
+//        var ns = '.ngcontextmenu';
+//
+//        console.log('enabled event');
+//        $document.on('click' + ns, this.hideAll);
+//        $document.on('contextmenu' + ns, this.hideAll);
+//
+//
+//        ContextMenuUtils.globalHandlerInitialized = true;
+//    }
+//
+//    ContextMenuUtils.renderContextMenuCore(fetchContentFn, event).then(function($content) {
+//        $body.append($content);
+//        ContextMenuUtils.openMenus.push({
+//            event: event,
+//            $content: $content
+//        });
+//
+//    });
+//}

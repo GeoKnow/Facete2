@@ -10,7 +10,8 @@ angular.module('Facete2', [
         'ui.jassa.openlayers',
         'ui.jassa.rex',
         'dddi',
-        'pascalprecht.translate'
+        'pascalprecht.translate',
+        'base64'
    ], [ '$rootScopeProvider', function($rootScopeProvider) {
      $rootScopeProvider.digestTtl(10);
 }])

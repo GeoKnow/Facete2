@@ -103,7 +103,7 @@ jassa.facete.ElementFactoryConceptFactory = Class.create(/*sparql.ElementFactory
 jassa.client = jassa.client || {};
 
 jassa.client.ConceptPathFinderApi = Class.create({
-    initialize: function(apiUrl, sparqlServiceIri, defaultGraphIris, joinSummaryServiceIri, joinSummaryGraphIris) {
+    initialize: function(apiUrl, sparqlServiceIri, defaultGraphIris, joinSummaryServiceIri, joinSummaryGraphIris, ajaxOptions) {
         this.apiUrl = apiUrl;
         this.sparqlServiceIri = sparqlServiceIri;
         this.defaultGraphIris = defaultGraphIris;
@@ -114,6 +114,8 @@ jassa.client.ConceptPathFinderApi = Class.create({
 
         this.joinSummaryServiceIri = joinSummaryServiceIri;
         this.joinSummaryGraphIris = joinSummaryGraphIris;
+
+        this.ajaxOptions = ajaxOptions;
     },
 
     createAjaxConfig: function(sourceConcept, targetConcept) {
@@ -137,8 +139,10 @@ jassa.client.ConceptPathFinderApi = Class.create({
         var data = this.createAjaxConfig(sourceConcept, targetConcept);
 
         // TODO How can we turn the ajax spec into a (base) URL?
+        //var ajaxOptions = { type: 'POST'};
+        //ajaxOptions
 
-        var result = new service.SparqlServiceHttp(this.apiUrl, this.defaultGraphIris, { type: 'POST' }, data);
+        var result = new service.SparqlServiceHttp(this.apiUrl, this.defaultGraphIris, this.ajaxOptions, data);
         return result;
     },
 
