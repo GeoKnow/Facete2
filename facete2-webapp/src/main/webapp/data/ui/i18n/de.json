@@ -70,5 +70,7 @@
 
   "AUTH": "Authentifizierung",
   "AUTH_NONE": "Keine Authentifizierung",
-  "AUTH_HTTP_BASIC": "HTTP Basic authentication"
+  "AUTH_HTTP_BASIC": "HTTP Basic authentication",
+
+  "ACTIONS": "Aktionen"
 }

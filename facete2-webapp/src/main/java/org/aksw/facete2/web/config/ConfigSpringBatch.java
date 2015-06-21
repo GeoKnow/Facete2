@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import(ConfigSparqlExportJob.class)
-//@Import(ConfigSparqlExportJob.class )
 public class ConfigSpringBatch
     implements ApplicationContextAware
 {

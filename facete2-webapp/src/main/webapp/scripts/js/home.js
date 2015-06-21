@@ -164,6 +164,7 @@ angular.module('Facete2')
     $scope.createChangeset = function(rexContext, prefixMapping, form) {
 
         var ChangesetUtils = {
+             // TODO Moved to its own util class
             /**
              * If the graph is null, an empty array is returned.
              */
@@ -1110,7 +1111,7 @@ angular.module('Facete2')
         }]);
 
     // TODO Auth
-    dddi.register('active.services.conceptPathFinder', [ '=active.config.dataService.auth', '=active.config.conceptPathFinderApiUrl', '=active.config.dataService', '?=active.config.joinSummaryService', 'active.config.mapConfig.geoMode.geoConcept',
+    dddi.register('active.services.conceptPathFinder', [ '?=active.config.dataService.auth', '=active.config.conceptPathFinderApiUrl', '=active.config.dataService', '?=active.config.joinSummaryService', 'active.config.mapConfig.geoMode.geoConcept',
         function(auth, conceptPathFinderApiUrl, dataService, jsService, geoConcept) {
             var ajaxOptions = applyAuth({ type: 'POST'}, auth);
 
@@ -1527,6 +1528,17 @@ angular.module('Facete2')
         $scope.active.mapConfig.zoom = 13;
     };
 
+
+    /**
+     * Action management
+     */
+//    var actionTest = {
+//        id: 'TEST_ACTION',
+//        promise: null,
+//        retry: null, // function t
+//    };
+
+    $scope.actions = [];
 
 
     /**

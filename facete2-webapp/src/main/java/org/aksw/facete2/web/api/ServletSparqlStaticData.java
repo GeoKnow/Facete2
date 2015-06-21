@@ -11,6 +11,9 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.OpAsQuery;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.syntax.Element;
+import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
 
 @Service
 //@Component
@@ -42,25 +45,24 @@ public class ServletSparqlStaticData
 
         // Better clone the query to not corrupt anything
         //query = (Query)query.clone();
-        boolean enableUnionDefaultGraph = true;
+        boolean enableUnionDefaultGraph = false;
         //boolean enableUnionDefaultGraph = rawQuery.getGraphURIs().isEmpty();
 
 
         Query query;
         if(enableUnionDefaultGraph) {
             Op op = Algebra.compile(rawQuery);
-            op = Algebra.unionDefaultGraph(op);
+            op = Algebra.unionDefaultGraph(op); // This approach actually breaks the projection of dataset-query.sparql
             query = OpAsQuery.asQuery(op);
         } else {
-            query = rawQuery;
+            query = rawQuery.cloneQuery();
+            // TODO Take default graphs into account
+            // TODO This is a hack which will break use of named graphs
+            Element el = query.getQueryPattern();
+            Element replacement = new ElementNamedGraph(Var.alloc("hack_123"), el);
+            query.setQueryPattern(replacement);
         }
 
-
-        // TODO Take default graphs into account
-        // TODO This is a hack which will break use of named graphs
-//        Element el = query.getQueryPattern();
-//        Element replacement = new ElementNamedGraph(Var.alloc("hack_123"), el);
-//        query.setQueryPattern(replacement);
 
 //        Map<String, String[]> paramMap = req.getParameterMap();
 //

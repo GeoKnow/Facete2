@@ -1,0 +1,20 @@
+Select Distinct * {
+  ?s
+    a <http://www.w3.org/ns/dcat#Dataset> ;
+    <http://www.w3.org/ns/dcat#theme> <http://example.org/resource/theme/primary> . 
+    Optional { ?s <http://xmlns.com/foaf/0.1/depiction> ?d } . 
+    Optional { ?x <http://example.org/ontology/distributionOf> ?s } 
+    Optional { ?j <http://example.org/ontology/joinSummaryOf> ?s } .
+
+    { Select Distinct ?s {
+        ?s ?y ?z .
+        ?s a <http://www.w3.org/ns/dcat#Dataset> ;
+           <http://www.w3.org/ns/dcat#theme> <http://example.org/resource/theme/primary> .
+       Optional { ?s <http://xmlns.com/foaf/0.1/depiction> ?d } .
+       Optional { ?x <http://example.org/ontology/distributionOf> ?s }
+       Optional { ?j <http://example.org/ontology/joinSummaryOf> ?s } .
+       Filter((?y in (<http://www.w3.org/2000/01/rdf-schema#comment>, <http://www.w3.org/2000/01/rdf-schema#label>))) .
+       Filter(((langMatches(lang(?z), "de") || langMatches(lang(?z), "en")) || langMatches(lang(?z), ""))) . Filter(regex(str(?z), "link", "i"))
+    }  Limit 10 }
+}  Limit 1000
+

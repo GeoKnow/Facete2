@@ -40,6 +40,8 @@
 <!--                        </ul></li> -->
 <!--                </ul> -->
 
+
+
             <ul class="nav nav-pills navbar-nav navbar-right">
                 <li class="dropdown" ng-class="{'active': (notifications.length > 0)}">
                     <a href="" class="dropdown-toggle" data-toggle="dropdown">{{'NOTIFICATIONS' | translate}} <span class="badge">{{notifications.length}}</span> <b class="caret"></b></a>
@@ -77,6 +79,19 @@
 <!--                            <li><a href="#">Something else here</a></li> -->
 <!--                            <li class="divider"></li> -->
 <!--                            <li><a href="#">Separated link</a></li> -->
+                    </ul>
+                </li>
+            </ul>
+
+            <ul class="nav nav-pills navbar-nav navbar-right">
+                <li class="dropdown" ng-class="{'active': (actions.length > 0)}">
+                    <a href="" class="dropdown-toggle" data-toggle="dropdown">{{'ACTIONS' | translate}} <span class="badge">{{actions.length}}</span> <b class="caret"></b></a>
+                    <ul class="dropdown-menu" style="overflow: auto; max-height: 500px;">
+                        <li ng-if="!(actions.length > 0)">({{'_EMPTY_LIST' | translate}})</li>
+                        <li ng-repeat="item in actions | reverse" class="well well-sm" style="margin: 5px;">
+                            {{item.id | translate}}
+
+                        </li>
                     </ul>
                 </li>
             </ul>
