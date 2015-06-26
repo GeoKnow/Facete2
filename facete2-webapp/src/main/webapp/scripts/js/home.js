@@ -11,7 +11,11 @@ var util = jassa.util;
 
 var client = jassa.client;
 
+
+
 angular.module('Facete2')
+
+
 
 .filter('trustAsHtml', ['$sce', function($sce) {
     return function(text) {
@@ -20,7 +24,8 @@ angular.module('Facete2')
 }])
 
 
-.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$dddi', '$translate', 'ngContextMenuFactory', function($scope, $q, $rootScope, $timeout, $location, $http, $dddi, $translate, ngContextMenuFactory) {
+.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$dddi', '$translate', 'ngContextMenuFactory', '$pending', '$problems' ,function($scope, $q, $rootScope, $timeout, $location, $http, $dddi, $translate, ngContextMenuFactory, $pending, $problems) {
+
 
     $scope.availableLangs = ['en', 'de', ''];
     $scope.langs = ['en', 'de', ''];
@@ -281,11 +286,8 @@ angular.module('Facete2')
 
     $scope.edit = AppConfig.edit.createDefaults();
 
-    /* Application UI state */
-    $scope.app = AppConfig.ui;
 
-
-    $scope.$watch('app.data.isOpen', function(state) {
+    $scope.$watch('ui.data.isOpen', function(state) {
         $scope.resizableConfig = state ?
             AppConfig.resizableConfig.enabled :
             AppConfig.resizableConfig.disabled;
@@ -494,7 +496,7 @@ angular.module('Facete2')
         dataSourceManager.addDataSource(spec)
             .then(function() {
                 // Hide data source creation dialog
-                $scope.app.dataSources.showAddDialog=false;
+                $scope.ui.dataSources.showAddDialog=false;
                 refreshDataSources();
             }).fail(function() {
                 alert('Failed to store data');
@@ -633,9 +635,9 @@ angular.module('Facete2')
         facetTreeConfig.getFacetConfig().setBaseConcept(baseConcept);
 
         if(filterString == null || filterString === '') {
-            $scope.app.baseConceptFilterString = null;
+            $scope.ui.baseConceptFilterString = null;
         } else {
-            $scope.app.baseConceptFilterString = filterString;
+            $scope.ui.baseConceptFilterString = filterString;
         }
     };
 
@@ -890,7 +892,13 @@ angular.module('Facete2')
         return ajaxSpec;
     };
 
-    dddi.register('active.services.sparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?active.services.sparqlCache',
+
+
+    /**
+     * The raw sparql service - without any extras such as caching
+     * Useful e.g. for validation (as we do not want to go through the client-side cache)
+     */
+    dddi.register('active.services.rawSparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?active.services.sparqlCache',
         function(serviceConfig, sparqlProxyUrl, sparqlCache) {
             //var cache = sparqlCacheSupplier ? sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris) : null;
 //console.log('Recreated sparql service');
@@ -906,17 +914,119 @@ angular.module('Facete2')
                 : jassa.service.SparqlServiceBuilder.http(sparqlProxyUrl, serviceConfig.defaultGraphIris, ajaxParams, {'service-uri': serviceConfig.serviceIri})
                 ;
 
-            //if(sparqlCache) {
-                // TODO Reuse prior request cache?
-                var requestCache = null; //new jassa.service.RequestCache(null, sparqlCache);
-                base = base.cache(requestCache);
-            //}
+            var r = base.create();
 
-            var r = base.virtFix().paginate(1000).pageExpand(100).create();
-
-            //console.log('Sparql service', serviceIri, defaultGraphIris);
             return r;
         }]);
+
+
+    var createQueryTest = function() {
+        // TODO Find a non-hacky way to bypass server side filtering for validation
+        var n = Math.floor((Math.random() * 1000000));
+
+        var s = jassa.rdf.NodeFactory.createVar('s');
+        var x = jassa.rdf.NodeFactory.createUri('http://example.org/test' + n);
+
+        // Select ?s { ?s <x> <x> } Limit 1
+        var query = new jassa.sparql.Query();
+        query.setQuerySelectType();
+        query.getProject().add(s);
+        query.setQueryPattern(new jassa.sparql.ElementTriplesBlock([new jassa.rdf.Triple(s, x, x)]));
+        query.setLimit(1);
+
+        return query;
+    };
+
+    var validateSparqlService = Promise.method(function(sparqlService) {
+
+        var query = createQueryTest();
+
+        var qe = sparqlService.createQueryExecution(query);
+        var result = qe.execSelect();
+        return result;
+
+
+        /*
+        var result =
+            new Promise(function(resolve, reject) {
+                corePromise.then(function(cacheData) {
+                    resolve(true);
+                }, function(e) {
+                    resolve(false);
+                });
+            })
+            .cancellable()
+            .catch(function(e) {
+                corePromise.cancel();
+            });
+            */
+
+    });
+
+
+    var validationPromiseFn = jassa.util.PromiseUtils.lastRequest(function() {
+        var sparqlService = $scope.active.services.rawSparqlService;
+
+
+        var r = validateSparqlService(sparqlService).then(function() {
+            $scope.active.services.isValidSparqlService = true;
+        }, function(e) {
+            $scope.active.services.isValidSparqlService = false;
+
+            // Maybe we need to throw an exception for the promise chain to fail
+            throw e;
+        });
+
+        return r;
+    });
+
+
+    /**
+     * Validation step
+     */
+    $scope.$watch('active.services.rawSparqlService', function(sparqlService) {
+        if(sparqlService != null) {
+            $pending.add({
+                getName: function() { return 'Validating SPARQL service'; },
+                run: validationPromiseFn
+            });
+        }
+    });
+
+
+//    var ctrl = dddi.register('active.services.isSparqlServiceValid', ['active.services.rawSparqlService', function(sparqlService) {
+//        var r = validateService(sparqlService);
+//        return r;
+//    }]);
+//
+
+    dddi.register('active.services.sparqlService', [ 'active.services.rawSparqlService', '?active.services.sparqlCache', 'active.services.isValidSparqlService',
+        function(rawSparqlService, sparqlCache, isValid) {
+
+            var r;
+            if(isValid) {
+
+                var base = jassa.service.SparqlServiceBuilder.from(rawSparqlService);
+                //if(sparqlCache) {
+                    // TODO Reuse prior request cache?
+                    var requestCache = null; //new jassa.service.RequestCache(null, sparqlCache);
+                    base = base.cache(requestCache);
+                //}
+
+                r = base.virtFix().paginate(1000).pageExpand(100).create();
+
+                //console.log('Sparql service', serviceIri, defaultGraphIris);
+            } else {
+                r = null;
+            }
+
+            return r;
+        }]);
+
+//    dddi.register('active.services.sparqlService', ['active.services.rawSparqlService', 'active.services.isValidSparqlService', function(sparqlService, isValidSparqlService) {
+//        var r = isValidSparqlService ? sparqlService : null;
+//        return r;
+//    }]);
 
     dddi.register('active.services.lookupServiceNodeLabels', [ 'active.services.sparqlService', 'active.services.labelLiteralPreference',
         function(sparqlService, literalPreference) {
@@ -1489,8 +1599,8 @@ angular.module('Facete2')
 
     $scope.doPlaceSearch = function(searchString) {
 
-        $scope.app.search.show = true;
-        $scope.app.search.isOpen = true;
+        $scope.ui.search.show = true;
+        $scope.ui.search.isOpen = true;
 
         var ajaxSpec = {
             crossDomain: true,

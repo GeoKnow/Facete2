@@ -74,6 +74,12 @@ var AppConfig = {
     },
 
     ui: {
+        pending: {
+            isOpen: false
+        },
+        problems: {
+            isOpen: false
+        },
         search: {
             show: false,
             isOpen: false

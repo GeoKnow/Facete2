@@ -32,12 +32,8 @@ import com.hp.hpl.jena.query.Dataset;
 
 @Configuration
 @EnableBatchProcessing
-@Import({ConfigDataSource.class, ConfigSparqlServiceFactory.class, ConfigSpringBatch.class})
+@Import({ConfigDataSource.class, ConfigHibernate.class, ConfigSparqlServiceFactory.class, ConfigSpringBatch.class})
 @ComponentScan({"org.aksw.jassa.web", "org.aksw.facete2.web"}) // TODO I think we can drop jassa.web from scannig by now
-//@Import({ConfigSparqlServiceFactory.class, ConfigSpringBatch.class })
-//@PropertySource("classpath:config/jdbc/jdbc.properties")
-// @EnableTransactionManagement
-//@Import(DataSourceConfig.class)
 public class ConfigApp {
     private static final Logger logger = LoggerFactory
             .getLogger(ConfigApp.class);
@@ -235,3 +231,7 @@ public class ConfigApp {
 //    }
 //
 }
+//@Import({ConfigSparqlServiceFactory.class, ConfigSpringBatch.class })
+//@PropertySource("classpath:config/jdbc/jdbc.properties")
+//@EnableTransactionManagement
+//@Import(DataSourceConfig.class)

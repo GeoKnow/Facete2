@@ -11,31 +11,31 @@ public class FileStreamSink
     implements StreamSink
 {
     private String basePath;
-    
+
     public FileStreamSink(String basePath) {
         this.basePath = basePath;
     }
-    
+
     public String getPath() {
         return this.basePath;
     }
-    
+
     public File getFile(String id) {
         if(basePath == null) {
             throw new RuntimeException("basePath file storage not set " + this);
         }
-        
+
         File result = new File(basePath + "/" + id);
         return result;
     }
-    
-    
+
+
     public boolean doesExist(String id) {
         File file = getFile(id);
         boolean result = file.exists();
         return result;
     }
-    
+
     public boolean delete(String id) {
         File file = getFile(id);
         boolean result = file.delete();
@@ -45,7 +45,7 @@ public class FileStreamSink
     @Override
     public InputStream getInputStream(String id) {
         File file = getFile(id);
-        
+
         InputStream result;
         try {
             result = new FileInputStream(file);
@@ -54,17 +54,17 @@ public class FileStreamSink
         }
         return result;
     }
-    
+
     @Override
     public OutputStream getOutputStream(String id) {
         File file = getFile(id);
-        
+
         File parentFile = file.getParentFile();
         if(parentFile != null) {
             parentFile.mkdirs();
         }
-        
-        
+
+
         OutputStream result;
         try {
             result = new FileOutputStream(file);
@@ -73,7 +73,7 @@ public class FileStreamSink
         }
         return result;
     }
-    
+
     @Override
     public boolean rename(String oldId, String newId) {
         File oldFile = getFile(oldId);

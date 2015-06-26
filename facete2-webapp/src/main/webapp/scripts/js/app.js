@@ -32,15 +32,142 @@ angular.module('Facete2', [
     $translateProvider.fallbackLanguage('en');
 }])
 
-.config([function() {
-    // Setup drop down menu
-    jQuery('.dropdown-toggle').dropdown();
+//.config([function() {
+//    // Setup drop down menu
+//    jQuery('.dropdown-toggle').dropdown();
+//
+//    // Fix input element click problem
+//    jQuery('.dropdown input, .dropdown label').click(function(e) {
+//      e.stopPropagation();
+//    });
+//}])
 
-    // Fix input element click problem
-    jQuery('.dropdown input, .dropdown label').click(function(e) {
-      e.stopPropagation();
-    });
+.service('$problems', [ '$q', function($q) {
+
+    var ProblemManager = function() {
+        this.problems = new IdList();
+    };
+
+    ProblemManager.prototype = {
+        add: function(problemSpec) {
+            var removeFn = this.problems.add({
+                data: problemSpec,
+                getName: function() {
+                    var r = problemSpec.getName();
+                    return r;
+                },
+                isRetryable: function() {
+                    return angular.isFunction(problemSpec.retry);
+                },
+                retry: function() {
+                    // remove the problem
+                    removeFn();
+
+                    if(this.isRetryable()) {
+                        problemSpec.retry();
+                    }
+                },
+                remove: function() {
+                    removeFn();
+                }
+            });
+
+            return removeFn;
+        },
+
+        list: function() {
+            var result = this.problems.list();
+            return result;
+        }
+    };
+
+
+
+    var result = new ProblemManager();
+
+    return result;
+
+
+    return result;
 }])
+
+
+/**
+ * $problems: By default, failed actions are added to the problems list
+ */
+.service('$pending', [ '$problems', '$q', function($problems, $q) {
+
+//    actionSpec = {
+//        info
+//        promiseFn
+//    };
+
+    var createAction = function(idList, actionSpec) {
+        var removePriorProblem = null;
+
+        var fn = function() {
+
+            var removePriorAction = idList.add(actionSpec);
+
+            removePriorProblem && removePriorProblem();
+            //removePriorAction && removePriorAction();
+
+            var promise = actionSpec.run();
+
+            // Remove the entry from the action list as soon as the promise completes
+            var onDone = function() {
+                removePriorAction && removePriorAction();
+            };
+
+            // On retry, re-execute the action again
+            var onProblem = function() {
+                onDone();
+
+                var removePriorProblem = $problems.add({
+                    getName: function() {
+                        var r = 'Failed at: ' + actionSpec.getName();
+                        return r;
+                    },
+                    retry: function() {
+                        fn();
+                    }
+                });
+
+            };
+
+            $q.when(promise).then(onDone, onProblem);
+        };
+
+        fn();
+        return null;
+    };
+
+
+
+    var ActionManager = function() {
+        this.actions = new IdList();
+    };
+
+    ActionManager.prototype = {
+
+        add: function(actionSpec) {
+            var result = createAction(this.actions, actionSpec);
+            return result;
+        },
+
+        list: function() {
+            var result = this.actions.list();
+            return result;
+        }
+    };
+
+
+
+    var result = new ActionManager();
+
+    return result;
+}])
+
 
 .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
     $urlRouterProvider.otherwise("/home");
@@ -67,6 +194,36 @@ angular.module('Facete2', [
         ;
 }])
 
+.run(['$rootScope', function($rootScope) {
+    /* Application UI state */
+    $rootScope.ui = AppConfig.ui;
+}])
+
+.run(['$rootScope', '$pending', '$problems', function($rootScope, $pending, $problems) {
+    $rootScope.$pending = $pending;
+    $rootScope.$problems = $problems;
+}])
+
+.run(['$rootScope', '$dddi', '$timeout', function($rootScope, $dddi, $timeout) {
+
+//    $rootScope.$watch('$pending.list().length', function(totalLength) {
+//        $rootScope.ui.pending.isOpen = totalLength > 0;
+//    });
+
+    $dddi($rootScope).register('ui.pending.isOpen', ['$pending.list().length',
+        function(totalLength) {
+            var r = totalLength > 0;
+            return r;
+        }]);
+
+    $dddi($rootScope).register('ui.problems.isOpen', ['$problems.list().length',
+        function(totalLength) {
+            var r = totalLength > 0;
+            return r;
+        }]);
+
+}])
+
 .run(['$rootScope', '$translate', function($rootScope, $translate) {
     var global = $rootScope.global = $rootScope.global || {};
     var ui = global.ui = global.ui || {};
@@ -79,6 +236,7 @@ angular.module('Facete2', [
     });
 
 }])
+
 
 ;
 

@@ -72,5 +72,7 @@
   "AUTH_NONE": "Keine Authentifizierung",
   "AUTH_HTTP_BASIC": "HTTP Basic authentication",
 
-  "ACTIONS": "Aktionen"
+  "ACTIONS": "Aktionen",
+  "PENDING_ACTIONS": "Laufende Aktionen",
+  "PROBLEMS": "Probleme"
 }

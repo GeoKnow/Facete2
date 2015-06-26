@@ -398,3 +398,48 @@ jassa.facete.QueryFactoryTableMod = Class.create(/*ns.QueryFactory,*/ {
 });
 
 
+var IdList = function() {
+    this.nextId = 0;
+    this.items = [];
+
+    this.resultList = [];
+};
+
+IdList.prototype = {
+
+    add: function(data) {
+        var id = ++this.nextId;
+        var item = {
+            id: id,
+            data: data
+        };
+        this.items.push(item);
+        this.resultList.push(data);
+
+        var self = this;
+        var result = function() {
+            // Remove item by id;
+            jassa.util.ArrayUtils.filter(self.items, function(item) {
+                var retain = item.id != id;
+                return retain;
+            });
+
+            self.updateResultList();
+        };
+
+        return result;
+    },
+
+    updateResultList: function() {
+        // TODO: Better always return the same reference
+        var replacement = this.items.map(function(item) {
+            return item.data;
+        });
+
+        jassa.util.ArrayUtils.replace(this.resultList, replacement);
+    },
+
+    list: function() {
+        return this.resultList;
+    }
+};

@@ -43,7 +43,7 @@
 
 
             <ul class="nav nav-pills navbar-nav navbar-right">
-                <li class="dropdown" ng-class="{'active': (notifications.length > 0)}">
+                <li class="dropdown" ng-class="{'active': (notifications.length > 0)}" dropdown>
                     <a href="" class="dropdown-toggle" data-toggle="dropdown">{{'NOTIFICATIONS' | translate}} <span class="badge">{{notifications.length}}</span> <b class="caret"></b></a>
                     <ul class="dropdown-menu" style="overflow: auto; max-height: 500px;">
                         <li ng-if="!(notifications.length > 0)">({{'_EMPTY_LIST' | translate}})</li>
@@ -84,12 +84,38 @@
             </ul>
 
             <ul class="nav nav-pills navbar-nav navbar-right">
-                <li class="dropdown" ng-class="{'active': (actions.length > 0)}">
-                    <a href="" class="dropdown-toggle" data-toggle="dropdown">{{'ACTIONS' | translate}} <span class="badge">{{actions.length}}</span> <b class="caret"></b></a>
-                    <ul class="dropdown-menu" style="overflow: auto; max-height: 500px;">
-                        <li ng-if="!(actions.length > 0)">({{'_EMPTY_LIST' | translate}})</li>
-                        <li ng-repeat="item in actions | reverse" class="well well-sm" style="margin: 5px;">
-                            {{item.id | translate}}
+<!--              ng-class="{'active': ($problems.list().length > 0)}" -->
+                <li class="dropdown" dropdown is-open="ui.problems.isOpen" ng-click="$event.stopPropagation()">
+                    <a href="" class="dropdown-toggle" dropdown-toggle ng:disabled="!$problems.list().length">{{'PROBLEMS' | translate}} <span class="badge">{{$problems.list().length}}</span> <b class="caret" ng-show="$problems.list().length"></b></a>
+                    <ul class="dropdown-menu" role="menu" style="overflow: auto; max-height: 500px; width: 500px;">
+                        <li class="well well-sm" style="margin: 5px;">
+
+                            <ul class="media-list">
+                                <li class="media" ng-repeat="item in $problems.list()">
+                                    <ng:include src="'partials/problem.html'"></ng:include>
+                                    <hr ng-if="!$last" />
+                                </li>
+                            </ul>
+
+
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+            <ul class="nav nav-pills navbar-nav navbar-right">
+                <li class="dropdown" dropdown is-open="ui.pending.isOpen" ng-click="$event.stopPropagation()">
+<!--                  " ng-class="{'active': ($pending.list().length > 0)}"-->
+                    <a href="" class="dropdown-toggle" dropdown-toggle ng:disabled="!$pending.list().length">{{'PENDING_ACTIONS' | translate}} <span class="badge">{{$pending.list().length}}</span> <b class="caret" ng-show="$pending.list().length"></b></a>
+                    <ul class="dropdown-menu" role="menu" style="overflow: auto; max-height: 500px; width: 500px;">
+                        <li class="well well-sm" style="margin: 5px;">
+
+                            <ul class="media-list">
+                                <li class="media" ng-repeat="item in $pending.list()">
+                                    <ng:include src="'partials/pending.html'"></ng:include>
+                                    <hr ng-if="!$last" />
+                                </li>
+                            </ul>
 
                         </li>
                     </ul>

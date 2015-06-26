@@ -1,0 +1,18 @@
+<div class="media-left">
+    <a href="">
+<!--         <img class="media-object" src="..." alt="..."> -->
+    </a>
+</div>
+<div class="media-body">
+    <h4 class="media-heading">{{item.getName() || item.id}}</h4>
+
+    <div class="btn-group" style="display:inline-block">
+        <button type="button" class="btn btn-danger" ng-click="action.cancel()"><span class="glyphicon glyphicon-stop"></span></button>
+    </div>
+
+    <div class="progress" ng-show="action.getPromise().isPending()">
+        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 45%">
+            <span class="sr-only">45% Complete</span>
+        </div>
+    </div>
+</div>

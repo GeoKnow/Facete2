@@ -4,11 +4,11 @@
 
         <accordion close-others="false">
 
-            <accordion-group style="pointer-events: auto;" ng-if="app.search.show" is-open="app.search.isOpen">
+            <accordion-group style="pointer-events: auto;" ng-if="ui.search.show" is-open="ui.search.isOpen">
                 <accordion-heading>
-                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.search.isOpen, 'glyphicon-chevron-right': !app.search.isOpen}"></i>
+                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': ui.search.isOpen, 'glyphicon-chevron-right': !ui.search.isOpen}"></i>
                     {{'SEARCH_RESULTS' | translate}}
-                    <a href="" ng-click="app.search.show = false"><span class="glyphicon glyphicon-remove-circle"></span></a>
+                    <a href="" ng-click="ui.search.show = false"><span class="glyphicon glyphicon-remove-circle"></span></a>
                 </accordion-heading>
 
                 <ul>
@@ -20,9 +20,9 @@
                 </ul>
             </accordion-group>
 
-            <accordion-group style="pointer-events: auto;" is-open="app.dataSources.isOpen">
+            <accordion-group style="pointer-events: auto;" is-open="ui.dataSources.isOpen">
                 <accordion-heading>
-                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.dataSources.isOpen, 'glyphicon-chevron-right': !app.dataSources.isOpen}"></i>
+                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': ui.dataSources.isOpen, 'glyphicon-chevron-right': !ui.dataSources.isOpen}"></i>
                     {{'DATA_SOURCES' | translate}} {{active.service ? '[' + active.service.name + ']': ''}}
                 </accordion-heading>
 
@@ -30,7 +30,7 @@
                     <label>{{'DS_AVAILABLE_DATA_SOURCES' | translate}}:<select ng-model="active.config" ng-options="item.name for item in active.serviceConfigs" class="form-control"></select></label>
                 </div>
                 <div class="form-group">
-                    <button class="btn btn-primary" ng-class="{'active': app.dataSources.showAddDialog}" ng-click="app.dataSources.showAddDialog=!app.dataSources.showAddDialog" class="form-control">{{'DS_ADD_DATA_SOURCE' | translate}}</button>
+                    <button class="btn btn-primary" ng-class="{'active': ui.dataSources.showAddDialog}" ng-click="ui.dataSources.showAddDialog=!ui.dataSources.showAddDialog" class="form-control">{{'DS_ADD_DATA_SOURCE' | translate}}</button>
                     <button ng-if="active.config" class="btn" ng-click="deleteDataSource(active.config.id)" class="form-control">{{'DS_DELETE_DATA_SOURCE' | translate}}</button>
                 </div>
             </accordion-group>
@@ -52,9 +52,9 @@
 <!--                <button class="btn btn-primary" ng-click="addConceptSpace()">Create a new Concept</button> -->
 <!--            </accordion-group> -->
 
-            <accordion-group class="portlet" style="pointer-events: auto;" is-open="app.geoLinks.isOpen">
+            <accordion-group class="portlet" style="pointer-events: auto;" is-open="ui.geoLinks.isOpen">
                 <accordion-heading>
-                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.geoLinks.isOpen, 'glyphicon-chevron-right': !app.geoLinks.isOpen}"></i>
+                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': ui.geoLinks.isOpen, 'glyphicon-chevron-right': !ui.geoLinks.isOpen}"></i>
                     {{'GEO_LINKS' | translate}}
                 </accordion-heading>
 
@@ -77,9 +77,9 @@
 <!--                </tabset> -->
             </accordion-group>
 
-            <accordion-group style="pointer-events: auto;" is-open="app.facets.isOpen">
+            <accordion-group style="pointer-events: auto;" is-open="ui.facets.isOpen">
                 <accordion-heading>
-                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.facets.isOpen, 'glyphicon-chevron-right': !app.facets.isOpen}"></i>
+                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': ui.facets.isOpen, 'glyphicon-chevron-right': !ui.facets.isOpen}"></i>
                     {{'FACETS' | translate}}
                 </accordion-heading>
 
@@ -89,20 +89,20 @@
                     </div>
                     <div class="panel-body">
 
-                        <div ng-show="app.baseConceptFilterString == null">
+                        <div ng-show="ui.baseConceptFilterString == null">
                             <form>
                                 <div class="input-group">
     <!--                                 <label>Base concept: -->
-                                    <input ng-model="app.baseConceptFilterStringTmp" type="text" class="form-control"></input>
+                                    <input ng-model="ui.baseConceptFilterStringTmp" type="text" class="form-control"></input>
                                     <span class="input-group-btn">
-                                        <button type="submit" ng-click="setBaseConcept(app.baseConceptFilterStringTmp)" class="btn btn-default" type="button">{{'FACETS_SET_FILTER' | translate}}</button>
+                                        <button type="submit" ng-click="setBaseConcept(ui.baseConceptFilterStringTmp)" class="btn btn-default" type="button">{{'FACETS_SET_FILTER' | translate}}</button>
                                     </span>
     <!--                                 </label> -->
                                 </div>
                             </form>
                         </div>
-                        <div ng-show="app.baseConceptFilterString != null">
-                            {{'FACETS_FILTER' | translate}}: {{app.baseConceptFilterString}}
+                        <div ng-show="ui.baseConceptFilterString != null">
+                            {{'FACETS_FILTER' | translate}}: {{ui.baseConceptFilterString}}
                             <a href="" ng-click="setBaseConcept(null)"><span class="glyphicon glyphicon-remove-circle"></span></a>
                         </div>
                     </div>
@@ -168,52 +168,52 @@
     <!-- Note: This div has overflow auto set, but actually it should never be needed -->
     <div style="position: absolute; margin: 0px; bottom: 20px; left: 530px; top: 50px; right: 5px; pointer-events: none;">
 
-        <accordion style="background-color: white; position: absolute; overflow: auto; bottom: 0px; left: 0px; max-height: 100%; min-height: 50px; min-width: 50px; max-width: 100%; pointer-events: auto;" resizable="resizableConfig" bounds="app.data.bounds" ng-style="!app.data.isOpen && {width: '', height: ''}">
-            <accordion-group is-open="app.data.isOpen">
+        <accordion style="background-color: white; position: absolute; overflow: auto; bottom: 0px; left: 0px; max-height: 100%; min-height: 50px; min-width: 50px; max-width: 100%; pointer-events: auto;" resizable="resizableConfig" bounds="ui.data.bounds" ng-style="!ui.data.isOpen && {width: '', height: ''}">
+            <accordion-group is-open="ui.data.isOpen">
                 <accordion-heading>
-                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': app.data.isOpen, 'glyphicon-chevron-right': !app.data.isOpen}"></i>
+                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': ui.data.isOpen, 'glyphicon-chevron-right': !ui.data.isOpen}"></i>
                     {{'DATA' | translate}}
                 </accordion-heading>
 
                 <tabset>
-                    <tab heading="{{'DATA_ALL' | translate}}" active="app.data.tabs[0].isActive">
+                    <tab heading="{{'DATA_ALL' | translate}}" active="ui.data.tabs[0].isActive">
                         <div class="well well-sm">
                             <button class="btn btn-primary" ng-click="exportFacetTable(active.tableFacetAll.configSupplier())">{{'DATA_EXPORT' | translate}}</button>
                         </div>
 
-                        <sparql-table table-service-supplier="active.tableFacetAll.tableServiceSupplier" config-supplier="active.tableFacetAll.configSupplier" table-mod="active.tableFacetAll.tableMod" cell-renderer-supplier="active.tableFacetAll.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[0].isActive"></sparql-table>
+                        <sparql-table table-service-supplier="active.tableFacetAll.tableServiceSupplier" config-supplier="active.tableFacetAll.configSupplier" table-mod="active.tableFacetAll.tableMod" cell-renderer-supplier="active.tableFacetAll.cellRendererSupplier" context="tableContext" disable-requests="!ui.data.tabs[0].isActive"></sparql-table>
                     </tab>
 
-                    <tab heading="{{'DATA_Selection' | translate}}" active="app.data.tabs[1].isActive">
+                    <tab heading="{{'DATA_Selection' | translate}}" active="ui.data.tabs[1].isActive">
                         <div class="well well-sm">
                             <button class="btn btn-primary" ng-click="exportFacetTable(active.tableFacetSelection.configSupplier())">{{'DATA_EXPORT' | translate}}</button>
                         </div>
 
-                        <sparql-table table-service-supplier="active.tableFacetSelection.tableServiceSupplier" config-supplier="active.tableFacetSelection.configSupplier" table-mod="active.tableFacetSelection.tableMod" cell-renderer-supplier="active.tableFacetSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[1].isActive"></sparql-table>
+                        <sparql-table table-service-supplier="active.tableFacetSelection.tableServiceSupplier" config-supplier="active.tableFacetSelection.configSupplier" table-mod="active.tableFacetSelection.tableMod" cell-renderer-supplier="active.tableFacetSelection.cellRendererSupplier" context="tableContext" disable-requests="!ui.data.tabs[1].isActive"></sparql-table>
                     </tab>
 
-                    <tab heading="{{'DATA_ESSENTIAL_ALL' | translate}}" active="app.data.tabs[2].isActive">
+                    <tab heading="{{'DATA_ESSENTIAL_ALL' | translate}}" active="ui.data.tabs[2].isActive">
                         <div class="well well-sm">
                             <button class="btn btn-primary" ng-click="exportQuery(active.tableEssentialAll.configSupplier().query)">{{'DATA_EXPORT' | translate}}</button>
                         </div>
 
-                        <sparql-table table-service-supplier="active.tableEssentialAll.tableServiceSupplier" config-supplier="active.tableEssentialAll.configSupplier" table-mod="active.tableEssentialAll.tableMod" cell-renderer-supplier="active.tableEssentialAll.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[2].isActive"></sparql-table>
+                        <sparql-table table-service-supplier="active.tableEssentialAll.tableServiceSupplier" config-supplier="active.tableEssentialAll.configSupplier" table-mod="active.tableEssentialAll.tableMod" cell-renderer-supplier="active.tableEssentialAll.cellRendererSupplier" context="tableContext" disable-requests="!ui.data.tabs[2].isActive"></sparql-table>
                     </tab>
 
-                    <tab heading="{{'DATA_ESSENTIAL_SELECTION' | translate}}" active="app.data.tabs[3].isActive">
+                    <tab heading="{{'DATA_ESSENTIAL_SELECTION' | translate}}" active="ui.data.tabs[3].isActive">
                         <div class="well well-sm">
                             <button class="btn btn-primary" ng-click="exportQuery(active.tableEssentialSelection.configSupplier().query)">{{'DATA_EXPORT' | translate}}</button>
                         </div>
 
-                        <sparql-table table-service-supplier="active.tableEssentialSelection.tableServiceSupplier" config-supplier="active.tableEssentialSelection.configSupplier" table-mod="active.tableEssentialSelection.tableMod" cell-renderer-supplier="active.tableEssentialSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[3].isActive"></sparql-table>
+                        <sparql-table table-service-supplier="active.tableEssentialSelection.tableServiceSupplier" config-supplier="active.tableEssentialSelection.configSupplier" table-mod="active.tableEssentialSelection.tableMod" cell-renderer-supplier="active.tableEssentialSelection.cellRendererSupplier" context="tableContext" disable-requests="!ui.data.tabs[3].isActive"></sparql-table>
                     </tab>
 
-                    <tab heading="{{'DATA_RESOURCE_SELECTION' | translate}}" active="app.data.tabs[4].isActive">
+                    <tab heading="{{'DATA_RESOURCE_SELECTION' | translate}}" active="ui.data.tabs[4].isActive">
                         <div class="well well-sm">
                             <button class="btn btn-primary" ng-click="exportQuery(active.tableResourceSelection.configSupplier().query)">{{'DATA_EXPORT' | translate}}</button>
                         </div>
 
-                        <sparql-table table-service-supplier="active.tableResourceSelection.tableServiceSupplier" config-supplier="active.tableResourceSelection.configSupplier" table-mod="active.tableResourceSelection.tableMod" cell-renderer-supplier="active.tableResourceSelection.cellRendererSupplier" context="tableContext" disable-requests="!app.data.tabs[4].isActive"></sparql-table>
+                        <sparql-table table-service-supplier="active.tableResourceSelection.tableServiceSupplier" config-supplier="active.tableResourceSelection.configSupplier" table-mod="active.tableResourceSelection.tableMod" cell-renderer-supplier="active.tableResourceSelection.cellRendererSupplier" context="tableContext" disable-requests="!ui.data.tabs[4].isActive"></sparql-table>
                     </tab>
 
 
@@ -230,7 +230,7 @@
 <!--                        </form> -->
 <!--                    </tab> -->
 
-<!--                     <tab heading="Find Relations" active="app.data.tabs[4].isActive"> -->
+<!--                     <tab heading="Find Relations" active="ui.data.tabs[4].isActive"> -->
 <!--                         <table> -->
 <!--                         <tr><td> -->
 <!--                             <div class="panel panel-info">  -->
@@ -277,7 +277,7 @@
 
     <div style="position: absolute; margin: 0px; top: 50px; left: 530px; top: 50px; overflow: auto; pointer-events: none;">
         <tabset style="pointer-events: auto;">
-            <tab ng-if="app.dataSources.showAddDialog" heading="{{'DS_HEADING' | translate}}" style="width: 500px;">
+            <tab ng-if="ui.dataSources.showAddDialog" heading="{{'DS_HEADING' | translate}}" style="width: 500px;">
 
                 <div class="row" style="border-style:solid; background-color:#ffffff; #eeeeee; border-width: 1px; margin: 5px; padding: 5px;">
                     <div class="col-md-6">
@@ -311,7 +311,7 @@
                             </div>
 
 
-                            <button class="btn btn-primary" ng-click="app.dataSources.showAddDialog=false">{{'CANCEL' | translate}}</button>
+                            <button class="btn btn-primary" ng-click="ui.dataSources.showAddDialog=false">{{'CANCEL' | translate}}</button>
                             <button class="btn btn-primary" ng-click="addDataSource()">{{'CONFIRM' | translate}}</button>
                         </form>
                     </div>
@@ -330,3 +330,9 @@
 
 
 <!--    <a href="https://github.com/GeoKnow/Facete2" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" src="images/forkme_right_green_007200.png" alt="Fork me on GitHub"></a> -->
+
+
+
+
+
+

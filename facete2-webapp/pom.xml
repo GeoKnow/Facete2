@@ -221,15 +221,15 @@
         <!-- <artifactId>sparqlify-jpa</artifactId> -->
         <!-- </dependency> -->
 
-        <!-- <dependency> -->
-        <!-- <groupId>org.hibernate</groupId> -->
-        <!-- <artifactId>hibernate-entitymanager</artifactId> -->
-        <!-- </dependency> -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+        </dependency>
 
-        <!-- <dependency> -->
-        <!-- <groupId>org.springframework</groupId> -->
-        <!-- <artifactId>spring-orm</artifactId> -->
-        <!-- </dependency> -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+        </dependency>
 
         <!-- <dependency> <groupId>org.aksw.jassa</groupId> <artifactId>jassa-servlets</artifactId>
             </dependency> -->
@@ -261,6 +261,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.aksw.sparqlify</groupId>
+            <artifactId>sparqlify-jpa</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.aksw.jdbc-utils</groupId>
             <artifactId>jdbc-utils-core</artifactId>
         </dependency>
@@ -279,6 +284,21 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
         </dependency>
 
         <dependency>
@@ -315,10 +335,10 @@
         <!-- </dependency> -->
 
 
-<!--         <dependency> -->
-<!--             <groupId>fr.dudie</groupId> -->
-<!--             <artifactId>nominatim-api</artifactId> -->
-<!--         </dependency> -->
+        <!-- <dependency> -->
+        <!-- <groupId>fr.dudie</groupId> -->
+        <!-- <artifactId>nominatim-api</artifactId> -->
+        <!-- </dependency> -->
 
         <dependency>
             <groupId>org.aksw.jena-sparql-api</groupId>

@@ -64,7 +64,11 @@ var ContextMenuUtils = {
             var $ = angular.element;
         }
 
-        var selector = '*';
+        //var selector = '*';
+        //var selector = 'body';
+
+        // TODO Allow customizing selectors
+        var selector = 'body, .olMapViewport';
         var $els = $(document).find(selector);
 
         var ns = '.ngcontextmenu';
