@@ -73,6 +73,6 @@
   "AUTH_HTTP_BASIC": "HTTP Basic authentication",
 
   "ACTIONS": "Aktionen",
-  "PENDING_ACTIONS": "Laufende Aktionen",
+  "PROCESSES": "Prozesse",
   "PROBLEMS": "Probleme"
 }

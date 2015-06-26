@@ -105,14 +105,14 @@
 
             <ul class="nav nav-pills navbar-nav navbar-right">
                 <li class="dropdown" dropdown is-open="ui.pending.isOpen" ng-click="$event.stopPropagation()">
-<!--                  " ng-class="{'active': ($pending.list().length > 0)}"-->
-                    <a href="" class="dropdown-toggle" dropdown-toggle ng:disabled="!$pending.list().length">{{'PENDING_ACTIONS' | translate}} <span class="badge">{{$pending.list().length}}</span> <b class="caret" ng-show="$pending.list().length"></b></a>
+<!--                  " ng-class="{'active': ($process.list().length > 0)}"-->
+                    <a href="" class="dropdown-toggle" dropdown-toggle ng:disabled="!$process.list().length">{{'PROCESSES' | translate}} <span class="badge">{{$processes.list().length}}</span> <b class="caret" ng-show="$processes.list().length"></b></a>
                     <ul class="dropdown-menu" role="menu" style="overflow: auto; max-height: 500px; width: 500px;">
                         <li class="well well-sm" style="margin: 5px;">
 
                             <ul class="media-list">
-                                <li class="media" ng-repeat="item in $pending.list()">
-                                    <ng:include src="'partials/pending.html'"></ng:include>
+                                <li class="media" ng-repeat="item in $processes.list()">
+                                    <ng:include src="'partials/process.html'"></ng:include>
                                     <hr ng-if="!$last" />
                                 </li>
                             </ul>

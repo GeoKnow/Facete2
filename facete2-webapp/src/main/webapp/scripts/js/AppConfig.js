@@ -74,7 +74,7 @@ var AppConfig = {
     },
 
     ui: {
-        pending: {
+        processes: {
             isOpen: false
         },
         problems: {

@@ -93,9 +93,23 @@ angular.module('Facete2', [
 
 
 /**
- * $problems: By default, failed actions are added to the problems list
+ * An action spawns a process, and if the process fails, a problem is created which allows restarting the process
+ *
+ * $problems: By default, failed processes are added to the problems list
+ *
+ *
  */
-.service('$pending', [ '$problems', '$q', function($problems, $q) {
+.service('$processes', [ '$problems', '$q', function($problems, $q) {
+
+
+/*
+We probably need to extend the pending/problem concept with a third entity, such as the action,
+to which problems and pending (what?) are linked.
+
+Execution of an action spawns a process
+
+
+ */
 
 //    actionSpec = {
 //        info
@@ -199,18 +213,18 @@ angular.module('Facete2', [
     $rootScope.ui = AppConfig.ui;
 }])
 
-.run(['$rootScope', '$pending', '$problems', function($rootScope, $pending, $problems) {
-    $rootScope.$pending = $pending;
+.run(['$rootScope', '$processes', '$problems', function($rootScope, $processes, $problems) {
+    $rootScope.$processes = $processes;
     $rootScope.$problems = $problems;
 }])
 
 .run(['$rootScope', '$dddi', '$timeout', function($rootScope, $dddi, $timeout) {
 
-//    $rootScope.$watch('$pending.list().length', function(totalLength) {
+//    $rootScope.$watch('$processes.list().length', function(totalLength) {
 //        $rootScope.ui.pending.isOpen = totalLength > 0;
 //    });
 
-    $dddi($rootScope).register('ui.pending.isOpen', ['$pending.list().length',
+    $dddi($rootScope).register('ui.processes.isOpen', ['$processes.list().length',
         function(totalLength) {
             var r = totalLength > 0;
             return r;

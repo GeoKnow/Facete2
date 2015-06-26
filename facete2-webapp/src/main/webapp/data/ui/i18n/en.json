@@ -71,7 +71,7 @@
   "AUTH_HTTP_BASIC": "HTTP Basic authentication",
 
   "ACTIONS": "Actions",
-  "PENDING_ACTIONS": "Pending actions",
+  "PROCESSES": "Processes",
   "PROBLEMS": "Problems"
 
 }

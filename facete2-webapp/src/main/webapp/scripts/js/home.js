@@ -24,7 +24,7 @@ angular.module('Facete2')
 }])
 
 
-.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$dddi', '$translate', 'ngContextMenuFactory', '$pending', '$problems' ,function($scope, $q, $rootScope, $timeout, $location, $http, $dddi, $translate, ngContextMenuFactory, $pending, $problems) {
+.controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$dddi', '$translate', 'ngContextMenuFactory', '$processes', '$problems' ,function($scope, $q, $rootScope, $timeout, $location, $http, $dddi, $translate, ngContextMenuFactory, $processes, $problems) {
 
 
     $scope.availableLangs = ['en', 'de', ''];
@@ -986,7 +986,7 @@ angular.module('Facete2')
      */
     $scope.$watch('active.services.rawSparqlService', function(sparqlService) {
         if(sparqlService != null) {
-            $pending.add({
+            $processes.add({
                 getName: function() { return 'Validating SPARQL service'; },
                 run: validationPromiseFn
             });
