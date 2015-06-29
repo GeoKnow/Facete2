@@ -417,6 +417,9 @@ IdList.prototype = {
         this.resultList.push(data);
 
         var self = this;
+
+        // TODO The result could be an object with methods:
+        // remove() and addRemoveListener()
         var result = function() {
             // Remove item by id;
             jassa.util.ArrayUtils.filter(self.items, function(item) {

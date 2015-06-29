@@ -104,9 +104,10 @@
             </ul>
 
             <ul class="nav nav-pills navbar-nav navbar-right">
-                <li class="dropdown" dropdown is-open="ui.pending.isOpen" ng-click="$event.stopPropagation()">
+                <li class="dropdown" dropdown is-open="ui.processes.isOpen" ng-click="$event.stopPropagation()">
+<!--                 {{ui.processes.isOpen}} -->
 <!--                  " ng-class="{'active': ($process.list().length > 0)}"-->
-                    <a href="" class="dropdown-toggle" dropdown-toggle ng:disabled="!$process.list().length">{{'PROCESSES' | translate}} <span class="badge">{{$processes.list().length}}</span> <b class="caret" ng-show="$processes.list().length"></b></a>
+                    <a href="" class="dropdown-toggle" dropdown-toggle ng:disabled="!$processes.list().length">{{'PROCESSES' | translate}} <span class="badge">{{$processes.list().length}}</span> <b class="caret" ng-show="$processes.list().length"></b></a>
                     <ul class="dropdown-menu" role="menu" style="overflow: auto; max-height: 500px; width: 500px;">
                         <li class="well well-sm" style="margin: 5px;">
 
