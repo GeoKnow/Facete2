@@ -21,3 +21,4 @@ release.properties
 facete2-debian-tomcat-common/target/
 facete2-debian-tomcat7/target/
 
+version.properties

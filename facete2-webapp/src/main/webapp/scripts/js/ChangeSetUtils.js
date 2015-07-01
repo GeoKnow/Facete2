@@ -1,5 +1,19 @@
 var ChangeSetUtils = {
 
+
+    createConceptSubjectOfChange: function(uriStr) {
+        var s = jassa.sparql.VarUtils.s;
+
+        var subjectOfChange = jassa.rdf.NodeFactory.createUri('http://purl.org/vocab/changeset/schema#subjectOfChange');
+
+        var element = new jassa.sparql.ElementTriplesBlock([
+            new jassa.rdf.Tripel(s, subjectOfChange, target)
+        ]);
+        var result = new jassa.sparql.Concept(element, s);
+
+        return result;
+    },
+
     createListService: function(sparqlService) {
 
         var store = new jassa.sponate.Store({
@@ -20,10 +34,10 @@ var ChangeSetUtils = {
         });
 
         var queryStr = '?s a cs:ChangeSet '
-            + 'Optional { ?s cs:subjectOfChange ?sub } '
-            + 'Optional { ?s cs:changeReason ?r } '
-            + 'Optional { ?s cs:createdDate ?r } '
-            + 'Optional { ?s cs:creatorName ?n } '
+            + 'Optional { ?s cs:subjectOfChange ?soc } '
+            + 'Optional { ?s cs:changeReason ?cr } '
+            + 'Optional { ?s cs:createdDate ?cd } '
+            + 'Optional { ?s cs:creatorName ?cn } '
             + 'Optional { ?s cs:precedingChangeset ?pre } '
             + 'Optional { ?s cs:addition ?add } '
             + 'Optional { ?s cs:removal ?rem } '
@@ -33,11 +47,11 @@ var ChangeSetUtils = {
             name: 'changeset',
             template: [{
                 id: '?s',
-                subjectOfChange: '?sub', //>cs:subjectOfChange
+                subjectOfChange: '?soc', //>cs:subjectOfChange
                 precedingChangeset: '?pre',
-                changeReason: '?r',
-                createdDate: '',
-                creatorName: '',
+                changeReason: '?cr',
+                createdDate: '?cd',
+                creatorName: '?cn',
                 addition: { $ref: { target: 'triple', on: '?add' } },
                 removal: { $ref: { target: 'triple', on: '?rem' } }
             }],

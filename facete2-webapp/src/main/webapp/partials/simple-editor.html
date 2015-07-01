@@ -116,4 +116,9 @@
         <button class="btn btn-primary" ng-class="{'disabled': !rexContext.diff.removed.size() && !rexContext.diff.added.size() }" ng-click="createChangeset(rexContext, rexPrefixMapping, forms.edit)">Create Changeset</button>
     </form>
 
+    <h4>History</h4>
+    <ul>
+        <li ng:if="!changesets.length">No changesets available.</li>
+        <li ng:repeat="item in changesets">{{changeDate}} {{changeReason}} {{changeAuthor}}</li>
+    </ul>
 </div>

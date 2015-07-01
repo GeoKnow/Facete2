@@ -61,6 +61,10 @@ angular.module('Facete2')
 
     $scope.editResource = null;
 
+    $scope.changesets = [];
+
+
+
     $scope.defaultNgModelOptions = {
         //updateOn: 'default blur',
         debounce: {
@@ -846,6 +850,8 @@ angular.module('Facete2')
     dddi = $dddi($scope);
 
 
+
+
     // Objects being wired up here
     // - sparqlCache
     // - services.sparqlService
@@ -1312,6 +1318,23 @@ angular.module('Facete2')
 
             return r;
             //return $scope.active.pathLabel;
+        }]);
+
+
+
+    //http://generator.geoknow.eu/resource/testchanges
+    /**
+     * Change history
+     */
+    dddi.register('changesets', ['editResource', 'active.services.sparqlService',
+        function(editResource, sparqlService) {
+            var concept = ChangeSetUtils.createConceptSubjectOfChange(editResource);
+            var ls = ChangeSetUtils.createListService();
+            ls.fetchItems(concept).then(function(items) {
+                var r = items.map(function(item) {
+                   return item.val;
+                });
+            });
         }]);
 
 

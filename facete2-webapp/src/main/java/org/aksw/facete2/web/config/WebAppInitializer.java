@@ -70,20 +70,20 @@ public class WebAppInitializer
         dispatcherContext.register(ConfigWebMvc.class);
 
         ServletRegistration.Dynamic jassaServlet = servletContext.addServlet("jassa-servlet", new ServletContainer());
-        jassaServlet.setInitParameter("jersey.config.server.provider.classnames", "org.aksw.jena_sparql_api.web.servlets.PathFindingApi org.aksw.facete2.web.api.ServletDataStore org.aksw.facete2.web.api.ServletExportSparql org.aksw.facete2.web.api.ServletSparqlSpringBatchStatus");
+        jassaServlet.setInitParameter("jersey.config.server.provider.classnames", "org.aksw.jena_sparql_api.web.servlets.PathFindingApi org.aksw.facete2.web.servlets.ServletDataStore org.aksw.facete2.web.servlets.ServletExportSparql org.aksw.facete2.web.servlets.ServletSparqlSpringBatchStatus org.aksw.facete2.web.servlets.ServletVersionInfo");
         jassaServlet.addMapping("/api/*");
         jassaServlet.setAsyncSupported(true);
         jassaServlet.setLoadOnStartup(1);
 
         ServletRegistration.Dynamic facete2Servlet = servletContext.addServlet("facete2-servlet", new ServletContainer());
-        facete2Servlet.setInitParameter("jersey.config.server.provider.classnames", "org.aksw.facete2.web.api.ServletSparqlProxyCache org.aksw.facete2.web.api.ServletSparqlCacheCtrl");
+        facete2Servlet.setInitParameter("jersey.config.server.provider.classnames", "org.aksw.facete2.web.servlets.ServletSparqlProxyCache org.aksw.facete2.web.servlets.ServletSparqlCacheCtrl");
         facete2Servlet.addMapping("/cache/*");
         facete2Servlet.setAsyncSupported(true);
         facete2Servlet.setLoadOnStartup(1);
 
 
         ServletRegistration.Dynamic staticServlet = servletContext.addServlet("static-servlet", new ServletContainer());
-        staticServlet.setInitParameter("jersey.config.server.provider.classnames", "org.aksw.facete2.web.api.ServletSparqlStaticData");
+        staticServlet.setInitParameter("jersey.config.server.provider.classnames", "org.aksw.facete2.web.servlets.ServletSparqlStaticData");
         staticServlet.addMapping("/static/*");
         staticServlet.setAsyncSupported(true);
         staticServlet.setLoadOnStartup(1);

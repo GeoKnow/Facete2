@@ -1,6 +1,8 @@
 package org.aksw.facete2.web.config;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 
@@ -28,6 +30,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
+import com.google.gson.Gson;
 import com.hp.hpl.jena.query.Dataset;
 
 @Configuration
@@ -103,6 +106,22 @@ public class ConfigApp {
             throw new RuntimeException(msg);
         }
 
+
+        return result;
+    }
+
+    @Bean
+    public Gson gson() {
+        Gson result = new Gson();
+        return result;
+    }
+
+    @Bean
+    public Properties versionInfo() throws IOException {
+        Properties result = new Properties();
+        Resource resource = new ClassPathResource("version.properties");
+
+        result.load(resource.getInputStream());
 
         return result;
     }

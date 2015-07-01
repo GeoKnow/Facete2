@@ -1,4 +1,4 @@
-package org.aksw.facete2.web.api;
+package org.aksw.facete2.web.servlets;
 
 import java.sql.Connection;
 import java.sql.SQLException;

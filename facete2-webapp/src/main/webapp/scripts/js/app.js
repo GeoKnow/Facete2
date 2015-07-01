@@ -346,6 +346,21 @@ angular.module('Facete2', [
 
 }])
 
+
+/**
+ * Fetch server version
+ */
+.run(['$rootScope', '$http', function($rootScope, $http) {
+    var failStr = '(unknown version)';
+
+    $http.get('api/version').then(function(response) {
+        $rootScope.versionInfo = response.data || failStr;
+    }, function() {
+        $rootScope.versionInfo = failStr;
+    });
+}])
+
+
 .run(['$rootScope', '$translate', function($rootScope, $translate) {
     var global = $rootScope.global = $rootScope.global || {};
     var ui = global.ui = global.ui || {};
