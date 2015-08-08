@@ -5,14 +5,15 @@ import java.util.List;
 
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.Path;
+import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
-import org.aksw.jena_sparql_api.core.SparqlServiceBuilder;
 import org.aksw.jena_sparql_api.sparql_path.core.algorithm.ConceptPathFinder;
+import org.aksw.jena_sparql_api.update.FluentSparqlService;
 
 
 public class PathFindingIssueRenePietzsch {
     public static void mainfoo(String[] args) {
-        QueryExecutionFactory qef = SparqlServiceBuilder.http("http://odple-virtuoso.eccenca.com/", "https://ckan.eccenca.com/").create();
+        QueryExecutionFactory qef = FluentQueryExecutionFactory.http("http://odple-virtuoso.eccenca.com/", "https://ckan.eccenca.com/").create();
 
         Concept sourceConcept = Concept.create("?s ?p ?o", "s");
         Concept targetConcept = Concept.create("?s <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?x ; <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?y", "s");
@@ -23,7 +24,7 @@ public class PathFindingIssueRenePietzsch {
     }
 
     public static void main(String[] args) {
-        QueryExecutionFactory qef = SparqlServiceBuilder.http("http://odple-virtuoso.eccenca.com/", "https://odple-ckan.eccenca.com/").create();
+        QueryExecutionFactory qef = FluentQueryExecutionFactory.http("http://odple-virtuoso.eccenca.com/", "https://odple-ckan.eccenca.com/").create();
 
         Concept sourceConcept = Concept.create("?s ?p ?o", "s");
         Concept targetConcept = Concept.create("?s <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?x ; <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?y", "s");

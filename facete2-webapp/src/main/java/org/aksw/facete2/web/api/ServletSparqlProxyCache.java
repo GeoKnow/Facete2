@@ -2,7 +2,6 @@ package org.aksw.facete2.web.api;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -11,11 +10,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
+import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
 import org.aksw.jena_sparql_api.web.servlets.SparqlEndpointBase;
 import org.aksw.jena_sparql_api.web.utils.AuthenticatorUtils;
 import org.apache.jena.atlas.web.auth.HttpAuthenticator;
-import org.apache.jena.atlas.web.auth.SimpleAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -109,12 +108,13 @@ public class ServletSparqlProxyCache
                 dgus == null ? Collections.<String>emptyList() : Arrays.asList(dgus),
                 ngus == null ? Collections.<String>emptyList() : Arrays.asList(ngus));
 
-        QueryExecutionFactory qef;
+
 
         HttpAuthenticator authenticator = AuthenticatorUtils.parseAuthenticator(req);
 
         // TODO: What is the best way to pass the authenticator to the sparql service?
-        qef = sparqlServiceFactory.createSparqlService(serviceUri, datasetDescription, authenticator);//new QueryExecutionFactoryHttp(serviceUri, defaultGraphUris);
+        SparqlService sparqlService = sparqlServiceFactory.createSparqlService(serviceUri, datasetDescription, authenticator);//new QueryExecutionFactoryHttp(serviceUri, defaultGraphUris); 
+        QueryExecutionFactory qef = sparqlService.getQueryExecutionFactory(); 
         QueryExecution result = qef.createQueryExecution(query);
 
         return result;

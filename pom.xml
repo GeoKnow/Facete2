@@ -40,7 +40,7 @@
 
         <!-- Dependency Versions -->
         <!-- facete2 only works with jena-sparql-api version 2.10.0-27 and onwards -->
-        <jena-sparql-api.version>2.12.1-10-SNAPSHOT</jena-sparql-api.version>
+        <jena-sparql-api.version>2.13.0-1-SNAPSHOT</jena-sparql-api.version>
         <sparqlify.version>0.6.16</sparqlify.version>
         <!-- <jassa.version>0.0.4</jassa.version> -->
 
@@ -98,12 +98,24 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-orm</artifactId>
                 <version>${spring.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>                
             </dependency>
 
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-entitymanager</artifactId>
                 <version>4.2.3.Final</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.logging</groupId>
+                        <artifactId>jboss-logging</artifactId>
+                    </exclusion>
+                </exclusions>                
             </dependency>
 
 
@@ -137,6 +149,12 @@
                 <groupId>org.aksw.jena-sparql-api</groupId>
                 <artifactId>jena-sparql-api-server</artifactId>
                 <version>${jena-sparql-api.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.glassfish.hk2.external</groupId>
+                        <artifactId>aopalliance-repackaged</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
