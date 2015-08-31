@@ -76,6 +76,67 @@
 
     Class = Jassa.ext.Class;
 
+    var ajaxWrapper = function() {
+        var jqXHR = $.ajax.apply(this, arguments);
+
+        var ajaxSpec = arguments[0];
+        if(ajaxSpec && ajaxSpec.headers) {
+            var delegate = ajaxSpec.beforeSend;
+            ajaxSpec.beforeSend = function(xhr) {
+
+                _(ajaxSpec.headers).forEach(function(v, k) {
+                    xhr.setRequestHeader(k, v);
+                });
+
+                // Call any prior beforeSend method
+                if(delegate) {
+                    delegate(xhr);
+                }
+            };
+        }
+
+        var r = Promise.resolve(jqXHR)
+            .cancellable()
+            .catch(Promise.TimeoutError, Promise.CancellationError, function(e) {
+                //console.log('CANCELLED REQUEST');
+                jqXHR.abort();
+                throw e;
+            });
+        return r;
+    };
+
+    var ajaxWrapper = function() {
+        var jqXHR = $.ajax.apply(this, arguments);
+
+        var ajaxSpec = arguments[0];
+        if(ajaxSpec && ajaxSpec.headers) {
+            var delegate = ajaxSpec.beforeSend;
+            ajaxSpec.beforeSend = function(xhr) {
+
+                _(ajaxSpec.headers).forEach(function(v, k) {
+                    xhr.setRequestHeader(k, v);
+                });
+
+                // Call any prior beforeSend method
+                if(delegate) {
+                    delegate(xhr);
+                }
+            };
+        }
+
+        var r = Promise.resolve(jqXHR)
+            .cancellable()
+            .catch(Promise.TimeoutError, Promise.CancellationError, function(e) {
+                //console.log('CANCELLED REQUEST');
+                jqXHR.abort();
+                throw e;
+            });
+        return r;
+    };
+    jassa = new Jassa(Promise, ajaxWrapper);
+    
+
+    /*
     jassa = new Jassa(Promise, function() {
         var jqXHR = $.ajax.apply(this, arguments);
 
@@ -104,6 +165,7 @@
             });
         return r;
     });
+    */
 
     jassa.sparql.ConceptFactory = Class.create({
         createConcept: function() {
