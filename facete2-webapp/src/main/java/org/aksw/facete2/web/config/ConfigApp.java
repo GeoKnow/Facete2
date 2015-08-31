@@ -28,6 +28,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
+import com.google.common.io.Files;
 import com.hp.hpl.jena.query.Dataset;
 
 @Configuration
@@ -56,19 +57,27 @@ public class ConfigApp {
 
     @Bean
     public QueryExecutionFactory queryExecutionFactoryStaticData() throws Exception {
-        String folder = env.getProperty("fs.rdfDataPath");
+        String folderStr = env.getProperty("fs.rdfDataPath");
         //folder = "/opt/facete2/rdf.d/";
-        folder = StringUtils.trimWhitespace(folder);
+        folderStr = StringUtils.trimWhitespace(folderStr);
+
 
         Dataset dataset;
 
-        if(!StringUtils.isEmpty(folder)) {
-            final DatasetFromWatchedFolder watcher = DatasetFromWatchedFolder.create(folder);
-            watcher.init();
+        if(!StringUtils.isEmpty(folderStr)) {
+            File folder = new File(folderStr);
+            if(folder.exists()) {
 
-            new Thread(watcher, "Dataset Watcher on " + folder).start();
+                final DatasetFromWatchedFolder watcher = DatasetFromWatchedFolder.create(folder);
+                watcher.init();
 
-            dataset = watcher.getDataset();
+                new Thread(watcher, "Dataset Watcher on " + folder).start();
+
+                dataset = watcher.getDataset();
+            } else {
+                dataset = null;
+                logger.warn("Cannot watch folder " + folderStr);
+            }
         } else {
             dataset = null;
         }
@@ -83,24 +92,29 @@ public class ConfigApp {
         String exportPathName = env.getRequiredProperty("fs.exportPath");
 
         File result = new File(exportPathName);
+        try {
+            if(!result.exists()) {
 
-        if(!result.exists()) {
+                boolean isCreated = result.mkdirs();
+                if(!isCreated) {
+                    String msg = "Failed to create export path [" + exportPathName + "]. Export feature will NOT be available!";
+                    throw new RuntimeException(msg);
+                }
+            }
 
-            boolean isCreated = result.mkdirs();
-            if(!isCreated) {
-                String msg = "Failed to create export path [" + exportPathName + "]. Export feature will NOT be available!";
+            if(result.isFile()) {
+                String msg = "Export path [" + exportPathName + "] is a file instead of a directory. Export feature will NOT be available!";
                 throw new RuntimeException(msg);
             }
-        }
 
-        if(result.isFile()) {
-            String msg = "Export path [" + exportPathName + "] is a file instead of a directory. Export feature will NOT be available!";
-            throw new RuntimeException(msg);
-        }
+            if(!result.canWrite()) {
+                String msg = "Cannot write to export path [" + exportPathName + "]; check file system permissions. Export feature will NOT be available!";
+                throw new RuntimeException(msg);
+            }
 
-        if(!result.canWrite()) {
-            String msg = "Cannot write to export path [" + exportPathName + "]; check file system permissions. Export feature will NOT be available!";
-            throw new RuntimeException(msg);
+        } catch(RuntimeException e) {
+            logger.warn("Warning", e);
+            result = Files.createTempDir();
         }
 
 

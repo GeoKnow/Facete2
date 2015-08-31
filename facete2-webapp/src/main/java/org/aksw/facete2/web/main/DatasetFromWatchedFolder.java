@@ -1,5 +1,6 @@
 package org.aksw.facete2.web.main;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
@@ -40,6 +41,11 @@ public class DatasetFromWatchedFolder
     public static DatasetFromWatchedFolder create(String basePathStr) {
         Path basePath = FileSystems.getDefault().getPath(basePathStr);
         DatasetFromWatchedFolder result = create(basePath);
+        return result;
+    }
+
+    public static DatasetFromWatchedFolder create(File folder) {
+        DatasetFromWatchedFolder result = create(folder.toPath());
         return result;
     }
 

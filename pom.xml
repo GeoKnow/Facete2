@@ -40,7 +40,7 @@
 
         <!-- Dependency Versions -->
         <!-- facete2 only works with jena-sparql-api version 2.10.0-27 and onwards -->
-        <jena-sparql-api.version>2.13.0-1-SNAPSHOT</jena-sparql-api.version>
+        <jena-sparql-api.version>2.13.0-1</jena-sparql-api.version>
         <sparqlify.version>0.6.16</sparqlify.version>
         <!-- <jassa.version>0.0.4</jassa.version> -->
 
@@ -103,7 +103,7 @@
                         <groupId>commons-logging</groupId>
                         <artifactId>commons-logging</artifactId>
                     </exclusion>
-                </exclusions>                
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -115,7 +115,7 @@
                         <groupId>org.jboss.logging</groupId>
                         <artifactId>jboss-logging</artifactId>
                     </exclusion>
-                </exclusions>                
+                </exclusions>
             </dependency>
 
 

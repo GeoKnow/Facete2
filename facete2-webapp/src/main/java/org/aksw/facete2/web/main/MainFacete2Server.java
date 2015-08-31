@@ -79,13 +79,13 @@ public class MainFacete2Server {
         port = (port == null) ? 7532 : port;
 
 
-        ServerUtils.startServer(port, new WebAppInitializer());
+        ServerUtils.startServer(MainFacete2Server.class, port, new WebAppInitializer());
     }
 }
 
-//        
-//        
-////        
+//
+//
+////
 ////        ProtectionDomain protectionDomain = MainFacete2Server.class.getProtectionDomain();
 ////        URL location = protectionDomain.getCodeSource().getLocation();
 ////        String externalForm = location.toExternalForm();
