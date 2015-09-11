@@ -157,6 +157,14 @@
                 </exclusions>
             </dependency>
 
+            <!-- TODO Remove dep once part of jena-sparql-api-server again -->
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-jsp</artifactId>
+                <version>8.1.17.v20150415</version>
+            </dependency>
+
+
             <dependency>
                 <groupId>org.aksw.jena-sparql-api</groupId>
                 <artifactId>jena-sparql-api-batch</artifactId>
