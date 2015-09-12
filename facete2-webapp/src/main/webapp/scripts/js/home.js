@@ -393,7 +393,7 @@ angular.module('Facete2')
     //alert(JSON.stringify(tmp));
 
     var qsaDataSourceSpec = tmp.serviceUri ? specToDataSource(tmp) : null;
-
+    console.log('QueryString DataSource: ', qsaDataSourceSpec);
 
 
     var tableConfigFacet; // Initialized later - TODO Fix the order
