@@ -452,7 +452,7 @@ angular.module('Facete2')
             _(config).defaults(defaults);
             config.name = 'Query String Datasource';
             configs.push(config);
-            applyScope();
+            //applyScope();
         }
 
 
