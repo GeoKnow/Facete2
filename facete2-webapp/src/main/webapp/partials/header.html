@@ -85,8 +85,8 @@
 
             <ul class="nav nav-pills navbar-nav navbar-right">
 <!--              ng-class="{'active': ($problems.list().length > 0)}" -->
-                <li class="dropdown" dropdown is-open="ui.problems.isOpen" ng-click="$event.stopPropagation()">
-                    <a href="" class="dropdown-toggle" dropdown-toggle ng:disabled="!$problems.list().length">{{'PROBLEMS' | translate}} <span class="badge">{{$problems.list().length}}</span> <b class="caret" ng-show="$problems.list().length"></b></a>
+                <li ng:show="$problems.list().length > 0" class="dropdown" dropdown is-open="ui.problems.isOpen" ng-click="$event.stopPropagation()">
+                    <a href="" class="dropdown-toggle" dropdown-toggle ng:disabled="$problems.list().length > 0">{{'PROBLEMS' | translate}} <span class="badge">{{$problems.list().length}}</span> <b class="caret" ng-show="$problems.list().length"></b></a>
                     <ul class="dropdown-menu" role="menu" style="overflow: auto; max-height: 500px; width: 500px;">
                         <li class="well well-sm" style="margin: 5px;">
 
@@ -104,10 +104,10 @@
             </ul>
 
             <ul class="nav nav-pills navbar-nav navbar-right">
-                <li class="dropdown" dropdown is-open="ui.processes.isOpen" ng-click="$event.stopPropagation()">
+                <li ng:show="$processes.list().length > 0" class="dropdown" dropdown is-open="ui.processes.isOpen" ng-click="$event.stopPropagation()">
 <!--                 {{ui.processes.isOpen}} -->
 <!--                  " ng-class="{'active': ($process.list().length > 0)}"-->
-                    <a href="" class="dropdown-toggle" dropdown-toggle ng:disabled="!$processes.list().length">{{'PROCESSES' | translate}} <span class="badge">{{$processes.list().length}}</span> <b class="caret" ng-show="$processes.list().length"></b></a>
+                    <a href="" class="dropdown-toggle" dropdown-toggle ng:disabled="$processes.list().length > 0">{{'PROCESSES' | translate}} <span class="badge">{{$processes.list().length}}</span> <b class="caret" ng-show="$processes.list().length"></b></a>
                     <ul class="dropdown-menu" role="menu" style="overflow: auto; max-height: 500px; width: 500px;">
                         <li class="well well-sm" style="margin: 5px;">
 

@@ -27,7 +27,7 @@
   "_NO_RESULTS": "No results",
   "_TABLE_EMPTY": "This table is empty.",
   "CONFIG_HEADING": "Facete2 Control Panel",
-  "CONFIG_UI_LANGS": "User Interface Language Preference",
+  "CONFIG_UI_LANGS": "User interface language preference",
   "CONFIG_DATASET_LANGS": "Dataset languages",
   "CONFIG_SSS_CACHE": "Server side SPARQL Cache",
   "CONFIG_CLEAR_CACHE": "Clear Cache",
@@ -61,7 +61,7 @@
   "CONFIG_EXPORT_HEADING_USE_LABELS": "Use labels instead of IRIs",
   "CONFIG_EXPORT_HEADING_EMPTY": "Root path label",
   "CONFIG_EXPORT_HEADING_INVERT": "Invert step pattern",
-  "CONFIG_EXPORT_HEADING_SEPARATOR": "Step eparator string",
+  "CONFIG_EXPORT_HEADING_SEPARATOR": "Step separator string",
 
   "USERNAME": "Username",
   "PASSWORD": "Password",
