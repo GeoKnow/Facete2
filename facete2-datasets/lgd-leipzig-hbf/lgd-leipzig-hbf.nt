@@ -1,0 +1,25 @@
+<http://linkedgeodata.org/data/triplify/node376142577> <http://www.w3.org/2000/01/rdf-schema#label> "RDF description of Leipzig Hauptbahnhof" .
+<http://linkedgeodata.org/triplify/node376142577> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://linkedgeodata.org/ontology/RailwayThing> .
+<http://linkedgeodata.org/triplify/node376142577> <http://linkedgeodata.org/ontology/short_name> "Leipzig Hbf" .
+<http://linkedgeodata.org/triplify/node376142577> <http://www.w3.org/2003/01/geo/wgs84_pos#lat> "5.1345754400000004E1"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://linkedgeodata.org/triplify/node376142577> <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> <http://linkedgeodata.org/triplify/meta/node376142577> .
+<http://linkedgeodata.org/triplify/node376142577> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://linkedgeodata.org/ontology/PublicTransportThing> .
+<http://linkedgeodata.org/triplify/node376142577> <http://linkedgeodata.org/ontology/railway%3Astation_category> "1" .
+<http://linkedgeodata.org/triplify/node376142577> <http://linkedgeodata.org/ontology/wheelchair> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+<http://linkedgeodata.org/triplify/node376142577> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://geovocab.org/spatial#Feature> .
+<http://linkedgeodata.org/triplify/node376142577> <http://www.w3.org/2002/07/owl#sameAs> <http://dbpedia.org/resource/Leipzig_Hauptbahnhof> .
+<http://linkedgeodata.org/triplify/node376142577> <http://www.w3.org/2000/01/rdf-schema#label> "Gare centrale de Leipzig"@fr .
+<http://linkedgeodata.org/triplify/node376142577> <http://geovocab.org/geometry#geometry> <http://linkedgeodata.org/geometry/node376142577> .
+<http://linkedgeodata.org/triplify/node376142577> <http://www.w3.org/2000/01/rdf-schema#label> "Leipzig Hauptbahnhof" .
+<http://linkedgeodata.org/triplify/node376142577> <http://linkedgeodata.org/ontology/uic_ref> "8010205"^^<http://www.w3.org/2001/XMLSchema#int> .
+<http://linkedgeodata.org/triplify/node376142577> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://linkedgeodata.org/ontology/Station> .
+<http://linkedgeodata.org/triplify/node376142577> <http://www.w3.org/2003/01/geo/wgs84_pos#long> "1.23820639E1"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://linkedgeodata.org/triplify/node376142577> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://linkedgeodata.org/ontology/RailwayStation> .
+<http://linkedgeodata.org/triplify/node376142577> <http://linkedgeodata.org/ontology/changeset> "20861718"^^<http://www.w3.org/2001/XMLSchema#int> .
+<http://linkedgeodata.org/triplify/node376142577> <http://linkedgeodata.org/ontology/railway%3Aref> "LL" .
+<http://linkedgeodata.org/triplify/node376142577> <http://purl.org/dc/terms/contributor> <http://linkedgeodata.org/triplify/user496201> .
+<http://linkedgeodata.org/triplify/node376142577> <http://linkedgeodata.org/ontology/version> "15"^^<http://www.w3.org/2001/XMLSchema#int> .
+<http://linkedgeodata.org/triplify/node376142577> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://linkedgeodata.org/meta/Node> .
+<http://linkedgeodata.org/triplify/node376142577> <http://purl.org/dc/terms/modified> "2014-03-02T11:43:39"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<http://linkedgeodata.org/triplify/node376142577> <http://linkedgeodata.org/ontology/gadmSameAs> <http://gadm.geovocab.org/services/withinRegion?lat=51.345753&long=12.382064#point> .
+<http://linkedgeodata.org/data/triplify/node376142577> <http://xmlns.com/foaf/0.1/primaryTopic> <http://linkedgeodata.org/triplify/node376142577> .

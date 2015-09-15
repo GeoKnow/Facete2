@@ -247,29 +247,34 @@ angular.module('Facete2')
     $scope.performUpdate = function(rexContext, prefixMapping, form) {
         var updateService = $scope.active.services.updateService;
 
-        var p = jassa.service.UpdateUtils.performUpdate(updateService, rexContext.diff, prefixMapping);
+        var p = jassa.service.UpdateUtils.performUpdate(updateService, rexContext.diff, null, prefixMapping);
         var x = p.then(function() {
             //var r = $http.post('cache/ctrl/clear');
             var r = Promise.resolve(jQuery.post('cache/ctrl/clear'));
 
             return r;
+        }, function() {
+        	alert('Update failed - probably you need to enable write priviledges or CORS');
         }).then(function() {
             // TODO Reset the sparql cache before calling reset
+        	// HACK We call rexContext.reset() with a $timeout
 
             form.$setPristine();
-            var r = rexContext.reset();
-            return r;
-        });
+        }).then(angular.noop);
+
+        var resetForm = function() {
+            ++$scope.editCounter;
+	        $timeout(function() {
+	            form.$setPristine();
+
+	            var r = rexContext.reset(true);
+	            return r;
+	        }, 100);
+        };
 
         // Note: Only when the update is successful do we reset the form to pristine
         // This will retain edits in case of failure
-        $q.when(x).then(function() {
-            ++$scope.editCounter;
-            //alert('Update successful');
-        }, function(e) {
-            ++$scope.editCounter;
-            //alert('Update failed with reason: ' + e.responseText);
-        });
+        $q.when(x).then(resetForm, resetForm);
     };
 
     // TODO Move graphToTurtle to a utility object
@@ -862,13 +867,15 @@ angular.module('Facete2')
             return r;
         }]);
 
-    dddi.register('active.services.sparqlCache', [ '=config.dataService', '=editCounter',
+    /* TODO Why does the sparqlCacheSupplier not exist?
+    dddi.register('active.services.sparqlCache', [ '=active.config.dataService', '=editCounter',
         function(dataServiceConfig) {
             sparqlCacheSupplier.invalidate();
 
             var r = $scope.sparqlCacheSupplier.getCache(dataServiceConfig.serviceIri, dataServiceConfig.defaultGraphIris);
             return r;
         }]);
+    */
 
 
     //  '=editCounter',
@@ -898,7 +905,7 @@ angular.module('Facete2')
      * The raw sparql service - without any extras such as caching
      * Useful e.g. for validation (as we do not want to go through the client-side cache)
      */
-    dddi.register('active.services.rawSparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?active.services.sparqlCache',
+    dddi.register('active.services.rawSparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?active.services.sparqlCache', 'editCounter',
         function(serviceConfig, sparqlProxyUrl, sparqlCache) {
             //var cache = sparqlCacheSupplier ? sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris) : null;
 //console.log('Recreated sparql service');
