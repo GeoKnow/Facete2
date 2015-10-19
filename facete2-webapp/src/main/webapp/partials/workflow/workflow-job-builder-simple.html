@@ -1,0 +1,57 @@
+
+<h3>Sparql Data Services</h3>
+<hr />
+
+
+<ul>
+    <li ng-repeat="dataService in dataServices"></li>
+</ul>
+
+<h3>Processing Steps</h3>
+
+<ul>
+    <li>Simple SPARQL Update tasklet (SPARQL Update string)</li>
+    <li>Chunked sparql update execution</li>
+
+what if we read geocoding information from store, create a graph from it, and now we want to
+add the graph to another target?
+in this case, we might want to remove triples from the target graph before doing the insert.
+
+
+So the main problem is: how to do lookups between datasets.
+We could load data into a temporary graph
+load sourceA into targetX
+load sourceB into targetX
+perform updates
+
+then to a sparqlUpdate based load task
+{ $chunkedQueryStep: {
+    chunk: 1000,
+    source: targetX,
+    target: sourceB,
+    query: 'Construct Where { ?s ?p ?o }'
+} }
+
+
+
+Yet, as a hack we could create a multi source, configured with partitioned queries (shape),
+and which all use the same concept as a base...
+Or we use query federation?
+
+
+
+
+We could do something like:
+Write data to a temporary store.
+Mark affected resources.
+
+- Create a concept for all resources having nominatim data
+  - Run a Delete query for it
+- Add the nominatim data as tmp triples to the target.
+- Create a concept for all resources that ave nominatim data
+
+
+
+
+in that case we would have two inputs...
+</ul>
