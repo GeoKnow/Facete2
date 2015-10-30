@@ -7,8 +7,11 @@ sudo apt-get purge facete2-tomcat-common facete2-tomcat7
 echo "Removing old deb packages"
 find -name '*.deb' | xargs rm
 
+echo "Refreshing bower"
+(cd facete2-webapp ; ./bower-update.sh)
+
 echo "Running mvn install"
-mvn install
+mvn clean install
 
 echo "Installing debs"
 sudo dpkg -i `find facete2-debian-tomcat-common/target -name *.deb`
