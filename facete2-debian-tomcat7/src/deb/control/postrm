@@ -1,1 +1,8 @@
-rm -rf /var/cache/facete2/
+#!/bin/bash
+
+set -e
+
+#rm -rf /var/cache/facete2/
+rm -rf /var/lib/tomcat7/webapps/facete2/
+
+

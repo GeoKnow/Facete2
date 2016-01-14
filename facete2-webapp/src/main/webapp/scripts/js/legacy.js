@@ -1,3 +1,9 @@
+jassa.sparql.ConceptFactory = Class.create({
+    createConcept: function() {
+        throw new Error('Not overridden');
+    }
+});
+
 jassa.sparql.ConceptFactoryConst = Class.create(/* ns.ConceptFactory, */ {
     initialize: function(concept) {
         this.concept = concept;
