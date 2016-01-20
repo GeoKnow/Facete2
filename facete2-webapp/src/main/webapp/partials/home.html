@@ -4,6 +4,24 @@
 
         <accordion close-others="false">
 
+            <accordion-group style="pointer-events: auto" ng-if="ui.playground.show || true" is-open="ui.playground.isOpen">
+                <accordion-heading>
+                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': ui.playground.isOpen, 'glyphicon-chevron-right': !ui.playground.isOpen}"></i>
+                    Playground
+                    <a href="" ng-click="ui.playground.show = false"><span class="glyphicon glyphicon-remove-circle"></span></a>
+                </accordion-heading>
+
+                <table class="table table-striped">
+                    <tr>
+                        <th>Date</th><th>User</th><th>Reason</th><th>Additions</th><th>Removals</th>
+                    </tr>
+                    <tr ng-repeat="item in history">
+                        <td>{{item.createdDate}}</td><td>{{item.creatorName}}</td><td>{{item.changeReason}}</td><td>{{graphToTurtle(item.additionGraph)}}</td><td>{{graphToTurtle(item.removalGraph)}}</td>
+                    </tr>
+                </table>
+            </accordion-group>
+
+
             <accordion-group style="pointer-events: auto;" ng-if="ui.search.show" is-open="ui.search.isOpen">
                 <accordion-heading>
                     <i class="glyphicon" ng-class="{'glyphicon-chevron-down': ui.search.isOpen, 'glyphicon-chevron-right': !ui.search.isOpen}"></i>
@@ -27,7 +45,7 @@
                 </accordion-heading>
 
                 <div class="form-group">
-                    <label>{{'DS_AVAILABLE_DATA_SOURCES' | translate}}:<select ng-model="active.config" ng-options="item.name for item in active.serviceConfigs" class="form-control"></select></label>
+                    <label class="control-label">{{'DS_AVAILABLE_DATA_SOURCES' | translate}}:<select ng-model="active.config" ng-options="item.name for item in active.serviceConfigs" class="form-control"></select></label>
                 </div>
                 <div class="form-group">
                     <button class="btn btn-primary" ng-class="{'active': ui.dataSources.showAddDialog}" ng-click="ui.dataSources.showAddDialog=!ui.dataSources.showAddDialog" class="form-control">{{'DS_ADD_DATA_SOURCE' | translate}}</button>
@@ -301,7 +319,7 @@
                             <ng-include ng-if="authenticators.defs[edit.auth.type].template" src="authenticators.defs[edit.auth.type].template"></ng-include>
 
                             <div class="form-group">
-                                <label>{{'DS_ADD_NAMED_GRAPHS' | translate}}: <input ng-model="edit.dataGraphIris" ng-list=" " ng-trim="false" type="text" class="form-control"></input></label>
+                                <label>{{'DS_ADD_DEFAULT_GRAPHS' | translate}}: <input ng-model="edit.dataGraphIris" ng-list=" " ng-trim="false" type="text" class="form-control"></input></label>
                             </div>
                             <div class="form-group">
                                 <label>{{'DS_ADD_JOIN_SUMMARY_SERVICE' | translate}}: <input ng-model="edit.jsServiceIri" type="text" class="form-control"></input></label>

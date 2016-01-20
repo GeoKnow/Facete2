@@ -27,6 +27,28 @@ angular.module('Facete2')
 .controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$dddi', '$translate', 'ngContextMenuFactory', '$actions' ,function($scope, $q, $rootScope, $timeout, $location, $http, $dddi, $translate, ngContextMenuFactory, $actions) {
 
 
+    {
+//        var sparqlService = jassa.service.SparqlServiceBuilder.http('http://akswnc3.informatik.uni-leipzig.de/data/jassa/sparql', ['http://example.org/changesets']).create();
+        var sparqlService = jassa.service.SparqlServiceBuilder.http('http://localhost:8890/sparql', ['http://jsa.aksw.org/test/changesets']).create();
+
+        //var s = 'http://ex.org/s';
+        var s = null;
+        var concept = ChangeSetUtils.createFilterConcept(s, null, null); //'http://subject', 'http://service', 'http://graph');
+        //alert('' + concept);
+
+        var ls = ChangeSetUtils.createListService(sparqlService);
+        ls.fetchItems(concept).then(function(entries) {
+            $scope.history = entries.map(function(entry) {
+                return entry.val;
+            });
+            //alert(JSON.stringify(entries));
+        });
+
+
+    }
+
+
+
     $scope.availableLangs = ['en', 'de', ''];
     $scope.langs = ['en', 'de', ''];
 
@@ -1532,20 +1554,27 @@ angular.module('Facete2')
     };
 
     $scope.selectGeom = function(data, event) {
-//        if(data.config && data.config.type === 'custom') {
-//            ngContextMenuFactory([{text: 'test'}], $scope, event);
-//        }
-
-        ngContextMenuFactory([{
-            text: 'Show in editor',
-            callback: function() {
-                $scope.editResource = node.getUri();
-                $scope.$location.path('/edit');
-            }
-        }, null, {
-            text: '' + data.shortLabel + ' - ' + data.id.getUri()
-        }], $scope, event);
-
+        if(data.config && data.config.type === 'custom') {
+            ngContextMenuFactory([{
+                text: 'Prepare in editor',
+                callback: function() {
+                    $scope.editResource = node.getUri();
+                    $scope.$location.path('/edit');
+                }
+//            }, null, {
+//                text: '' + data.shortLabel + ' - ' + data.id.getUri()
+            }], $scope, event);
+        } else {
+            ngContextMenuFactory([{
+                text: 'Show in editor',
+                callback: function() {
+                    $scope.editResource = node.getUri();
+                    $scope.$location.path('/edit');
+                }
+            }, null, {
+                text: '' + data.shortLabel + ' - ' + data.id.getUri()
+            }], $scope, event);
+        }
 
         console.log('Data selected: ', data, event);
 

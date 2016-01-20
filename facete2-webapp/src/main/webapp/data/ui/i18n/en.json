@@ -37,6 +37,7 @@
   "DS_HEADING": "Data Source",
   "DS_ADD_TITLE": "Title",
   "DS_ADD_SPARQL_IRI": "Sparql Service IRI",
+  "DS_ADD_DEFAULT_GRAPHS": "Default Graphs (Separate entries with white space)",
   "DS_ADD_NAMED_GRAPHS": "Named Graphs (Separate entries with white space)",
   "DS_ADD_JOIN_SUMMARY_SERVICE": "Join Summary Service",
   "DS_ADD_JOIN_SUMMARY_GRAPHS": "Join Summary Graphs (Separate entries with white space)",
