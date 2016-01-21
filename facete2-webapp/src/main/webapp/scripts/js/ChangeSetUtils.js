@@ -73,14 +73,16 @@ var ChangeSetUtils = {
             from: '?x cs:removal ?y . ?y rdf:subject ?s ; rdf:predicate ?p ; rdf:object ?o'
         });
 
-        var queryStr = '?s a cs:ChangeSet '
-            + 'Optional { ?s cs:subjectOfChange ?sub } '
-            + 'Optional { ?s cs:changeReason ?r } '
-            + 'Optional { ?s cs:createdDate ?cd } '
-            + 'Optional { ?s cs:creatorName ?cn } '
-            + 'Optional { ?s cs:service ?cs } '
-            + 'Optional { ?s cs:graph ?cg } '
-            + 'Optional { ?s cs:precedingChangeset ?pre } '
+        var queryStr = 'SELECT * { '
+            + '?s a cs:ChangeSet '
+            + 'OPTIONAL { ?s cs:subjectOfChange ?sub } '
+            + 'OPTIONAL { ?s cs:changeReason ?r } '
+            + 'OPTIONAL { ?s cs:createdDate ?cd } '
+            + 'OPTIONAL { ?s cs:creatorName ?cn } '
+            + 'OPTIONAL { ?s cs:service ?cs } '
+            + 'OPTIONAL { ?s cs:graph ?cg } '
+            + 'OPTIONAL { ?s cs:precedingChangeset ?pre } '
+            + '} ORDER BY DESC(?cd)'
             //+ 'Optional { ?s cs:addition ?add } '
             //+ 'Optional { ?s cs:removal ?rem } '
             ;
@@ -105,6 +107,7 @@ var ChangeSetUtils = {
                 precedingChangeset: '?pre',
                 changeReason: '?r',
                 createdDate: '?cd',
+                age: ['?cd', function(str) { return moment(str).fromNow(); }],
                 creatorName: '?cn',
                 service: '?cs',
                 graph: '?cg',

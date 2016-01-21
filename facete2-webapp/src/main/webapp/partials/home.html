@@ -16,7 +16,7 @@
                         <th>Date</th><th>User</th><th>Reason</th><th>Additions</th><th>Removals</th>
                     </tr>
                     <tr ng-repeat="item in history">
-                        <td>{{item.createdDate}}</td><td>{{item.creatorName}}</td><td>{{item.changeReason}}</td><td>{{graphToTurtle(item.additionGraph)}}</td><td>{{graphToTurtle(item.removalGraph)}}</td>
+                        <td title="{{item.createdDate}}">{{item.age}}</td><td>{{item.creatorName}}</td><td>{{item.changeReason}}</td><td>{{graphToTurtle(item.additionGraph)}}</td><td>{{graphToTurtle(item.removalGraph)}}</td>
                     </tr>
                 </table>
             </accordion-group>
