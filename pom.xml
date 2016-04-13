@@ -40,8 +40,8 @@
 
         <!-- Dependency Versions -->
         <!-- facete2 only works with jena-sparql-api version 2.10.0-27 and onwards -->
-        <jena-sparql-api.version>2.13.0-1</jena-sparql-api.version>
-        <sparqlify.version>0.6.16</sparqlify.version>
+        <jena-sparql-api.version>3.0.1-2-SNAPSHOT</jena-sparql-api.version>
+        <sparqlify.version>0.8.0-SNAPSHOT</sparqlify.version>
         <!-- <jassa.version>0.0.4</jassa.version> -->
 
         <spring.version>4.1.4.RELEASE</spring.version>
@@ -134,16 +134,21 @@
 
             <dependency>
                 <groupId>org.aksw.jena-sparql-api</groupId>
-                <artifactId>jena-sparql-api-web</artifactId>
+                <artifactId>jena-sparql-api-geo</artifactId>
                 <version>${jena-sparql-api.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.aksw.jena-sparql-api</groupId>
-                <artifactId>jena-sparql-api-geo</artifactId>
+                <artifactId>jena-sparql-api-batch</artifactId>
                 <version>${jena-sparql-api.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.aksw.jena-sparql-api</groupId>
+                <artifactId>jena-sparql-api-web</artifactId>
+                <version>${jena-sparql-api.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.aksw.jena-sparql-api</groupId>
@@ -164,12 +169,6 @@
                 <version>8.1.17.v20150415</version>
             </dependency>
 
-
-            <dependency>
-                <groupId>org.aksw.jena-sparql-api</groupId>
-                <artifactId>jena-sparql-api-batch</artifactId>
-                <version>${jena-sparql-api.version}</version>
-            </dependency>
 
             <!-- <dependency> -->
             <!-- <groupId>org.aksw.jena-sparql-api</groupId> -->
@@ -338,7 +337,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5</version>
+                <version>2.5.3</version>
                 <configuration>
                     <arguments>-P!source-artifacts</arguments>
                     <useReleaseProfile>false</useReleaseProfile>
@@ -450,6 +449,8 @@
                         <exclude>postgresql-</exclude>
                         <exclude>commons-beanutils-</exclude>
                         <exclude>xmlpull-</exclude>
+                        <exclude>asm-</exclude>
+
 
                         <!-- TODO These conflicts should be resolved -->
                         <!-- <exclude>stax-api-</exclude> -->

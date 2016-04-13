@@ -1,10 +1,9 @@
-package org.aksw.facete2.web.config;
+package org.aksw.facete2.web.main;
 
 import java.io.File;
 
 import javax.sql.DataSource;
 
-import org.aksw.facete2.web.main.DatasetFromWatchedFolder;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactoryDataset;
 import org.aksw.sparqlify.config.syntax.Config;
@@ -17,7 +16,6 @@ import org.aksw.sparqlify.inverse.SparqlSqlInverseMapperImpl;
 import org.aksw.sparqlify.util.SparqlifyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -28,16 +26,17 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
-import com.google.common.io.Files;
 import org.apache.jena.query.Dataset;
 
 @Configuration
-@EnableBatchProcessing
-@Import({ConfigDataSource.class, ConfigHibernate.class, ConfigSparqlServiceFactory.class, ConfigSpringBatch.class})
-@ComponentScan({"org.aksw.jassa.web", "org.aksw.facete2.web"}) // TODO I think we can drop jassa.web from scannig by now
-public class ConfigApp {
+@ComponentScan({"org.aksw.jassa.web", "org.aksw.facete2.web"})
+//@Import(DataSourceConfig.class)
+@Import(SparqlServiceFactoryConfig.class)
+//@PropertySource("classpath:config/jdbc/jdbc.properties")
+// @EnableTransactionManagement
+public class AppConfig {
     private static final Logger logger = LoggerFactory
-            .getLogger(ConfigApp.class);
+            .getLogger(AppConfig.class);
 
     @javax.annotation.Resource
     private Environment env;
@@ -57,27 +56,19 @@ public class ConfigApp {
 
     @Bean
     public QueryExecutionFactory queryExecutionFactoryStaticData() throws Exception {
-        String folderStr = env.getProperty("fs.rdfDataPath");
+        String folder = env.getProperty("fs.rdfDataPath");
         //folder = "/opt/facete2/rdf.d/";
-        folderStr = StringUtils.trimWhitespace(folderStr);
-
+        folder = StringUtils.trimWhitespace(folder);
 
         Dataset dataset;
 
-        if(!StringUtils.isEmpty(folderStr)) {
-            File folder = new File(folderStr);
-            if(folder.exists()) {
+        if(!StringUtils.isEmpty(folder)) {
+            final DatasetFromWatchedFolder watcher = DatasetFromWatchedFolder.create(folder);
+            watcher.init();
 
-                final DatasetFromWatchedFolder watcher = DatasetFromWatchedFolder.create(folder);
-                watcher.init();
+            new Thread(watcher, "Dataset Watcher on " + folder).start();
 
-                new Thread(watcher, "Dataset Watcher on " + folder).start();
-
-                dataset = watcher.getDataset();
-            } else {
-                dataset = null;
-                logger.warn("Cannot watch folder " + folderStr);
-            }
+            dataset = watcher.getDataset();
         } else {
             dataset = null;
         }
@@ -92,29 +83,24 @@ public class ConfigApp {
         String exportPathName = env.getRequiredProperty("fs.exportPath");
 
         File result = new File(exportPathName);
-        try {
-            if(!result.exists()) {
 
-                boolean isCreated = result.mkdirs();
-                if(!isCreated) {
-                    String msg = "Failed to create export path [" + exportPathName + "]. Export feature will NOT be available!";
-                    throw new RuntimeException(msg);
-                }
-            }
+        if(!result.exists()) {
 
-            if(result.isFile()) {
-                String msg = "Export path [" + exportPathName + "] is a file instead of a directory. Export feature will NOT be available!";
+            boolean isCreated = result.mkdirs();
+            if(!isCreated) {
+                String msg = "Failed to create export path [" + exportPathName + "]. Export feature will NOT be available!";
                 throw new RuntimeException(msg);
             }
+        }
 
-            if(!result.canWrite()) {
-                String msg = "Cannot write to export path [" + exportPathName + "]; check file system permissions. Export feature will NOT be available!";
-                throw new RuntimeException(msg);
-            }
+        if(result.isFile()) {
+            String msg = "Export path [" + exportPathName + "] is a file instead of a directory. Export feature will NOT be available!";
+            throw new RuntimeException(msg);
+        }
 
-        } catch(RuntimeException e) {
-            logger.warn("Warning", e);
-            result = Files.createTempDir();
+        if(!result.canWrite()) {
+            String msg = "Cannot write to export path [" + exportPathName + "]; check file system permissions. Export feature will NOT be available!";
+            throw new RuntimeException(msg);
         }
 
 
@@ -245,7 +231,3 @@ public class ConfigApp {
 //    }
 //
 }
-//@Import({ConfigSparqlServiceFactory.class, ConfigSpringBatch.class })
-//@PropertySource("classpath:config/jdbc/jdbc.properties")
-//@EnableTransactionManagement
-//@Import(DataSourceConfig.class)

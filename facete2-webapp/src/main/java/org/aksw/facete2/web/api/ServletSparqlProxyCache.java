@@ -12,15 +12,17 @@ import javax.ws.rs.core.Context;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
+import org.aksw.jena_sparql_api.stmt.SparqlStmtUpdate;
 import org.aksw.jena_sparql_api.web.servlets.SparqlEndpointBase;
 import org.aksw.jena_sparql_api.web.utils.AuthenticatorUtils;
 import org.apache.jena.atlas.web.auth.HttpAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.sparql.core.DatasetDescription;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.sparql.core.DatasetDescription;
+import org.apache.jena.update.UpdateProcessor;
 
 @Service
 //@Component
@@ -113,10 +115,11 @@ public class ServletSparqlProxyCache
         HttpAuthenticator authenticator = AuthenticatorUtils.parseAuthenticator(req);
 
         // TODO: What is the best way to pass the authenticator to the sparql service?
-        SparqlService sparqlService = sparqlServiceFactory.createSparqlService(serviceUri, datasetDescription, authenticator);//new QueryExecutionFactoryHttp(serviceUri, defaultGraphUris); 
-        QueryExecutionFactory qef = sparqlService.getQueryExecutionFactory(); 
+        SparqlService sparqlService = sparqlServiceFactory.createSparqlService(serviceUri, datasetDescription, authenticator);//new QueryExecutionFactoryHttp(serviceUri, defaultGraphUris);
+        QueryExecutionFactory qef = sparqlService.getQueryExecutionFactory();
         QueryExecution result = qef.createQueryExecution(query);
 
         return result;
     }
+
 }

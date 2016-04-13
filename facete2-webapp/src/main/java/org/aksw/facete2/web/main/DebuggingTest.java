@@ -39,30 +39,31 @@ import org.apache.jena.riot.web.HttpOp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.ARQ;
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryException;
-import com.hp.hpl.jena.query.QueryExecException;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFactory;
-import com.hp.hpl.jena.query.ResultSetFormatter;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.sparql.ARQException;
-import com.hp.hpl.jena.sparql.engine.http.HttpParams;
-import com.hp.hpl.jena.sparql.engine.http.HttpQuery;
-import com.hp.hpl.jena.sparql.engine.http.Params;
-import com.hp.hpl.jena.sparql.engine.http.Service;
-import com.hp.hpl.jena.sparql.graph.GraphFactory;
-import com.hp.hpl.jena.sparql.resultset.CSVInput;
-import com.hp.hpl.jena.sparql.resultset.JSONInput;
-import com.hp.hpl.jena.sparql.resultset.TSVInput;
-import com.hp.hpl.jena.sparql.resultset.XMLInput;
-import com.hp.hpl.jena.sparql.util.Context;
-import com.hp.hpl.jena.util.FileManager;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.ARQ;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryException;
+import org.apache.jena.query.QueryExecException;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFactory;
+import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.sparql.ARQException;
+import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.engine.http.HttpParams;
+import org.apache.jena.sparql.engine.http.HttpQuery;
+import org.apache.jena.sparql.engine.http.Params;
+import org.apache.jena.sparql.engine.http.Service;
+import org.apache.jena.sparql.graph.GraphFactory;
+import org.apache.jena.sparql.resultset.CSVInput;
+import org.apache.jena.sparql.resultset.JSONInput;
+import org.apache.jena.sparql.resultset.TSVInput;
+import org.apache.jena.sparql.resultset.XMLInput;
+import org.apache.jena.sparql.util.Context;
+import org.apache.jena.util.FileManager;
 
 public class DebuggingTest {
     public static void main(String[] args) throws Exception {
@@ -791,5 +792,23 @@ class QueryEngineHTTP implements QueryExecution {
     public boolean isClosed() {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public Iterator<Quad> execConstructQuads() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Dataset execConstructDataset() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Dataset execConstructDataset(Dataset dataset) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

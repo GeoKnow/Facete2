@@ -7,8 +7,8 @@ import org.aksw.jena_sparql_api.web.servlets.SparqlEndpointBase;
 import org.aksw.sparqlify.core.sparql.QueryExecutionFactoryEx;
 import org.springframework.stereotype.Service;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
 
 @Service
 @Path("/export-status/sparql/")
