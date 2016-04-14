@@ -66,7 +66,7 @@ var SparqlSystem = Class.create({
             var r = jassa.service.SparqlServiceBuilder.http(accessUrl, graphIris);
             return r;
         }
-    }
+    },
 
     aquireQueryService: function() {
 
