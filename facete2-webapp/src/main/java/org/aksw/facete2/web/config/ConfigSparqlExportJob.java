@@ -1,4 +1,4 @@
-package org.aksw.facete2.web.main;
+package org.aksw.facete2.web.config;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -11,6 +11,8 @@ import javax.sql.DataSource;
 
 import org.aksw.facete2.web.api.BindingMapperPassThrough;
 import org.aksw.facete2.web.api.SparqlPagingItemReader;
+import org.aksw.facete2.web.main.DataCountTasklet;
+import org.aksw.facete2.web.main.LineAggregatorBindingToXml;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
@@ -96,8 +98,8 @@ class ItemProcessorSparqlResultSet
  */
 @Configuration
 @EnableBatchProcessing
-@Import(SparqlServiceFactoryConfig.class)
-public class SparqlExportJobConfig {
+@Import(ConfigSparqlServiceFactory.class)
+public class ConfigSparqlExportJob {
 
     /**
      * Attention: You have to name these beans jobBuilders and stepbuilders

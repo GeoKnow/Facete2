@@ -9,6 +9,7 @@ import java.util.List;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.aksw.facete2.web.api.StreamingOutputInputStream;
+import org.aksw.facete2.web.config.ConfigSparqlExportJob;
 import org.aksw.sparqlify.inverse.SparqlSqlInverseMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,7 +118,7 @@ public class MainSparqlExportJobLauncher {
     }
     
     public static void cleanUp() {
-        ApplicationContext context = new AnnotationConfigApplicationContext(SparqlExportJobConfig.class);
+        ApplicationContext context = new AnnotationConfigApplicationContext(ConfigSparqlExportJob.class);
         JobExplorer jobExplorer = context.getBean(JobExplorer.class);
         JobRepository jobRepository = context.getBean(JobRepository.class);
         //JobOperator jobOperator = context.getBean(JobOperator.class);

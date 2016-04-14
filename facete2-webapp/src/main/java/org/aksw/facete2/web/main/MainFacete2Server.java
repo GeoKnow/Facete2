@@ -2,22 +2,13 @@ package org.aksw.facete2.web.main;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.security.ProtectionDomain;
-
-import javax.servlet.ServletException;
 
 import org.aksw.commons.util.slf4j.LoggerCount;
-import org.aksw.facete2.web.config.WebAppInitializer;
 import org.aksw.jena_sparql_api.web.server.ServerUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler.Context;
-import org.eclipse.jetty.util.component.AbstractLifeCycle.AbstractLifeCycleListener;
-import org.eclipse.jetty.util.component.LifeCycle;
-import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

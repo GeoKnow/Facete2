@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.aksw.facete2.web.config.ConfigSparqlExportJob;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -50,10 +51,10 @@ public class SparqlExportManager {
         String dgu = Joiner.on(' ').join(tmp);
 
         JobParameters jobParameters = new JobParametersBuilder()
-            .addString(SparqlExportJobConfig.JOBPARAM_SERVICE_URI, serviceUri, true)
-            .addString(SparqlExportJobConfig.JOBPARAM_DEFAULT_GRAPH_URIS, dgu, true)
-            .addString(SparqlExportJobConfig.JOBPARAM_QUERY_STRING, queryString, true)
-            .addString(SparqlExportJobConfig.JOBPARAM_TARGET_RESOURCE, targetResource, false)
+            .addString(ConfigSparqlExportJob.JOBPARAM_SERVICE_URI, serviceUri, true)
+            .addString(ConfigSparqlExportJob.JOBPARAM_DEFAULT_GRAPH_URIS, dgu, true)
+            .addString(ConfigSparqlExportJob.JOBPARAM_QUERY_STRING, queryString, true)
+            .addString(ConfigSparqlExportJob.JOBPARAM_TARGET_RESOURCE, targetResource, false)
             .toJobParameters();
 
         JobExecution result = jobRepository.getLastJobExecution(job.getName(), jobParameters);
@@ -80,7 +81,7 @@ public class SparqlExportManager {
     public InputStream getTargetInputStream(long jobExecutionId) throws FileNotFoundException {
         JobExecution jobExecution = jobExplorer.getJobExecution(jobExecutionId);
         JobParameters jobParameters = jobExecution.getJobParameters();
-        String targetResource = jobParameters.getString(SparqlExportJobConfig.JOBPARAM_TARGET_RESOURCE);
+        String targetResource = jobParameters.getString(ConfigSparqlExportJob.JOBPARAM_TARGET_RESOURCE);
 
         FileInputStream result = new FileInputStream(targetResource);
         return result;
@@ -89,7 +90,7 @@ public class SparqlExportManager {
 
     public static SparqlExportManager createTestInstance() {
 
-        ApplicationContext context = new AnnotationConfigApplicationContext(SparqlExportJobConfig.class);
+        ApplicationContext context = new AnnotationConfigApplicationContext(ConfigSparqlExportJob.class);
         JobExplorer jobExplorer = context.getBean(JobExplorer.class);
         JobRepository jobRepository = context.getBean(JobRepository.class);
         //JobOperator jobOperator = context.getBean(JobOperator.class);

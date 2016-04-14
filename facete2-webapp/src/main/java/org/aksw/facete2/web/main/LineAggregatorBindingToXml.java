@@ -3,7 +3,7 @@ package org.aksw.facete2.web.main;
 import java.util.Collection;
 
 import org.springframework.batch.item.file.transform.LineAggregator;
-
+import org.aksw.facete2.web.config.ConfigSparqlExportJob;
 import org.apache.jena.sparql.engine.binding.Binding;
 
 public class LineAggregatorBindingToXml
@@ -17,7 +17,7 @@ public class LineAggregatorBindingToXml
 
     @Override
     public String aggregate(Binding binding) {
-        String result = "  " + SparqlExportJobConfig.toXmlStringBinding(binding, varNames);
+        String result = "  " + ConfigSparqlExportJob.toXmlStringBinding(binding, varNames);
         return result;
     }
 }

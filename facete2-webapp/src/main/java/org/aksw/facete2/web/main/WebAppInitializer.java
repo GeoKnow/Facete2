@@ -6,6 +6,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
 import org.aksw.facete2.web.api.FilterPost;
+import org.aksw.facete2.web.config.ConfigApp;
+import org.aksw.facete2.web.config.ConfigWebMvc;
 import org.aksw.jena_sparql_api.web.filters.CorsFilter;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.springframework.web.WebApplicationInitializer;
@@ -26,7 +28,7 @@ public class WebAppInitializer
     {
         // Create the 'root' Spring application context
         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
-        rootContext.register(AppConfig.class);
+        rootContext.register(ConfigApp.class);
 //
 //        // Manage the lifecycle of the root application context
         servletContext.addListener(new ContextLoaderListener(rootContext));
@@ -67,7 +69,7 @@ public class WebAppInitializer
 
         // Create the dispatcher servlet's Spring application context
         AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
-        dispatcherContext.register(WebMvcConfig.class);
+        dispatcherContext.register(ConfigWebMvc.class);
 
         ServletRegistration.Dynamic jassaServlet = servletContext.addServlet("jassa-servlet", new ServletContainer());
         jassaServlet.setInitParameter("jersey.config.server.provider.classnames", "org.aksw.jena_sparql_api.web.servlets.PathFindingApi org.aksw.facete2.web.api.ServletDataStore org.aksw.facete2.web.api.ServletExportSparql org.aksw.facete2.web.api.ServletSparqlSpringBatchStatus");
