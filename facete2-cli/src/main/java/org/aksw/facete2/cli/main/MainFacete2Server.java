@@ -1,4 +1,4 @@
-package org.aksw.facete2.web.main;
+package org.aksw.facete2.cli.main;
 
 import java.net.URL;
 import java.net.URLClassLoader;

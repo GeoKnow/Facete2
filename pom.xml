@@ -30,7 +30,9 @@
 
     <modules>
         <!-- <module>facete2-js</module> -->
+        <module>facete2-core</module>
         <module>facete2-webapp</module>
+        <module>facete2-cli</module>
         <module>facete2-debian-tomcat-common</module>
         <module>facete2-debian-tomcat7</module>
     </modules>
@@ -52,10 +54,10 @@
         <log4j.version>1.2.14</log4j.version>
 
         <!-- Project Settings -->
-        <maven.compiler.source>1.6</maven.compiler.source>
-        <maven.compiler.target>1.6</maven.compiler.target>
-        <java.version>1.6</java.version>
-        <java.version.javadoc>http://docs.oracle.com/javase/6/docs/api/</java.version.javadoc>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>1.8</java.version>
+        <java.version.javadoc>http://docs.oracle.com/javase/8/docs/api/</java.version.javadoc>
         <file.encoding>UTF-8</file.encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -73,6 +75,13 @@
     <dependencyManagement>
         <dependencies>
             <!-- Self dependencies -->
+            <dependency>
+                <groupId>org.aksw.facete2</groupId>
+                <artifactId>facete2-webapp</artifactId>
+                <version>${project.version}</version>
+                <classifier>classes</classifier>
+            </dependency>
+
             <dependency>
                 <groupId>org.aksw.facete2</groupId>
                 <artifactId>facete2-webapp</artifactId>
@@ -152,7 +161,7 @@
 
             <dependency>
                 <groupId>org.aksw.jena-sparql-api</groupId>
-                <artifactId>jena-sparql-api-server</artifactId>
+                <artifactId>jena-sparql-api-server-utils</artifactId>
                 <version>${jena-sparql-api.version}</version>
                 <exclusions>
                     <exclusion>
@@ -414,6 +423,18 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <attachClasses>true</attachClasses>
+                    <!-- <warSourceDirectory>${basedir}/src/main/webapp</warSourceDirectory> -->
+                    <!-- <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes> -->
+                    <!-- <classesClassifier>classes</classesClassifier> -->
+                </configuration>
+            </plugin>
             <!-- <plugin> -->
             <!-- <groupId>org.apache.maven.plugins</groupId> -->
             <!-- <artifactId>maven-war-plugin</artifactId> -->
