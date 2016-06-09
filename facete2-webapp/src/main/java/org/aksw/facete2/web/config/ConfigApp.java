@@ -8,13 +8,14 @@ import org.aksw.facete2.web.main.DatasetFromWatchedFolder;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactoryDataset;
 import org.aksw.sparqlify.config.syntax.Config;
-import org.aksw.sparqlify.core.algorithms.CandidateViewSelectorImpl;
+import org.aksw.sparqlify.core.algorithms.CandidateViewSelectorSparqlify;
 import org.aksw.sparqlify.core.interfaces.SparqlSqlOpRewriterImpl;
 import org.aksw.sparqlify.core.interfaces.SqlTranslator;
 import org.aksw.sparqlify.core.sparql.QueryExecutionFactoryEx;
 import org.aksw.sparqlify.inverse.SparqlSqlInverseMapper;
 import org.aksw.sparqlify.inverse.SparqlSqlInverseMapperImpl;
 import org.aksw.sparqlify.util.SparqlifyUtils;
+import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -29,7 +30,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
 import com.google.common.io.Files;
-import org.apache.jena.query.Dataset;
 
 @Configuration
 @EnableBatchProcessing
@@ -139,7 +139,7 @@ public class ConfigApp {
     @Bean
     public SparqlSqlInverseMapper sparqlSqlInverseMapper(QueryExecutionFactoryEx sparqlService) {
         SparqlSqlOpRewriterImpl opRewriter = SparqlifyUtils.unwrapOpRewriter(sparqlService);
-        CandidateViewSelectorImpl candidateViewSelector = SparqlifyUtils.unwrapCandidateViewSelector(opRewriter);
+        CandidateViewSelectorSparqlify candidateViewSelector = SparqlifyUtils.unwrapCandidateViewSelector(opRewriter);
         SqlTranslator sqlTranslator = SparqlifyUtils.unwrapSqlTransformer(opRewriter);
 
         SparqlSqlInverseMapper result = new SparqlSqlInverseMapperImpl(candidateViewSelector, sqlTranslator);

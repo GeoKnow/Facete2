@@ -30,15 +30,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.jena.atlas.io.IO;
 import org.apache.jena.atlas.web.auth.HttpAuthenticator;
 import org.apache.jena.atlas.web.auth.SimpleAuthenticator;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFLanguages;
-import org.apache.jena.riot.RiotReader;
-import org.apache.jena.riot.WebContent;
-import org.apache.jena.riot.web.HttpOp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Dataset;
@@ -51,6 +42,11 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFactory;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFLanguages;
+import org.apache.jena.riot.WebContent;
+import org.apache.jena.riot.web.HttpOp;
 import org.apache.jena.sparql.ARQException;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.engine.http.HttpParams;
@@ -63,7 +59,8 @@ import org.apache.jena.sparql.resultset.JSONInput;
 import org.apache.jena.sparql.resultset.TSVInput;
 import org.apache.jena.sparql.resultset.XMLInput;
 import org.apache.jena.sparql.util.Context;
-import org.apache.jena.util.FileManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DebuggingTest {
     public static void main(String[] args) throws Exception {
@@ -500,7 +497,7 @@ class QueryEngineHTTP implements QueryExecution {
             throw new QueryException("Endpoint returned Content Type: " + actualContentType
                     + " which is not a valid RDF Graph syntax");
 
-        return RiotReader.createIteratorTriples(in, lang, null);
+        return RDFDataMgr.createIteratorTriples(in, lang, null);
     }
 
     @Override

@@ -1,25 +1,11 @@
 package org.aksw.facete2.web.config;
 
-import java.io.InputStream;
 import java.util.Properties;
 
 import javax.annotation.Resource;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
-import org.aksw.sparqlify.config.syntax.Config;
-import org.aksw.sparqlify.core.algorithms.CandidateViewSelectorImpl;
-import org.aksw.sparqlify.core.interfaces.SparqlSqlOpRewriterImpl;
-import org.aksw.sparqlify.core.interfaces.SqlTranslator;
-import org.aksw.sparqlify.inverse.SparqlSqlInverseMapper;
-import org.aksw.sparqlify.inverse.SparqlSqlInverseMapperImpl;
-import org.aksw.sparqlify.jpa.EntityInverseMapper;
-import org.aksw.sparqlify.jpa.EntityInverseMapperImplHibernate;
-import org.aksw.sparqlify.util.SparqlifyUtils;
-import org.aksw.sparqlify.validation.LoggerCount;
-import org.hibernate.SessionFactory;
-import org.hibernate.ejb.HibernateEntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
@@ -27,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.orm.hibernate4.HibernateExceptionTranslator;
