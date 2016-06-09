@@ -1,3 +1,6 @@
+echo "Installing dependent packages"
+sudo apt-get install dbconfig-common xsltproc postgres
+
 echo "Stopping tomcat"
 sudo service tomcat7 stop
 
