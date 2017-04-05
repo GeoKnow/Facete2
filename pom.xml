@@ -30,7 +30,9 @@
 
     <modules>
         <!-- <module>facete2-js</module> -->
+        <module>facete2-core</module>
         <module>facete2-webapp</module>
+        <module>facete2-cli</module>
         <module>facete2-debian-tomcat-common</module>
         <module>facete2-debian-tomcat7</module>
     </modules>
@@ -42,6 +44,7 @@
         <!-- facete2 only works with jena-sparql-api version 2.10.0-27 and onwards -->
         <jena-sparql-api.version>3.1.1-2-SNAPSHOT</jena-sparql-api.version>
         <sparqlify.version>0.8.3-SNAPSHOT</sparqlify.version>
+
         <!-- <jassa.version>0.0.4</jassa.version> -->
 
         <spring.version>4.1.4.RELEASE</spring.version>
@@ -52,10 +55,10 @@
         <log4j.version>1.2.14</log4j.version>
 
         <!-- Project Settings -->
-        <maven.compiler.source>1.6</maven.compiler.source>
-        <maven.compiler.target>1.6</maven.compiler.target>
-        <java.version>1.6</java.version>
-        <java.version.javadoc>http://docs.oracle.com/javase/6/docs/api/</java.version.javadoc>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>1.8</java.version>
+        <java.version.javadoc>http://docs.oracle.com/javase/8/docs/api/</java.version.javadoc>
         <file.encoding>UTF-8</file.encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -73,6 +76,13 @@
     <dependencyManagement>
         <dependencies>
             <!-- Self dependencies -->
+            <dependency>
+                <groupId>org.aksw.facete2</groupId>
+                <artifactId>facete2-webapp</artifactId>
+                <version>${project.version}</version>
+                <classifier>classes</classifier>
+            </dependency>
+
             <dependency>
                 <groupId>org.aksw.facete2</groupId>
                 <artifactId>facete2-webapp</artifactId>
@@ -115,6 +125,13 @@
                         <groupId>org.jboss.logging</groupId>
                         <artifactId>jboss-logging</artifactId>
                     </exclusion>
+
+                    <!-- Excluded in favor of the javax.persistence package provided the
+                        jsa's mapper module -->
+                    <exclusion>
+                        <groupId>org.hibernate.javax.persistence</groupId>
+                        <artifactId>hibernate-jpa-2.0-api</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
 
@@ -134,7 +151,7 @@
 
             <dependency>
                 <groupId>org.aksw.jena-sparql-api</groupId>
-                <artifactId>jena-sparql-api-web</artifactId>
+                <artifactId>jena-sparql-api-geo</artifactId>
                 <version>${jena-sparql-api.version}</version>
             </dependency>
 
@@ -146,14 +163,20 @@
 
             <dependency>
                 <groupId>org.aksw.jena-sparql-api</groupId>
-                <artifactId>jena-sparql-api-geo</artifactId>
+                <artifactId>jena-sparql-api-batch</artifactId>
                 <version>${jena-sparql-api.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.aksw.jena-sparql-api</groupId>
+                <artifactId>jena-sparql-api-web</artifactId>
+                <version>${jena-sparql-api.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.aksw.jena-sparql-api</groupId>
-                <artifactId>jena-sparql-api-server-standalone</artifactId>
+                <!-- <artifactId>jena-sparql-api-server-standalone</artifactId> -->
+                <artifactId>jena-sparql-api-server-utils</artifactId>
                 <version>${jena-sparql-api.version}</version>
                 <exclusions>
                     <exclusion>
@@ -170,12 +193,6 @@
                 <version>8.1.17.v20150415</version>
             </dependency>
 
-
-            <dependency>
-                <groupId>org.aksw.jena-sparql-api</groupId>
-                <artifactId>jena-sparql-api-batch</artifactId>
-                <version>${jena-sparql-api.version}</version>
-            </dependency>
 
             <!-- <dependency> -->
             <!-- <groupId>org.aksw.jena-sparql-api</groupId> -->
@@ -351,7 +368,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5</version>
+                <version>2.5.3</version>
                 <configuration>
                     <arguments>-P!source-artifacts</arguments>
                     <useReleaseProfile>false</useReleaseProfile>
@@ -419,7 +436,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.17</version>
+                <version>2.19</version>
                 <configuration>
                     <forkMode>pertest</forkMode>
                     <argLine>-Xms256m -Xmx512m</argLine>
@@ -428,6 +445,18 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <attachClasses>true</attachClasses>
+                    <!-- <warSourceDirectory>${basedir}/src/main/webapp</warSourceDirectory> -->
+                    <!-- <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes> -->
+                    <!-- <classesClassifier>classes</classesClassifier> -->
+                </configuration>
+            </plugin>
             <!-- <plugin> -->
             <!-- <groupId>org.apache.maven.plugins</groupId> -->
             <!-- <artifactId>maven-war-plugin</artifactId> -->
@@ -463,6 +492,8 @@
                         <exclude>postgresql-</exclude>
                         <exclude>commons-beanutils-</exclude>
                         <exclude>xmlpull-</exclude>
+                        <exclude>asm-</exclude>
+
 
                         <!-- TODO These conflicts should be resolved -->
                         <!-- <exclude>stax-api-</exclude> -->

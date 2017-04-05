@@ -27,6 +27,28 @@ angular.module('Facete2')
 .controller('FaceteAppCtrl', ['$scope', '$q', '$rootScope', '$timeout', '$location', '$http', '$dddi', '$translate', 'ngContextMenuFactory', '$actions' ,function($scope, $q, $rootScope, $timeout, $location, $http, $dddi, $translate, ngContextMenuFactory, $actions) {
 
 
+    {
+//        var sparqlService = jassa.service.SparqlServiceBuilder.http('http://akswnc3.informatik.uni-leipzig.de/data/jassa/sparql', ['http://example.org/changesets']).create();
+        var sparqlService = jassa.service.SparqlServiceBuilder.http('http://localhost:8890/sparql', ['http://jsa.aksw.org/test/changesets'], {type: 'POST'}).create();
+
+        //var s = 'http://ex.org/s';
+        var s = null;
+        var concept = ChangeSetUtils.createFilterConcept(null, null, null); //'http://subject', 'http://service', 'http://graph');
+        //alert('' + concept);
+
+        var ls = ChangeSetUtils.createListService(sparqlService);
+        ls.fetchItems(concept).then(function(entries) {
+            $scope.history = entries.map(function(entry) {
+                return entry.val;
+            });
+            //alert(JSON.stringify(entries));
+        });
+
+
+    }
+
+
+
     $scope.availableLangs = ['en', 'de', ''];
     $scope.langs = ['en', 'de', ''];
 
@@ -99,6 +121,8 @@ angular.module('Facete2')
     // so that components will update themselves
     $scope.editCounter = 0;
 
+    //$scope.editLookupEnabled = true;
+
     //$scope.datasetToEditCounter = new jassa.util.Map();
 
     $scope.updateCustomPaths = function(sourceElementStr, sourceVarName, targetElementStr, targetVarName) {
@@ -166,7 +190,7 @@ angular.module('Facete2')
      */
 
 
-    $scope.createChangeset = function(rexContext, prefixMapping, form) {
+    $scope.registerChangeset = function(rexContext, prefixMapping, form) {
 
         var ChangesetUtils = {
              // TODO Moved to its own util class
@@ -254,22 +278,24 @@ angular.module('Facete2')
 
             return r;
         }, function() {
-        	alert('Update failed - probably you need to enable write priviledges or CORS');
+            alert('Update failed - probably you need to enable write priviledges or CORS');
         }).then(function() {
             // TODO Reset the sparql cache before calling reset
-        	// HACK We call rexContext.reset() with a $timeout
+            // HACK We call rexContext.reset() with a $timeout
 
             form.$setPristine();
         }).then(angular.noop);
 
         var resetForm = function() {
             ++$scope.editCounter;
-	        $timeout(function() {
-	            form.$setPristine();
-
-	            var r = rexContext.reset(true);
-	            return r;
-	        }, 100);
+            form.$setPristine();
+            rexContext.scheduleReset();
+//            $timeout(function() {
+//                form.$setPristine();
+//
+//                var r = rexContext.resetData();
+//                return r;
+//            }, 100);
         };
 
         // Note: Only when the update is successful do we reset the form to pristine
@@ -905,8 +931,15 @@ angular.module('Facete2')
      * The raw sparql service - without any extras such as caching
      * Useful e.g. for validation (as we do not want to go through the client-side cache)
      */
-    dddi.register('active.services.rawSparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?active.services.sparqlCache', 'editCounter',
+    //'editCounter',
+    dddi.register('active.services.rawSparqlService', [ '=active.config.dataService', '?=active.config.sparqlProxyUrl', '?active.services.sparqlCache',
         function(serviceConfig, sparqlProxyUrl, sparqlCache) {
+
+            // Unset SPARQL service validation
+            $scope.active.services.sparqlService = null;
+            $scope.active.services.isValidSparqlService = false;
+
+
             //var cache = sparqlCacheSupplier ? sparqlCacheSupplier.getCache(serviceIri, defaultGraphIris) : null;
 //console.log('Recreated sparql service');
 
@@ -1009,7 +1042,7 @@ angular.module('Facete2')
 //    }]);
 //
 
-    dddi.register('active.services.sparqlService', [ 'active.services.rawSparqlService', '?active.services.sparqlCache', 'active.services.isValidSparqlService',
+    dddi.register('active.services.sparqlService', [ 'active.services.rawSparqlService', '?active.services.sparqlCache', 'active.services.isValidSparqlService', 'editCounter',
         function(rawSparqlService, sparqlCache, isValid) {
 
             var r;
@@ -1522,7 +1555,25 @@ angular.module('Facete2')
 
     $scope.selectGeom = function(data, event) {
         if(data.config && data.config.type === 'custom') {
-            ngContextMenuFactory([{text: 'test'}], $scope, event);
+            ngContextMenuFactory([{
+                text: 'Prepare in editor',
+                callback: function() {
+                    $scope.editResource = node.getUri();
+                    $scope.$location.path('/edit');
+                }
+//            }, null, {
+//                text: '' + data.shortLabel + ' - ' + data.id.getUri()
+            }], $scope, event);
+        } else {
+            ngContextMenuFactory([{
+                text: 'Show in editor',
+                callback: function() {
+                    $scope.editResource = node.getUri();
+                    $scope.$location.path('/edit');
+                }
+            }, null, {
+                text: '' + data.shortLabel + ' - ' + data.id.getUri()
+            }], $scope, event);
         }
 
         console.log('Data selected: ', data, event);

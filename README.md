@@ -38,6 +38,13 @@ Point your browser to
 [http://localhost:8080/facete2](http://localhost:8080/facete2)
 
 
+## Build
+The build requires the `node` command to be present. Some packages only provide the nodejs command, in this case, build can be fixed by adding this symbolic link:
+
+```sh
+sudo ln -s /usr/bin/nodejs /usr/bin/node
+```
+
 ## Dataset requirements
 
 * All properties must be declared with `?x a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property>
@@ -53,5 +60,4 @@ This project is built on these of our other projects:
 * [Jassa User Interface Components](https://github.com/GeoKnow/Jassa-UI-Angular)
 * [jena-sparql-api](https://github.com/AKSW/jena-sparql-api)
 * [Sparqlify](https://github.com/AKSW/Sparqlify)
-
 

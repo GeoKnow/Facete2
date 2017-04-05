@@ -1,4 +1,4 @@
-package org.aksw.facete2.web.config;
+package org.aksw.facete2.web.main;
 
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
@@ -6,6 +6,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
 import org.aksw.facete2.web.api.FilterPost;
+import org.aksw.facete2.web.config.ConfigApp;
+import org.aksw.facete2.web.config.ConfigWebMvc;
 import org.aksw.jena_sparql_api.web.filters.CorsFilter;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.springframework.web.WebApplicationInitializer;

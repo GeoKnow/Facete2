@@ -12,7 +12,7 @@ var AppConfig = {
         }
     },
 
-    geoModes: [ {
+    geoModes: [{
             label: 'WGS84 with numeric coordinates',
             value: {
                 mapFactory: jassa.geo.GeoMapFactoryUtils.wgs84CastMapFactory,
@@ -35,6 +35,16 @@ var AppConfig = {
             value: {
                 mapFactory: jassa.geo.GeoMapFactoryUtils.ogcVirtMapFactory,
                 geoConcept: jassa.geo.GeoConceptUtils.conceptGeoVocab
+            }
+        }, {
+            label: 'Schema.org lat/long with numeric coordinates',
+            value: {
+                mapFactory: jassa.geo.GeoMapFactoryUtils.createXyMapFactory('http://schema.org/longitude', 'http://schema.org/latitude', false),
+            }
+        }, {
+            label: 'Schema.org lat/long with string and/or numeric coordinates',
+            value: {
+                mapFactory: jassa.geo.GeoMapFactoryUtils.createXyMapFactory('http://schema.org/longitude', 'http://schema.org/latitude', true),
             }
         }],
 

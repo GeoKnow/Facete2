@@ -13,7 +13,9 @@
 /* TODO The section below should only contain overrides of bootstrap, but not our own definitions */
 
 
-.form-group label {
+/* This override is dangerous and should not be needed anywhere in facete */
+/* It may break the layout of third party HTML components */
+.form-group > label {
     width: 100%;
 }
 

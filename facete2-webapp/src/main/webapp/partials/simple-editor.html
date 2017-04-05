@@ -51,7 +51,7 @@
 
                 </div>
             </div>
-            <button class="btn btn-primary" ng-click="propertyData.push(null)">Add Object</button>
+            <button class="btn btn-primary" ng-click="propertyData.push({})">Add Object</button>
         </div>
 <!-- </div> -->
     </form>
@@ -113,7 +113,7 @@
                 </label>
         </div>
 
-        <button class="btn btn-primary" ng-class="{'disabled': !rexContext.diff.removed.size() && !rexContext.diff.added.size() }" ng-click="createChangeset(rexContext, rexPrefixMapping, forms.edit)">Create Changeset</button>
+        <button class="btn btn-primary" ng-class="{'disabled': !rexContext.diff.removed.size() && !rexContext.diff.added.size() }" ng-click="registerChangeset(rexContext, rexPrefixMapping, forms.edit)">Create Changeset</button>
     </form>
 
 </div>

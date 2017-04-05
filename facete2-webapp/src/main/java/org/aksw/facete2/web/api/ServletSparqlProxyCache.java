@@ -116,9 +116,11 @@ public class ServletSparqlProxyCache
 
         // TODO: What is the best way to pass the authenticator to the sparql service?
         SparqlService sparqlService = sparqlServiceFactory.createSparqlService(serviceUri, datasetDescription, httpClient);//new QueryExecutionFactoryHttp(serviceUri, defaultGraphUris);
+
         QueryExecutionFactory qef = sparqlService.getQueryExecutionFactory();
         QueryExecution result = qef.createQueryExecution(query);
 
         return result;
     }
+
 }

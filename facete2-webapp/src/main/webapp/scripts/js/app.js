@@ -204,7 +204,7 @@ angular.module('Facete2', [
             onSuccess();
         };
 
-        var promise;
+        var promise = null;
 
         var fn = function() {
 

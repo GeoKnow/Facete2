@@ -48,12 +48,12 @@ public class DebuggingTest {
     }
 
 }
-//
-///**
-// * A query execution implementation where queries are executed against a remote
-// * service
-// *
-// */
+
+/**
+ * A query execution implementation where queries are executed against a remote
+ * service
+ *
+ */
 //class QueryEngineHTTP implements QueryExecution {
 //
 //    private static Logger log = LoggerFactory.getLogger(QueryEngineHTTP.class);
@@ -457,7 +457,7 @@ public class DebuggingTest {
 //            throw new QueryException("Endpoint returned Content Type: " + actualContentType
 //                    + " which is not a valid RDF Graph syntax");
 //
-//        return RiotReader.createIteratorTriples(in, lang, null);
+//        return RDFDataMgr.createIteratorTriples(in, lang, null);
 //    }
 //
 //    @Override
@@ -749,5 +749,23 @@ public class DebuggingTest {
 //    public boolean isClosed() {
 //        // TODO Auto-generated method stub
 //        return false;
+//    }
+//
+//    @Override
+//    public Iterator<Quad> execConstructQuads() {
+//        // TODO Auto-generated method stub
+//        return null;
+//    }
+//
+//    @Override
+//    public Dataset execConstructDataset() {
+//        // TODO Auto-generated method stub
+//        return null;
+//    }
+//
+//    @Override
+//    public Dataset execConstructDataset(Dataset dataset) {
+//        // TODO Auto-generated method stub
+//        return null;
 //    }
 //}
