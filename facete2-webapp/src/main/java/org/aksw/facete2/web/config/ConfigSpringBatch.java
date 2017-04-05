@@ -2,9 +2,9 @@ package org.aksw.facete2.web.config;
 
 import javax.annotation.PostConstruct;
 
-import org.aksw.jena_sparql_api.batch.ConfigSparqlExportJob;
 import org.aksw.jena_sparql_api.batch.SparqlBatchUtils;
 import org.aksw.jena_sparql_api.batch.SparqlExportManager;
+import org.aksw.jena_sparql_api.batch.config.ConfigSparqlExportJob;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;

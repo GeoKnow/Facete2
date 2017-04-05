@@ -113,7 +113,7 @@
             <plugin>
                 <groupId>com.github.trecloux</groupId>
                 <artifactId>yeoman-maven-plugin</artifactId>
-                <version>0.1</version>
+                <version>0.5</version>
                 <configuration>
                     <yeomanProjectDirectory>${project.basedir}</yeomanProjectDirectory>
                 </configuration>
@@ -236,7 +236,7 @@
 
         <dependency>
             <groupId>org.aksw.jena-sparql-api</groupId>
-            <artifactId>jena-sparql-api-server</artifactId>
+            <artifactId>jena-sparql-api-server-standalone</artifactId>
         </dependency>
 
         <dependency>
