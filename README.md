@@ -45,6 +45,24 @@ The build requires the `node` command to be present. Some packages only provide 
 sudo ln -s /usr/bin/nodejs /usr/bin/node
 ```
 
+You need to provide a basic nodejs build environment, which on debian/ubuntu systems can be installed with:
+```sh
+sudo apt-get install npm
+sudo npm install -g bower
+sudo npm install -g grunt-cli
+sudo npm install -g gulp
+sudo npm install -g jshint
+```
+
+
+In case your system uses the old *node* rather than *nodejs* package, you can try upgrading using
+```sh
+sudo apt-get --purge remove node
+sudo apt-get install nodejs
+sudo update-alternatives --install /usr/bin/node node /usr/bin/nodejs 'replace-with-property-entry-id'
+```
+
+
 ## Dataset requirements
 
 * All properties must be declared with `?x a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property>
