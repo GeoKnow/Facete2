@@ -28,6 +28,7 @@ angular.module('Facete2')
 
 
     {
+        if(false) {
 //        var sparqlService = jassa.service.SparqlServiceBuilder.http('http://akswnc3.informatik.uni-leipzig.de/data/jassa/sparql', ['http://example.org/changesets']).create();
         var sparqlService = jassa.service.SparqlServiceBuilder.http('http://localhost:8890/sparql', ['http://jsa.aksw.org/test/changesets'], {type: 'POST'}).create();
 
@@ -43,7 +44,7 @@ angular.module('Facete2')
             });
             //alert(JSON.stringify(entries));
         });
-
+        }
 
     }
 
