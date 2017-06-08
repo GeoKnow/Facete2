@@ -1,9 +1,9 @@
 package org.aksw.facete2.web.api.geocode;
 
+import java.util.function.Function;
+
 import org.aksw.jena_sparql_api.lookup.LookupService;
 import org.aksw.jena_sparql_api.lookup.LookupServiceTransformValue;
-
-import com.google.common.base.Function;
 
 
 public class FluentLookupService<K, V> {

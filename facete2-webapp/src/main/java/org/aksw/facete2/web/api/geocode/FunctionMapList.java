@@ -2,8 +2,7 @@ package org.aksw.facete2.web.api.geocode;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.base.Function;
+import java.util.function.Function;
 
 public class FunctionMapList<V, W>
     implements Function<Iterable<? extends V>, List<W>>

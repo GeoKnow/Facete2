@@ -1,6 +1,7 @@
 package org.aksw.facete2.web.api.geocode;
 
-import com.google.common.base.Function;
+import java.util.function.Function;
+
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
