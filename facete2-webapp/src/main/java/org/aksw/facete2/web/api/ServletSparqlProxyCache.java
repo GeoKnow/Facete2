@@ -2,7 +2,10 @@ package org.aksw.facete2.web.api;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
@@ -21,6 +24,8 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.google.common.base.Strings;
 
 @Service
 //@Component
@@ -101,13 +106,9 @@ public class ServletSparqlProxyCache
         }
 
 
-        String[] dgus = paramMap.get("default-graph-uri");
-        String[] ngus = paramMap.get("named-graph-uri");
-
         DatasetDescription datasetDescription = new DatasetDescription(
-                dgus == null ? Collections.<String>emptyList() : Arrays.asList(dgus),
-                ngus == null ? Collections.<String>emptyList() : Arrays.asList(ngus));
-
+                filterStringArray(paramMap.get("default-graph-uri")),
+                filterStringArray(paramMap.get("named-graph-uri")));
 
 
         UsernamePasswordCredentials credentials = AuthenticatorUtils.parseCredentials(req);
@@ -123,4 +124,20 @@ public class ServletSparqlProxyCache
         return result;
     }
 
+    /**
+     * Trim array items and remove empty one
+     * @param strs
+     * @return
+     */
+    public static List<String> filterStringArray(String[] strs) {
+    	List<String> result = Optional.ofNullable(strs)
+			.map(Arrays::asList)
+			.orElse(Collections.emptyList())
+			.stream()
+			.filter(x -> x != null)
+			.map(String::trim)
+			.filter(x -> !Strings.isNullOrEmpty(x))
+			.collect(Collectors.toList());
+    	return result;
+    }
 }

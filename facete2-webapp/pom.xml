@@ -155,10 +155,10 @@
 <!--             <artifactId>jena-sparql-api-web</artifactId> -->
 <!--         </dependency> -->
 
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-jsp</artifactId>
-        </dependency>
+<!--         <dependency> -->
+<!--             <groupId>org.eclipse.jetty</groupId> -->
+<!--             <artifactId>jetty-jsp</artifactId> -->
+<!--         </dependency> -->
 
         <dependency>
             <groupId>org.aksw.jena-sparql-api</groupId>

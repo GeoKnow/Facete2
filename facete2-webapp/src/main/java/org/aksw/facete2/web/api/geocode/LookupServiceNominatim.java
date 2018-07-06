@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.aksw.jena_sparql_api.lookup.LookupService;
 import org.apache.http.client.HttpClient;
@@ -18,6 +19,7 @@ import fr.dudie.nominatim.client.NominatimOptions;
 import fr.dudie.nominatim.client.request.NominatimSearchRequest;
 import fr.dudie.nominatim.client.request.paramhelper.PolygonFormat;
 import fr.dudie.nominatim.model.Address;
+import io.reactivex.Flowable;
 
 public class LookupServiceNominatim
     implements LookupService<String, List<Address>>
@@ -29,7 +31,7 @@ public class LookupServiceNominatim
     }
 
     @Override
-    public Map<String, List<Address>> apply(Iterable<String> keys) {
+    public Flowable<Entry<String, List<Address>>> apply(Iterable<String> keys) {
         Map<String, List<Address>> result = new HashMap<String, List<Address>>();
 
         for(String key : keys) {
@@ -47,7 +49,7 @@ public class LookupServiceNominatim
             }
             result.put(key, addresses);
         }
-        return result;
+        return Flowable.fromIterable(result.entrySet());
     }
 
     public static LookupServiceNominatim createDefault(String email) {
@@ -70,7 +72,7 @@ public class LookupServiceNominatim
                 .transformValue(FunctionMapList.map(FunctionNominatimAddressToGeometry.fn))
                 .create();
 
-        Map<String, List<Geometry>> map = ls.apply(Arrays.asList("salerno, italy"));
+        Map<String, List<Geometry>> map = ls.fetchMap(Arrays.asList("salerno, italy"));
 
 
         //Map<String, List<Address>> map = ls.lookup(Arrays.asList("italy"));
