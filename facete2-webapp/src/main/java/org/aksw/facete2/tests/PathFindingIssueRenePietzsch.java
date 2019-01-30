@@ -4,11 +4,10 @@ package org.aksw.facete2.tests;
 import java.util.List;
 
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.Path;
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.sparql_path.core.algorithm.ConceptPathFinder;
-import org.aksw.jena_sparql_api.update.FluentSparqlService;
+import org.aksw.jena_sparql_api.util.sparql.syntax.path.SimplePath;
 
 
 public class PathFindingIssueRenePietzsch {
@@ -19,7 +18,7 @@ public class PathFindingIssueRenePietzsch {
         Concept targetConcept = Concept.create("?s <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?x ; <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?y", "s");
 
         // Resolution: A bug in virtuoso 07.10.3207 which causes the join summary query to fail if a default graph was provided
-        List<Path> paths = ConceptPathFinder.findPaths(qef, sourceConcept, targetConcept, 10, 10);
+        List<SimplePath> paths = ConceptPathFinder.findPaths(qef, sourceConcept, targetConcept, 10, 10);
         System.out.println(paths);
     }
 
@@ -30,7 +29,7 @@ public class PathFindingIssueRenePietzsch {
         Concept targetConcept = Concept.create("?s <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?x ; <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?y", "s");
 
         // Resolution: A bug in virtuoso 07.10.3207 which causes the join summary query to fail if a default graph was provided
-        List<Path> paths = ConceptPathFinder.findPaths(qef, sourceConcept, targetConcept, 10, 10);
+        List<SimplePath> paths = ConceptPathFinder.findPaths(qef, sourceConcept, targetConcept, 10, 10);
         System.out.println(paths);
     }
 
