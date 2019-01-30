@@ -1,3 +1,24 @@
+
+var setDataSourceDefaults = function(record) {
+    var item = record.data;
+    item.id = record.id;
+
+    var spec = {};
+    spec.id = item.id;
+    spec.name = item.name;
+    spec.dataService = spec.dataService || {};
+    spec.dataService.serviceIri = item.dataServiceIri;
+    spec.dataService.defaultGraphIris = item.dataGraphIris;
+
+    spec.dataService.auth = item.auth;
+
+    spec.joinSummaryService = spec.joinSummaryService || {};
+    spec.joinSummaryService.serviceIri = item.jsServiceIri;
+    spec.joinSummaryService. defaultGraphIris = item.jsGraphIris;
+
+    return spec;
+}
+
 var DataSourceManager = Class.create({
 
     initialize: function(storeApiUrl) {
@@ -18,7 +39,9 @@ var DataSourceManager = Class.create({
         var result = jQuery.ajax(spec).pipe(function(response) {
 
             var configs = _(response).map(function(record) {
-                var item = record.data;
+            	var spec = setDataSourceDefaults(record);
+/*
+            	var item = record.data;
                 item.id = record.id;
 
                 var spec = {};
@@ -33,7 +56,7 @@ var DataSourceManager = Class.create({
                 spec.joinSummaryService = spec.joinSummaryService || {};
                 spec.joinSummaryService.serviceIri = item.jsServiceIri;
                 spec.joinSummaryService. defaultGraphIris = item.jsGraphIris;
-
+*/
                 return spec;
             });
             //console.log('CONFIGS', configs);

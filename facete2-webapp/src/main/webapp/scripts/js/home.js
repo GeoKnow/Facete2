@@ -489,7 +489,7 @@ angular.module('Facete2')
 
 
 
-        $q.when(dataSourceManager.loadDataSources()).then(function(cs) {
+        return $q.when(dataSourceManager.loadDataSources()).then(function(cs) {
             _(cs).each(function(config) {
                 //console.log('Config', config);
                 _(config).defaults(defaults);
@@ -733,7 +733,24 @@ angular.module('Facete2')
 
 
     refreshDataSources();
+    
+	// Check if there is a default datasource
+    var simpleStoreClient = new SimpleStoreClient(AppConfig.storeApiUrl);
 
+    function loadDefaultDataSource() {
+    	$q.when(simpleStoreClient.load('defaultSparqlEndpoint', 0)).then(function(records) {
+    		if(records.length > 0) {
+    			var record = records[0];
+	    		var spec = setDataSourceDefaults(record);
+	    		spec.name = "Default SPARQL Service";
+	    		$scope.active.config = spec;
+    		}
+    	});
+    }
+    
+    loadDefaultDataSource();
+    
+    
     $scope.active.serviceConfigs = [];
 
 

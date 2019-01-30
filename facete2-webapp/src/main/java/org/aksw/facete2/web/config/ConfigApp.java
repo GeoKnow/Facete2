@@ -7,7 +7,6 @@ import javax.sql.DataSource;
 import org.aksw.facete2.web.main.DatasetFromWatchedFolder;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactoryDataset;
-import org.aksw.jena_sparql_api.views.index.CandidateViewSelectorImpl;
 import org.aksw.sparqlify.config.syntax.Config;
 import org.aksw.sparqlify.core.algorithms.CandidateViewSelectorSparqlify;
 import org.aksw.sparqlify.core.interfaces.SparqlSqlOpRewriterImpl;
@@ -34,7 +33,7 @@ import com.google.common.io.Files;
 
 @Configuration
 @EnableBatchProcessing
-@Import({ConfigDataSource.class, ConfigHibernate.class, ConfigSparqlServiceFactory.class, ConfigSpringBatch.class})
+@Import({ConfigDataSource.class, ConfigSimpleStore.class, ConfigHibernate.class, ConfigSparqlServiceFactory.class, ConfigSpringBatch.class})
 @ComponentScan({"org.aksw.jassa.web", "org.aksw.facete2.web"}) // TODO I think we can drop jassa.web from scannig by now
 public class ConfigApp {
     private static final Logger logger = LoggerFactory
