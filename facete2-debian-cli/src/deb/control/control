@@ -1,0 +1,12 @@
+Package: facete2-cli
+Version: [[version]]
+Section: web
+Priority: optional
+Architecture: all
+Depends: java-runtime-headless
+Maintainer: Claus Stadler <cstadler@informatik.uni-leipzig.de>
+Description: Hobbit Faceted Browsing Benchmark CLI
+Distribution: ldstack-nightly
+Homepage: https://github.com/GeoKnow/Facete2
+Vcs-Git: git://github.com/GeoKnow/Facete2.git
+Vcs-Browser: https://github.com/GeoKnow/Facete2

@@ -28,8 +28,8 @@ public class ConfigDefaultDataSource {
 	protected SimpleStore store;
 
 	
-	@Value("${SERVICE_URI}") String serviceUri;
-	@Value("${DEFAULT_GRAPH_URI}") String defaultGraphUri;
+	protected @Value("${SERVICE_URI}") String serviceUri;
+	protected @Value("${DEFAULT_GRAPH_URI}") String defaultGraphUri;
 
 
     @PostConstruct

@@ -34,6 +34,7 @@
 		<module>facete2-core</module>
 		<module>facete2-webapp</module>
 		<module>facete2-cli</module>
+		<module>facete2-debian-cli</module>
 		<module>facete2-debian-tomcat-common</module>
 		<module>facete2-debian-tomcat7</module>
 	</modules>
@@ -78,6 +79,13 @@
 	<dependencyManagement>
 		<dependencies>
 			<!-- Self dependencies -->
+
+                        <dependency>
+                                <groupId>org.aksw.facete2</groupId>
+                                <artifactId>facete2-cli</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
 			<dependency>
 				<groupId>org.aksw.facete2</groupId>
 				<artifactId>facete2-webapp</artifactId>
