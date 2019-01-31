@@ -44,7 +44,7 @@
 		<!-- Dependency Versions -->
 		<!-- facete2 only works with jena-sparql-api version 2.10.0-27 and onwards -->
 		<jena-sparql-api.version>3.10.0-1-SNAPSHOT</jena-sparql-api.version>
-		<sparqlify.version>0.8.6-SNAPSHOT</sparqlify.version>
+		<sparqlify.version>0.8.7-SNAPSHOT</sparqlify.version>
 
 		<!-- <jassa.version>0.0.4</jassa.version> -->
 
