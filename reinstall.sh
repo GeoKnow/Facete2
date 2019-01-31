@@ -15,6 +15,6 @@ echo "Running mvn install"
 (cd facete2-debian-tomcat7 && mvn install)
 
 echo "Installing debs"
-sudo dpkg -i `find facete2-debian-tomcat-common/target -name *.deb`
-sudo dpkg -i `find facete2-debian-tomcat7/target -name *.deb`
+sudo dpkg -i `find facete2-debian-tomcat-common/target -name '*.deb'`
+sudo dpkg -i `find facete2-debian-tomcat7/target -name '*.deb'`
 
