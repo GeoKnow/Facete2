@@ -1,10 +1,9 @@
-package org.aksw.facete2.cli.main;
+package org.aksw.facete2.web.main;
 
 import java.net.URL;
 import java.net.URLClassLoader;
 
 import org.aksw.commons.util.slf4j.LoggerCount;
-import org.aksw.facete2.web.main.WebAppInitializer;
 import org.aksw.jena_sparql_api.web.server.ServerUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -71,8 +70,7 @@ public class MainFacete2Server {
         port = (port == null) ? 7532 : port;
 
 
-        //ServerUtils.startServer(MainFacete2Server.class, port, new WebAppInitializer());
-        ServerUtils.startServer(WebAppInitializer.class, port, new WebAppInitializer());
+        ServerUtils.startServer(MainFacete2Server.class, port, new WebAppInitializer());
     }
 }
 
