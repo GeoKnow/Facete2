@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>facete-docker-cli</artifactId>
+
+	<parent>
+		<groupId>org.aksw.facete2</groupId>
+		<artifactId>facete2-docker-parent</artifactId>
+		<version>0.9.1-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.aksw.facete2</groupId>
+			<artifactId>facete2-cli</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<configuration>
+					<repository>${docker.benchmark-controller.repository}</repository>
+					<buildArgs>
+						<MAIN_IMAGE>${docker.benchmark-controller.repository}</MAIN_IMAGE>
+						<ARTIFACT_ID>${project.artifactId}</ARTIFACT_ID>
+					</buildArgs>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>
+

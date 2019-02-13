@@ -37,6 +37,8 @@
 		<module>facete2-debian-cli</module>
 		<module>facete2-debian-tomcat-common</module>
 		<module>facete2-debian-tomcat7</module>
+
+		<module>facete2-docker-parent</module>
 	</modules>
 
 
