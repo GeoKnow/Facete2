@@ -1,0 +1,5 @@
+#!/bin/bash
+
+JVM_ARGS="-DSERVICE_URL=${SERVICE_URL} -Djdbc.url=jdbc:postgresql://localhost:5432/facete2tomcatcommon -Djdbc.username=postgres -Djdbc.password=postgres -Dfs.rdfDataPath=/opt/facete2/rdf.d -Dfs.exportPath=/opt/facete2/exports" facete2
+
+
