@@ -30,7 +30,7 @@ WORKDIR /usr/share/lib/facete2-cli/
 ADD target/lib lib
 # Add the service itself
 #ADD target/${JAR_FILE} ${JAR_FILE}
-COPY target/*.jar .
+COPY target/*.jar ./
 
 ADD pgsql /tmp/
 ADD make-db.sh .
