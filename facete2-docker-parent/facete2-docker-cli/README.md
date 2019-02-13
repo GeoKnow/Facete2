@@ -10,32 +10,9 @@
 
 ## Run
 
- * run one instance, open http://<docker ip>:8080/facete2 in your browser:
+    docker run -p"7532:7532" --name facete2 -it facete2
 
+## Access
+The application should now be running under (startup may take ~10 to 60 seconds depending on hardware and system load)
 
-    docker run -d -p 8080:8080 -p 80:80 --name facete2 facete2
-
- * run many times, open http://<docker ip>:<container port>/facete2 in your browser:
-
-
-    docker run --rm -P facete2
-    docker ps
-
-
-## Data Sets
-
- * freebase exzerpt liegt unter: http://cstadler.aksw.org/conti/
- * FP7
-    * Sparql IRI: http://fp7-pp.publicdata.eu/sparql
-    * Named Graph: http://fp7-pp.publicdata.eu/
- * Freebase Germany
-    * Sparql IRI:  http://cstadler.aksw.org/conti/freebase/germany/sparql
-    * Named Graph: http://freebase.com/2013-09-22/data/
-    * Join Summary Service: http://cstadler.aksw.org/service/join-summary/sparql
-    * Join Summary Graph: http://freebase.com/2013-09-22/data/
-
-
-## ToDos
-
- * current config is a bad hack, even it works though
- * fix facete2-tomcat7 package as it starts tomcat with error, thus causes regular build to fail
+   http://localhost:7532/
