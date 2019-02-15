@@ -14,8 +14,8 @@
 	</parent>
 
 	<properties>
-<!--        <docker.repository>git.project-hobbit.eu:4567</docker.repository> -->
-		<prefix>git.project-hobbit.eu:4567/cstadler/fbb/fbb-v2-</prefix>
+            <docker.repository>registry.hub.docker.com</docker.repository>
+		<prefix></prefix>
 
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
